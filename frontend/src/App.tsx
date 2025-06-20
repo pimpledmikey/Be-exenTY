@@ -105,7 +105,7 @@ function Dashboard({ user }: { user: any }) {
 
 	let content = null;
 	if (current === 'usuarios') {
-		content = <UsuarioList adminUsername={user.username} />;
+		content = <UsuarioList />;
 	} else if (current === 'grupos') {
 		content = <GrupoList />;
 	} else if (current === 'almacen') {
