@@ -1,10 +1,20 @@
 import express from 'express';
+import cors from 'cors';
 import almacenRoutes from './routes/almacenRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import permisosRoutes from './routes/permisosRoutes.js';
 import loginRoutes from './routes/loginRoutes.js';
 
 const app = express();
+
+// Configuración de CORS para aceptar peticiones del frontend en Render
+app.use(cors({
+  origin: [
+    'https://front-lxru.onrender.com', // Dominio real de frontend en Render
+    'http://localhost:5173' // Para desarrollo local
+  ],
+  credentials: true
+}));
 
 app.use(express.json());
 
