@@ -1,4 +1,16 @@
 :root {
+  --tblr-primary: #0f8158 !important; /* Verde principal */
+  --tblr-illustrations-primary: #0f8158 !important;
+  --tblr-success: #0f8158 !important;
+  --tblr-btn-primary-bg: #0f8158 !important;
+  --tblr-btn-primary-border: #0f8158 !important;
+  --tblr-btn-primary-hover-bg: #19b97f !important;
+  --tblr-btn-primary-hover-border: #19b97f !important;
+  --tblr-link-color: #19b97f !important;
+  --tblr-link-hover-color: #0f8158 !important;
+}
+/*
+:root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -54,6 +66,57 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.page-wrapper, .page-body, .modal-content, .card, .table, .table-dark, .alert, .modal-header, .modal-footer {
+  background-color: #181a2a !important;
+  color: #fff !important;
+}
+
+input.form-control, select.form-select, textarea.form-control {
+  background-color: #181a2a !important;
+  color: #fff !important;
+  border: 1px solid #2c2e3e !important;
+}
+input.form-control:focus, select.form-select:focus, textarea.form-control:focus {
+  background-color: #22243a !important;
+  color: #fff !important;
+  border-color: #0f8158 !important;
+}
+
+body .table thead th,
+body .table-dark thead th,
+body .table th,
+body .markdown>table thead th,
+body .modal-footer {
+  background-color: #181a2a !important;
+  color: #fff !important;
+  border-bottom: 1px solid #2c2e3e !important;
+}
+
+.modal-footer {
+  background-color: #181a2a !important;
+  color: #fff !important;
+}
+
+.table-dark td, .table-dark tbody td {
+  background-color: #22243a !important;
+  color: #fff !important;
+}
+
+.btn, .btn-primary, .btn-success, .btn-danger, .btn-outline-secondary, .btn-link {
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.table thead th,
+.table-dark thead th,
+.dataTable thead th,
+body .dataTable thead th,
+body .table.dataTable thead th {
+  background-color: #181a2a !important;
+  color: #fff !important;
+  border-bottom: 1px solid #2c2e3e !important;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
@@ -66,3 +129,4 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+*Ç
