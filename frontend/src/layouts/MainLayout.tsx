@@ -1,5 +1,4 @@
-import { Layout, Navbar, Nav, NavItem, Sidebar, SidebarSection, SidebarNav, SidebarNavItem, Container } from 'tabler-react';
-import { IconUsers, IconHome, IconBuildingWarehouse, IconUserPlus, IconUserCog } from '@tabler/icons-react';
+import Sidebar from '../components/Sidebar';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -7,47 +6,24 @@ interface MainLayoutProps {
   current: string;
 }
 
-const menu = [
-  { key: 'dashboard', label: 'Dashboard', icon: <IconHome size={20} /> },
-  { key: 'almacen', label: 'Almacén', icon: <IconBuildingWarehouse size={20} /> },
-  { key: 'usuarios', label: 'Usuarios', icon: <IconUsers size={20} /> },
-  { key: 'crear-usuario', label: 'Crear usuario', icon: <IconUserPlus size={20} /> },
-  { key: 'grupos', label: 'Grupos', icon: <IconUserCog size={20} /> },
-];
-
 const MainLayout: React.FC<MainLayoutProps> = ({ children, onNavChange, current }) => (
-  <Layout>
-    <Navbar>
-      <Navbar.Brand href="#" className="d-flex align-items-center gap-2">
-        <img src="/logo192.png" alt="Logo" height={32} />
-        <span className="fw-bold">Be-exenTY</span>
-      </Navbar.Brand>
-      <Nav className="ms-auto">
-        <NavItem href="#" icon="logout">Salir</NavItem>
-      </Nav>
-    </Navbar>
-    <Layout>
-      <Sidebar>
-        <SidebarSection>
-          <SidebarNav>
-            {menu.map(item => (
-              <SidebarNavItem
-                key={item.key}
-                active={current === item.key}
-                onClick={() => onNavChange(item.key)}
-                icon={item.icon}
-              >
-                {item.label}
-              </SidebarNavItem>
-            ))}
-          </SidebarNav>
-        </SidebarSection>
-      </Sidebar>
-      <Container className="py-4" style={{ minHeight: '90vh' }}>
+  <div className="d-flex" style={{ minHeight: '100vh', background: '#f5f6fa' }}>
+    <Sidebar current={current} onChange={onNavChange} user={{ username: '', group: '' }} />
+    <div className="flex-grow-1">
+      <header className="navbar navbar-expand-lg navbar-dark bg-primary px-4" style={{ height: 60 }}>
+        <div className="container-fluid d-flex justify-content-between align-items-center h-100">
+          <div className="d-flex align-items-center">
+            <img src="/logo192.png" alt="Logo" height={32} style={{ objectFit: 'contain' }} className="me-2" />
+            <span style={{ fontWeight: 700, fontSize: 20 }}>Be-exenTY</span>
+          </div>
+          <button className="btn btn-outline-light btn-sm">Salir</button>
+        </div>
+      </header>
+      <main className="container-xl py-4">
         {children}
-      </Container>
-    </Layout>
-  </Layout>
+      </main>
+    </div>
+  </div>
 );
 
 export default MainLayout;

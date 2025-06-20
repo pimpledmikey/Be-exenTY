@@ -143,7 +143,7 @@ export default function EntradasList() {
           </li>
         </ul>
       </nav>
-      {/* Modal Tabler para alta/edición */}
+      {/* Modal para alta/edición */}
       {showForm && (
         <div className="modal fade show d-block modal-dark" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.5)' }} data-bs-theme="dark">
           <div className="modal-dialog modal-dialog-centered">
@@ -165,7 +165,7 @@ export default function EntradasList() {
           </div>
         </div>
       )}
-      {/* Modal de confirmación Tabler */}
+      {/* Modal de confirmación */}
       {showConfirm && entradaAEliminar && (
         <div className="modal fade show d-block modal-dark" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.5)' }} data-bs-theme="dark">
           <div className="modal-dialog modal-dialog-centered">

@@ -110,7 +110,7 @@ export default function SalidasList() {
           </tbody>
         </table>
       </div>
-      {/* Modal Tabler para alta/edición */}
+      {/* Modal para alta/edición */}
       {showForm && (
         <div className="modal fade show d-block modal-dark" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.5)' }} data-bs-theme="dark">
           <div className="modal-dialog modal-dialog-centered">
@@ -132,7 +132,7 @@ export default function SalidasList() {
           </div>
         </div>
       )}
-      {/* Modal de confirmación Tabler */}
+      {/* Modal de confirmación */}
       {showConfirm && salidaAEliminar && (
         <div className="modal fade show d-block modal-dark" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.5)' }} data-bs-theme="dark">
           <div className="modal-dialog modal-dialog-centered">
