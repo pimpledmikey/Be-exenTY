@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import SalidaForm from './SalidaForm';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 interface Salida {
   exit_id: number;
   article_id: string;
@@ -25,7 +27,7 @@ export default function SalidasList() {
   const fetchSalidas = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/almacen/salidas', {
+      const res = await fetch(`${API_URL}/almacen/salidas`, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -48,7 +50,7 @@ export default function SalidasList() {
   const eliminarSalida = async () => {
     if (!salidaAEliminar) return;
     try {
-      const res = await fetch(`/api/almacen/salidas/${salidaAEliminar.exit_id}`, {
+      const res = await fetch(`${API_URL}/almacen/salidas/${salidaAEliminar.exit_id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

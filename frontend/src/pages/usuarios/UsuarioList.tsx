@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import UsuarioForm from './UsuarioForm';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 interface Usuario {
   id: number;
   username: string;
@@ -22,7 +24,7 @@ const UsuarioList: React.FC<{ adminUsername: string }> = ({ adminUsername }) => 
 
   const fetchUsuarios = () => {
     setLoading(true);
-    fetch('/api/user/usuarios', {
+    fetch(`${API_URL}/user/usuarios`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
     })
       .then(res => {
@@ -42,7 +44,7 @@ const UsuarioList: React.FC<{ adminUsername: string }> = ({ adminUsername }) => 
   const eliminarUsuario = async () => {
     if (!usuarioAEliminar) return;
     try {
-      const res = await fetch(`/api/user/usuarios/${usuarioAEliminar.id}`, {
+      const res = await fetch(`${API_URL}/user/usuarios/${usuarioAEliminar.id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import GrupoForm from './GrupoForm';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 interface Grupo {
   id: number;
   nombre: string;
@@ -19,7 +21,7 @@ const GrupoList: React.FC = () => {
 
   const fetchGrupos = () => {
     setLoading(true);
-    fetch('/api/user/grupos', {
+    fetch(`${API_URL}/user/grupos`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`
       }
@@ -41,7 +43,7 @@ const GrupoList: React.FC = () => {
   const eliminarGrupo = async () => {
     if (!grupoAEliminar) return;
     try {
-      const res = await fetch(`/api/user/grupos/${grupoAEliminar.id}`, {
+      const res = await fetch(`${API_URL}/user/grupos/${grupoAEliminar.id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
