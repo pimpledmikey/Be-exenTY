@@ -3,6 +3,8 @@ import styles from './Login.module.css';
 import Swal from 'sweetalert2';
 import logoBeExEn from '../assets/logoBeExEn.png';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 interface LoginPageProps {
   onLogin: (user: any) => void;
 }
@@ -16,7 +18,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const res = await fetch('/api/login', {
+    const res = await fetch(`${API_URL}/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password })
