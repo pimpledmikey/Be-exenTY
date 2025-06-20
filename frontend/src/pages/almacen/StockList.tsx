@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 interface Stock {
   article_id: number;
   code: string;
@@ -31,7 +33,7 @@ export default function StockList() {
     const fetchStock = async () => {
       setLoading(true);
       try {
-        const res = await fetch('/api/almacen/stock', {
+        const res = await fetch(`${API_URL}/almacen/stock`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
           }

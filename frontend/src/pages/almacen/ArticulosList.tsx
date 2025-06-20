@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import ArticuloForm from './ArticuloForm';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 interface Articulo {
   article_id: string;
   code: string;
@@ -31,7 +33,7 @@ export default function ArticulosList() {
   const fetchArticulos = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/almacen/articulos', {
+      const res = await fetch(`${API_URL}/almacen/articulos`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -55,7 +57,7 @@ export default function ArticulosList() {
   const eliminarArticulo = async () => {
     if (!articuloAEliminar) return;
     try {
-      const res = await fetch(`/api/almacen/articulos/${articuloAEliminar.article_id}`, {
+      const res = await fetch(`${API_URL}/almacen/articulos/${articuloAEliminar.article_id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

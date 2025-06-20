@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import EntradaForm from './EntradaForm';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 interface Entrada {
   entry_id: number;
   article_id: string;
@@ -40,7 +42,7 @@ export default function EntradasList() {
   const fetchEntradas = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/almacen/entradas', {
+      const res = await fetch(`${API_URL}/almacen/entradas`, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -63,7 +65,7 @@ export default function EntradasList() {
   const eliminarEntrada = async () => {
     if (!entradaAEliminar) return;
     try {
-      const res = await fetch(`/api/almacen/entradas/${entradaAEliminar.entry_id}`, {
+      const res = await fetch(`${API_URL}/almacen/entradas/${entradaAEliminar.entry_id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
