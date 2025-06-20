@@ -18,12 +18,11 @@ interface Usuario {
 }
 
 interface UsuarioFormProps {
-  adminUsername: string;
   usuario?: Usuario | null;
   onClose?: (refresh?: boolean) => void;
 }
 
-export default function UsuarioForm({ adminUsername, usuario, onClose }: UsuarioFormProps) {
+export default function UsuarioForm({ usuario, onClose }: UsuarioFormProps) {
   const [form, setForm] = useState<Usuario>({
     username: usuario?.username || '',
     name: usuario?.name || '',
@@ -87,7 +86,7 @@ export default function UsuarioForm({ adminUsername, usuario, onClose }: Usuario
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
-        onClose();
+        if (onClose) onClose();
       }, 800);
     } catch (err: any) {
       setError(err.message);
