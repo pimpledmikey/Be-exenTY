@@ -142,7 +142,7 @@ export default function UsuarioForm({ adminUsername, usuario, onClose }: Usuario
         {usuario ? (
           <input
             className="form-control"
-            value={grupos.find(g => g.group_id == form.group_id)?.name || ''}
+            value={grupos.find(g => String(g.group_id) == form.group_id)?.name || ''}
             disabled
             readOnly
           />

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface Stock {
   article_id: number;
@@ -16,7 +16,7 @@ export default function StockList() {
   const [alerta, setAlerta] = useState<{ tipo: 'success' | 'danger'; mensaje: string } | null>(null);
 
   // Filtrado
-  const [filtro, setFiltro] = useState('');
+  const [filtro] = useState('');
   const [pagina, setPagina] = useState(1);
   const porPagina = 15;
   const stockFiltrado = stock.filter(s =>

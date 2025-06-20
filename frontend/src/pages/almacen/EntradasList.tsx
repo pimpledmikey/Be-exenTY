@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import EntradaForm from './EntradaForm';
 
 interface Entrada {
@@ -25,7 +25,7 @@ export default function EntradasList() {
   // Paginación y filtrado
   const [pagina, setPagina] = useState(1);
   const porPagina = 15;
-  const [filtro, setFiltro] = useState('');
+  const [filtro] = useState('');
   const entradasFiltradas = entradas.filter(e =>
     (e.articulo_nombre || String(e.article_id)).toLowerCase().includes(filtro.toLowerCase()) ||
     String(e.entry_id).includes(filtro) ||

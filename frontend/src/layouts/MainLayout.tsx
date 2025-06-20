@@ -1,4 +1,3 @@
-import React from 'react';
 import { Layout, Navbar, Nav, NavItem, Sidebar, SidebarSection, SidebarNav, SidebarNavItem, Container } from 'tabler-react';
 import { IconUsers, IconHome, IconBuildingWarehouse, IconUserPlus, IconUserCog } from '@tabler/icons-react';
 

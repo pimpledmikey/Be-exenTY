@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import ArticuloForm from './ArticuloForm';
 
 interface Articulo {

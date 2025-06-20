@@ -1,4 +1,3 @@
-import React from 'react';
 import logoBeExEn from '../assets/logoBeExEn.png';
 
 interface SidebarProps {
