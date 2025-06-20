@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 interface Articulo {
-  article_id?: number;
+  article_id?: string;
   code: string;
   name: string;
   description: string;
@@ -17,6 +17,7 @@ interface ArticuloFormProps {
 }
 
 const initialState: Articulo = {
+  article_id: undefined,
   code: '',
   name: '',
   description: '',
@@ -34,7 +35,7 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
 
   useEffect(() => {
     if (articulo) {
-      setForm({ ...articulo });
+      setForm({ ...articulo, article_id: articulo.article_id ? String(articulo.article_id) : undefined });
     } else {
       setForm(initialState);
     }
@@ -55,7 +56,7 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
-        body: JSON.stringify(form)
+        body: JSON.stringify({ ...form, article_id: form.article_id ? String(form.article_id) : undefined })
       });
       if (!res.ok) throw new Error('Error al guardar artículo');
       setSuccess(true);

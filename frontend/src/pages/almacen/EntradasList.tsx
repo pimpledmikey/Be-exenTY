@@ -3,7 +3,7 @@ import EntradaForm from './EntradaForm';
 
 interface Entrada {
   entry_id: number;
-  article_id: number;
+  article_id: string;
   quantity: number;
   unit_cost: number;
   invoice_number: string;
@@ -48,7 +48,7 @@ export default function EntradasList() {
       });
       if (!res.ok) throw new Error('Error al cargar entradas');
       const data = await res.json();
-      setEntradas(data);
+      setEntradas(data.map((e: any) => ({ ...e, article_id: String(e.article_id) })));
     } catch (err: any) {
       setError(err.message);
     } finally {

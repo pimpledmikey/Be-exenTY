@@ -3,11 +3,11 @@ import SalidaForm from './SalidaForm';
 
 interface Salida {
   exit_id: number;
-  article_id: number;
+  article_id: string;
   quantity: number;
   date: string;
   reason: string;
-  user_id: number;
+  user_id: string;
   articulo_nombre?: string;
   usuario_nombre?: string;
 }
@@ -33,7 +33,7 @@ export default function SalidasList() {
       });
       if (!res.ok) throw new Error('Error al cargar salidas');
       const data = await res.json();
-      setSalidas(data);
+      setSalidas(data.map((s: any) => ({ ...s, article_id: String(s.article_id), user_id: String(s.user_id) })));
     } catch (err: any) {
       setError(err.message);
     } finally {

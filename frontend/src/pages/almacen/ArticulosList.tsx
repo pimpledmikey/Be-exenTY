@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ArticuloForm from './ArticuloForm';
 
 interface Articulo {
-  article_id: number;
+  article_id: string;
   code: string;
   name: string;
   description: string;
@@ -40,7 +40,7 @@ export default function ArticulosList() {
       });
       if (!res.ok) throw new Error('Error al cargar artículos');
       const data = await res.json();
-      setArticulos(data);
+      setArticulos(data.map((a: any) => ({ ...a, article_id: String(a.article_id) })));
     } catch (err: any) {
       setError(err.message);
     } finally {
