@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 interface ArticuloSimple {
   article_id: number;
   name: string;
@@ -38,12 +40,12 @@ const SalidaForm: React.FC<SalidaFormProps> = ({ salida, onClose }) => {
   const [usuarios, setUsuarios] = useState<UsuarioSimple[]>([]);
 
   useEffect(() => {
-    fetch('/api/almacen/articulos-simple', {
+    fetch(`${API_URL}/almacen/articulos-simple`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
     })
       .then(res => res.json())
       .then(data => setArticulos(data));
-    fetch('/api/user/usuarios-simple', {
+    fetch(`${API_URL}/user/usuarios-simple`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
     })
       .then(res => res.json())
@@ -69,7 +71,7 @@ const SalidaForm: React.FC<SalidaFormProps> = ({ salida, onClose }) => {
     setSuccess(false);
     try {
       const method = salida && salida.exit_id ? 'PUT' : 'POST';
-      const url = salida && salida.exit_id ? `/api/almacen/salidas/${salida.exit_id}` : '/api/almacen/salidas';
+      const url = salida && salida.exit_id ? `${API_URL}/almacen/salidas/${salida.exit_id}` : `${API_URL}/almacen/salidas`;
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 interface Grupo {
   group_id: number;
   name: string;
@@ -70,28 +72,23 @@ export default function UsuarioForm({ adminUsername, usuario, onClose }: Usuario
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     setError(null);
     setSuccess(false);
-    if (form.password !== form.confirmPassword) {
-      setError('Las contraseñas no coinciden');
-      return;
-    }
-    setLoading(true);
     try {
-      const url = usuario ? `/api/user/usuarios/${usuario.id}` : '/api/user/create';
-      const method = usuario ? 'PUT' : 'POST';
+      const method = usuario && usuario.id ? 'PUT' : 'POST';
+      const url = usuario && usuario.id ? `${API_URL}/user/usuarios/${usuario.id}` : `${API_URL}/user/usuarios`;
       const res = await fetch(url, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ ...form, adminUsername })
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
+        body: JSON.stringify(form)
       });
-      if (!res.ok) throw new Error(usuario ? 'Error al actualizar usuario' : 'Error al crear usuario');
+      if (!res.ok) throw new Error('Error al guardar usuario');
       setSuccess(true);
-      setTimeout(() => onClose && onClose(true), 800);
-      if (!usuario) setForm({ username: '', name: '', email: '', group_id: '', password: '', confirmPassword: '' });
+      setTimeout(() => {
+        setSuccess(false);
+        onClose();
+      }, 800);
     } catch (err: any) {
       setError(err.message);
     } finally {

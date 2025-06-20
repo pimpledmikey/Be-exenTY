@@ -27,6 +27,8 @@ const initialState: Entrada = {
   supplier: '',
 };
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const EntradaForm: React.FC<EntradaFormProps> = ({ entrada, onClose }) => {
   const [form, setForm] = useState<Entrada>(initialState);
   const [loading, setLoading] = useState(false);
@@ -35,7 +37,7 @@ const EntradaForm: React.FC<EntradaFormProps> = ({ entrada, onClose }) => {
   const [articulos, setArticulos] = useState<ArticuloSimple[]>([]);
 
   useEffect(() => {
-    fetch('/api/almacen/articulos-simple', {
+    fetch(`${API_URL}/almacen/articulos-simple`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
     })
       .then(res => res.json())
@@ -61,7 +63,7 @@ const EntradaForm: React.FC<EntradaFormProps> = ({ entrada, onClose }) => {
     setSuccess(false);
     try {
       const method = entrada && entrada.entry_id ? 'PUT' : 'POST';
-      const url = entrada && entrada.entry_id ? `/api/almacen/entradas/${entrada.entry_id}` : '/api/almacen/entradas';
+      const url = entrada && entrada.entry_id ? `${API_URL}/almacen/entradas/${entrada.entry_id}` : `${API_URL}/almacen/entradas`;
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },

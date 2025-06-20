@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 interface Grupo {
   id?: number;
   nombre: string;
@@ -25,21 +27,23 @@ const GrupoForm: React.FC<GrupoFormProps> = ({ grupo, onClose }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     setError(null);
     setSuccess(false);
-    setLoading(true);
     try {
-      const res = await fetch(grupo ? `/api/user/grupos/${grupo.id}` : '/api/user/grupos', {
-        method: grupo ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
+      const method = grupo && grupo.id ? 'PUT' : 'POST';
+      const url = grupo && grupo.id ? `${API_URL}/user/grupos/${grupo.id}` : `${API_URL}/user/grupos`;
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
         body: JSON.stringify({ name: nombre }) // solo enviar name
       });
-      if (!res.ok) throw new Error(grupo ? 'Error al actualizar grupo' : 'Error al crear grupo');
+      if (!res.ok) throw new Error('Error al guardar grupo');
       setSuccess(true);
-      setTimeout(() => onClose(true), 800);
+      setTimeout(() => {
+        setSuccess(false);
+        onClose();
+      }, 800);
     } catch (err: any) {
       setError(err.message);
     } finally {

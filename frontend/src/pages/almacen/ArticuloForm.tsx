@@ -27,6 +27,8 @@ const initialState: Articulo = {
   status: 'activo',
 };
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
   const [form, setForm] = useState<Articulo>(initialState);
   const [loading, setLoading] = useState(false);
@@ -52,7 +54,7 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
     setSuccess(false);
     try {
       const method = articulo && articulo.article_id ? 'PUT' : 'POST';
-      const url = articulo && articulo.article_id ? `/api/almacen/articulos/${articulo.article_id}` : '/api/almacen/articulos';
+      const url = articulo && articulo.article_id ? `${API_URL}/almacen/articulos/${articulo.article_id}` : `${API_URL}/almacen/articulos`;
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
