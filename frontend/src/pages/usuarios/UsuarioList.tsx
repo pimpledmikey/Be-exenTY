@@ -12,7 +12,7 @@ interface Usuario {
   group_id: string;
 }
 
-const UsuarioList: React.FC<{ adminUsername: string }> = ({ adminUsername }) => {
+const UsuarioList: React.FC = () => {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -142,7 +142,6 @@ const UsuarioList: React.FC<{ adminUsername: string }> = ({ adminUsername }) => 
               </div>
               <div className="modal-body">
                 <UsuarioForm
-                  adminUsername={adminUsername}
                   usuario={editUsuario}
                   onClose={() => {
                     setShowForm(false);
