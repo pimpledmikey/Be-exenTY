@@ -37,7 +37,7 @@ export default function UsuarioForm({ usuario, onClose }: UsuarioFormProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/user/grupos', {
+    fetch(`${API_URL}/user/grupos`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
     })
       .then(res => res.json())
@@ -77,10 +77,21 @@ export default function UsuarioForm({ usuario, onClose }: UsuarioFormProps) {
     try {
       const method = usuario && usuario.id ? 'PUT' : 'POST';
       const url = usuario && usuario.id ? `${API_URL}/user/usuarios/${usuario.id}` : `${API_URL}/user/usuarios`;
+      const body: any = {
+        name: form.name,
+        email: form.email,
+        group_id: form.group_id,
+      };
+      if (!usuario) {
+        body.username = form.username;
+        body.password = form.password;
+      } else if (form.password) {
+        body.password = form.password;
+      }
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
-        body: JSON.stringify(form)
+        body: JSON.stringify(body)
       });
       if (!res.ok) throw new Error('Error al guardar usuario');
       setSuccess(true);
@@ -135,25 +146,16 @@ export default function UsuarioForm({ usuario, onClose }: UsuarioFormProps) {
       </div>
       <div className="mb-3">
         <label className="form-label">Grupo</label>
-        {usuario ? (
-          <input
-            className="form-control"
-            value={grupos.find(g => String(g.group_id) == form.group_id)?.name || ''}
-            disabled
-            readOnly
-          />
-        ) : (
-          <select
-            name="group_id"
-            className="form-select"
-            value={form.group_id}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Selecciona grupo</option>
-            {grupos.map(g => <option key={g.group_id} value={g.group_id}>{g.name}</option>)}
-          </select>
-        )}
+        <select
+          name="group_id"
+          className="form-select"
+          value={form.group_id}
+          onChange={handleChange}
+          required
+        >
+          <option value="">Selecciona grupo</option>
+          {grupos.map(g => <option key={g.group_id} value={g.group_id}>{g.name}</option>)}
+        </select>
       </div>
       <div className="mb-3">
         <label className="form-label">Contraseña (dejar vacío para no cambiar)</label>
