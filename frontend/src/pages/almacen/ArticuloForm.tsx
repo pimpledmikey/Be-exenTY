@@ -58,7 +58,15 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
-        body: JSON.stringify({ ...form, article_id: form.article_id ? String(form.article_id) : undefined })
+        body: JSON.stringify({
+          code: form.code,
+          name: form.name,
+          description: form.description,
+          unit: form.unit,
+          min_stock: Number(form.min_stock),
+          max_stock: Number(form.max_stock),
+          status: form.status
+        })
       });
       if (!res.ok) throw new Error('Error al guardar artículo');
       setSuccess(true);
