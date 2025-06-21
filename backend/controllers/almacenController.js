@@ -97,6 +97,10 @@ export const updateArticulo = async (req, res) => {
   try {
     const { id } = req.params;
     const { code, name, description, unit, min_stock, max_stock, status } = req.body;
+    // Validación de campos requeridos
+    if (!code || !name || !unit || min_stock == null || max_stock == null || !status) {
+      return res.status(400).json({ error: 'Faltan campos requeridos' });
+    }
     await pool.query(
       'UPDATE articles SET code=?, name=?, description=?, unit=?, min_stock=?, max_stock=?, status=? WHERE article_id=?',
       [code, name, description, unit, min_stock, max_stock, status, id]
