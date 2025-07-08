@@ -1,5 +1,3 @@
-import logoBeExEn from '../assets/logoBeExEn.png';
-
 interface SidebarProps {
   user: { username: string; group: string };
   current: string;
@@ -17,7 +15,8 @@ export default function Sidebar({ current, onChange }: SidebarProps) {
   return (
     <nav className="navbar navbar-dark bg-dark flex-column p-3" style={{ minHeight: '100vh', width: 220 }}>
       <div className="text-center mb-4">
-        <img src={logoBeExEn} alt="Logo" width={120} style={{ objectFit: 'contain' }} />
+        {/* Solo texto, sin logo */}
+        <span style={{ fontWeight: 700, fontSize: 28, color: '#fff', letterSpacing: 1 }}>Be-exen</span>
       </div>
       <ul className="nav nav-pills flex-column mb-auto">
         {menu.map(item => (
@@ -33,6 +32,12 @@ export default function Sidebar({ current, onChange }: SidebarProps) {
           </li>
         ))}
       </ul>
+      <div className="mt-auto text-center">
+        {/* Imagen de usuario dummy y datos */}
+        <img src="https://ui-avatars.com/api/?name=Usuario&background=0D6EFD&color=fff&size=64" alt="Usuario" width={48} height={48} style={{ borderRadius: '50%', objectFit: 'cover', marginBottom: 8 }} />
+        <div style={{ color: '#fff', fontWeight: 500, fontSize: 15 }}>Usuario</div>
+        <div style={{ color: '#b0b0b0', fontSize: 13 }}>Rol</div>
+      </div>
     </nav>
   );
 }

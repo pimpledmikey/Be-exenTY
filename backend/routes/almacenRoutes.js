@@ -2,6 +2,7 @@ import { Router } from 'express';
 import * as almacenController from '../controllers/almacenController.js';
 import checkModuleAccess from '../middlewares/checkModuleAccess.js';
 import auth from '../middlewares/auth.js';
+import validarStock from '../middlewares/validarStock.js';
 
 const router = Router();
 
@@ -12,7 +13,7 @@ router.delete('/articulos/:id', auth, checkModuleAccess, almacenController.delet
 router.get('/entradas', auth, checkModuleAccess, almacenController.getEntradas);
 router.post('/entradas', auth, checkModuleAccess, almacenController.createEntrada);
 router.get('/salidas', auth, checkModuleAccess, almacenController.getSalidas);
-router.post('/salidas', auth, checkModuleAccess, almacenController.createSalida);
+router.post('/salidas', auth, checkModuleAccess, validarStock, almacenController.createSalida);
 router.get('/stock', auth, checkModuleAccess, almacenController.getStock);
 router.get('/articulos-simple', auth, checkModuleAccess, almacenController.getArticulosSimple);
 

@@ -1,0 +1,4 @@
+# Tabla: articles
+code,name,description,unit,min_stock,max_stock,status
+A001,Abrazadera omega,"3/4"" pulgada",pieza,0,10,activo
+A002,Tornillo hexagonal,"M8 x 30mm",pieza,5,50,activo

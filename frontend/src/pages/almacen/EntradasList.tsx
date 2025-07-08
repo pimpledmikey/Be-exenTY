@@ -19,10 +19,7 @@ export default function EntradasList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [editEntrada, setEditEntrada] = useState<Entrada | null>(null);
   const [alerta, setAlerta] = useState<{ tipo: 'success' | 'danger'; mensaje: string } | null>(null);
-  const [entradaAEliminar, setEntradaAEliminar] = useState<Entrada | null>(null);
-  const [showConfirm, setShowConfirm] = useState(false);
 
   // Paginación y filtrado
   const [pagina, setPagina] = useState(1);
@@ -62,27 +59,6 @@ export default function EntradasList() {
     fetchEntradas();
   }, []);
 
-  const eliminarEntrada = async () => {
-    if (!entradaAEliminar) return;
-    try {
-      const res = await fetch(`${API_URL}/almacen/entradas/${entradaAEliminar.entry_id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      if (!res.ok) throw new Error('Error al eliminar entrada');
-      setAlerta({ tipo: 'success', mensaje: 'Entrada eliminada correctamente' });
-      fetchEntradas();
-    } catch (err) {
-      setAlerta({ tipo: 'danger', mensaje: 'No se pudo eliminar la entrada' });
-    } finally {
-      setShowConfirm(false);
-      setEntradaAEliminar(null);
-    }
-  };
-
   if (loading) return <div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando entradas...</span></div>;
   if (error) return <div className="alert alert-danger">Error: {error}</div>;
 
@@ -107,6 +83,7 @@ export default function EntradasList() {
               <th>Factura</th>
               <th>Fecha</th>
               <th>Proveedor</th>
+              {/* Acciones deshabilitadas por política */}
               <th>Acciones</th>
             </tr>
           </thead>
@@ -120,10 +97,7 @@ export default function EntradasList() {
                 <td>{e.invoice_number}</td>
                 <td>{e.date}</td>
                 <td>{e.supplier}</td>
-                <td>
-                  <button className="btn btn-primary btn-sm me-2" onClick={() => { setEditEntrada(e); setShowForm(true); }}>Editar</button>
-                  <button className="btn btn-danger btn-sm" onClick={() => { setEntradaAEliminar(e); setShowConfirm(true); }}>Eliminar</button>
-                </td>
+                <td><span className="text-muted">No permitido</span></td>
               </tr>
             ))}
           </tbody>
@@ -145,43 +119,23 @@ export default function EntradasList() {
           </li>
         </ul>
       </nav>
-      {/* Modal para alta/edición */}
+      {/* Modal para alta */}
       {showForm && (
         <div className="modal fade show d-block modal-dark" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.5)' }} data-bs-theme="dark">
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">{editEntrada ? 'Editar entrada' : 'Registrar entrada'}</h5>
+                <h5 className="modal-title">Registrar entrada</h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setShowForm(false)}></button>
               </div>
               <div className="modal-body">
                 <EntradaForm
-                  entrada={editEntrada}
+                  entrada={null}
                   onClose={() => {
                     setShowForm(false);
                     fetchEntradas();
                   }}
                 />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* Modal de confirmación */}
-      {showConfirm && entradaAEliminar && (
-        <div className="modal fade show d-block modal-dark" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.5)' }} data-bs-theme="dark">
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Confirmar eliminación</h5>
-                <button type="button" className="btn-close btn-close-white" onClick={() => setShowConfirm(false)}></button>
-              </div>
-              <div className="modal-body">
-                <p>¿Seguro que deseas eliminar la entrada #{entradaAEliminar.entry_id}?</p>
-              </div>
-              <div className="modal-footer">
-                <button className="btn btn-secondary" onClick={() => setShowConfirm(false)}>Cancelar</button>
-                <button className="btn btn-danger" onClick={eliminarEntrada}>Eliminar</button>
               </div>
             </div>
           </div>

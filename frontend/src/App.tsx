@@ -1,8 +1,94 @@
-import { useState } from 'react';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { useEffect, useState } from 'react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import LoginPage from './pages/Login';
 import UsuarioList from './pages/usuarios/UsuarioList';
 import GrupoList from './pages/usuarios/GrupoList';
 import AlmacenMenu from './pages/almacen/AlmacenMenu';
+import GoogleCalendarPage from './pages/GoogleCalendarPage';
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+function DashboardHome() {
+	const [stock, setStock] = useState<any[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+	const [stats, setStats] = useState({ totalArticulos: 0, stockBajo: 0, totalStock: 0 });
+
+	useEffect(() => {
+		const fetchStock = async () => {
+			setLoading(true);
+			try {
+				const res = await fetch(`${API_URL}/almacen/stock`, {
+					headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+				});
+				if (!res.ok) throw new Error('Error al cargar stock');
+				const data = await res.json();
+				setStock(data);
+				setStats({
+					totalArticulos: data.length,
+					stockBajo: data.filter((a: any) => a.stock < 5).length,
+					totalStock: data.reduce((acc: number, a: any) => acc + (a.stock || 0), 0)
+				});
+			} catch (err: any) {
+				setError(err.message);
+			} finally {
+				setLoading(false);
+			}
+		};
+		fetchStock();
+	}, []);
+
+	if (loading) return <div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando dashboard...</span></div>;
+	if (error) return <div className="alert alert-danger">Error: {error}</div>;
+
+	return (
+		<div className="row g-4">
+			<div className="col-12 col-md-4">
+				<div className="card bg-dark text-white mb-4">
+					<div className="card-body">
+						<h4 className="card-title mb-1">Total artículos</h4>
+						<div style={{ fontSize: 32, fontWeight: 700 }}>{stats.totalArticulos}</div>
+					</div>
+				</div>
+			</div>
+			<div className="col-12 col-md-4">
+				<div className="card bg-dark text-white mb-4">
+					<div className="card-body">
+						<h4 className="card-title mb-1">Stock bajo (&lt; 5)</h4>
+						<div style={{ fontSize: 32, fontWeight: 700 }}>{stats.stockBajo}</div>
+					</div>
+				</div>
+			</div>
+			<div className="col-12 col-md-4">
+				<div className="card bg-dark text-white mb-4">
+					<div className="card-body">
+						<h4 className="card-title mb-1">Stock total</h4>
+						<div style={{ fontSize: 32, fontWeight: 700 }}>{stats.totalStock}</div>
+					</div>
+				</div>
+			</div>
+			<div className="col-12">
+				<div className="card bg-dark text-white mb-4">
+					<div className="card-body">
+						<h4 className="card-title mb-3">Stock por artículo</h4>
+						<div style={{ width: '100%', height: 300 }}>
+							<ResponsiveContainer width="100%" height="100%">
+								<BarChart data={stock.slice(0, 10)} margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
+									<CartesianGrid strokeDasharray="3 3" stroke="#444" />
+									<XAxis dataKey="name" stroke="#fff" tick={{ fontSize: 12 }} />
+									<YAxis stroke="#fff" />
+									<Tooltip contentStyle={{ background: '#222', color: '#fff' }} />
+									<Bar dataKey="stock" fill="#0d6efd" />
+								</BarChart>
+							</ResponsiveContainer>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+}
 
 function Dashboard({ user }: { user: any }) {
 	const [current, setCurrent] = useState('dashboard');
@@ -37,7 +123,7 @@ function Dashboard({ user }: { user: any }) {
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					width="24"
-					height="24"
+				height="24"
 					viewBox="0 0 24 24"
 					fill="none"
 					stroke="currentColor"
@@ -62,7 +148,7 @@ function Dashboard({ user }: { user: any }) {
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							width="24"
-							height="24"
+						height="24"
 							viewBox="0 0 24 24"
 							fill="none"
 							stroke="currentColor"
@@ -84,7 +170,7 @@ function Dashboard({ user }: { user: any }) {
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							width="24"
-							height="24"
+						height="24"
 							viewBox="0 0 24 24"
 							fill="none"
 							stroke="currentColor"
@@ -101,6 +187,28 @@ function Dashboard({ user }: { user: any }) {
 				},
 			]
 			: []),
+		{
+			label: 'Calendario',
+			key: 'calendar',
+			icon: (
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="24"
+					height="24"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					strokeWidth="2"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+					className="icon icon-1"
+				>
+					<rect x="3" y="3" width="18" height="18" rx="2" />
+					<path d="M3 10h18" />
+					<path d="M10 3v18" />
+				</svg>
+			),
+		},
 	];
 
 	let content = null;
@@ -110,48 +218,10 @@ function Dashboard({ user }: { user: any }) {
 		content = <GrupoList />;
 	} else if (current === 'almacen') {
 		content = <AlmacenMenu />;
+	} else if (current === 'calendar') {
+		content = <GoogleCalendarPage />;
 	} else {
-		content = (
-			<div className="row row-deck row-cards">
-				<div className="col-12 col-lg-6">
-					<div className="card bg-dark text-white mb-4">
-						<div className="card-body">
-							<h3 className="card-title">
-								Bienvenido, {user?.username || 'Usuario'}
-							</h3>
-							<p className="card-text">
-								Aquí verás el resumen de tu sistema. Cuando subas inventario,
-								aparecerán los datos aquí.
-							</p>
-						</div>
-					</div>
-				</div>
-				<div className="col-6 col-lg-3">
-					<div className="card bg-dark text-white mb-4">
-						<div className="card-body">
-							<h4 className="card-title">Usuarios</h4>
-							<p className="card-text">Gestiona los usuarios del sistema.</p>
-						</div>
-					</div>
-				</div>
-				<div className="col-6 col-lg-3">
-					<div className="card bg-dark text-white mb-4">
-						<div className="card-body">
-							<h4 className="card-title">Almacén</h4>
-							<p className="card-text">Sube y administra tu inventario aquí.</p>
-						</div>
-					</div>
-				</div>
-				<div className="col-12 col-lg-6">
-					<div className="card bg-dark text-white mb-4">
-						<div className="card-body">
-							<h4 className="card-title">Grupos</h4>
-							<p className="card-text">Organiza los grupos de trabajo.</p>
-						</div>
-					</div>
-				</div>
-			</div>
-		);
+		content = <DashboardHome />;
 	}
 	return (
 		<div
@@ -180,24 +250,12 @@ function Dashboard({ user }: { user: any }) {
 					style={{ height: 64 }}
 				>
 					<div className="d-flex align-items-center">
-						<a
-							href="#"
-							className="navbar-brand d-flex align-items-center me-4"
-						>
-							<img
-								src="/static/logo-white.svg"
-								width="110"
-								height="32"
-								alt="Tabler"
-								className="navbar-brand-image"
-							/>
-						</a>
+						{/* Cambiar logo por texto Be-exen */}
+						<span style={{ fontWeight: 700, fontSize: 24, color: '#fff', letterSpacing: 1, marginRight: 24 }}>Be-exen</span>
 						<ul className="navbar-nav flex-row d-none d-md-flex">
 							{sidebarItems.map(item => (
 								<li
-									className={`nav-item px-2${
-										current === item.key ? ' active' : ''
-									}`}
+									className={`nav-item px-2${current === item.key ? ' active' : ''}`}
 									key={item.key}
 								>
 									<a
@@ -216,15 +274,11 @@ function Dashboard({ user }: { user: any }) {
 						</ul>
 					</div>
 					<div className="d-flex align-items-center">
-						<span
-							className="avatar avatar-sm ms-3"
-							style={{ backgroundImage: 'url(/static/avatars/044m.jpg)' }}
-						></span>
+						{/* Imagen dummy de usuario */}
+						<img src={'https://ui-avatars.com/api/?name=' + encodeURIComponent(user?.username || 'Usuario') + '&background=0D6EFD&color=fff&size=40'} alt="Usuario" width={32} height={32} style={{ borderRadius: '50%', objectFit: 'cover' }} />
 						<div className="d-none d-xl-block ps-2">
 							<div>{user?.username || 'Usuario'}</div>
-							<div className="mt-1 small text-secondary">
-								{user?.group || 'UI Designer'}
-							</div>
+							<div className="mt-1 small text-secondary">{user?.group || 'Rol'}</div>
 						</div>
 						<a
 							href="#"
@@ -326,7 +380,11 @@ function App() {
 	if (!user) {
 		return <LoginPage onLogin={setUser} />;
 	}
-	return <Dashboard user={user} />;
+	return (
+		<GoogleOAuthProvider clientId="125375132260-aq6pe7g161f8nr9ofrudiemtkhodc1q3.apps.googleusercontent.com">
+			<Dashboard user={user} />
+		</GoogleOAuthProvider>
+	);
 }
 
 export default App;

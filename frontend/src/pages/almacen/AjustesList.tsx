@@ -1,38 +1,37 @@
 import { useEffect, useState } from 'react';
-import SalidaForm from './SalidaForm';
+import AjusteForm from './AjusteForm';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-interface Salida {
-  exit_id: number;
+interface Ajuste {
+  adjustment_id: number;
   article_id: string;
   quantity: number;
-  date: string;
   reason: string;
   user_id: string;
+  date: string;
   articulo_nombre?: string;
   usuario_nombre?: string;
 }
 
-export default function SalidasList() {
-  const [salidas, setSalidas] = useState<Salida[]>([]);
+export default function AjustesList() {
+  const [ajustes, setAjustes] = useState<Ajuste[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [alerta, setAlerta] = useState<{ tipo: 'success' | 'danger'; mensaje: string } | null>(null);
 
-  const fetchSalidas = async () => {
+  const fetchAjustes = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/almacen/salidas`, {
+      const res = await fetch(`${API_URL}/ajustes`, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
       });
-      if (!res.ok) throw new Error('Error al cargar salidas');
+      if (!res.ok) throw new Error('Error al cargar ajustes');
       const data = await res.json();
-      setSalidas(data.map((s: any) => ({ ...s, article_id: String(s.article_id), user_id: String(s.user_id) })));
+      setAjustes(data.map((a: any) => ({ ...a, article_id: String(a.article_id), user_id: String(a.user_id) })));
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -41,22 +40,16 @@ export default function SalidasList() {
   };
 
   useEffect(() => {
-    fetchSalidas();
+    fetchAjustes();
   }, []);
 
-  if (loading) return <div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando salidas...</span></div>;
+  if (loading) return <div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando ajustes...</span></div>;
   if (error) return <div className="alert alert-danger">Error: {error}</div>;
 
   return (
     <div style={{width: '100%', maxWidth: '100vw', paddingTop: 8}}>
-      <h2 className="mb-0">Listado de Salidas</h2>
-      {alerta && (
-        <div className={`alert alert-${alerta.tipo} alert-dismissible`} role="alert">
-          {alerta.mensaje}
-          <button type="button" className="btn-close" onClick={() => setAlerta(null)}></button>
-        </div>
-      )}
-      <button className="btn btn-success mb-0" onClick={() => { setShowForm(true); }}>Crear salida</button>
+      <h2 className="mb-0">Ajustes de Inventario</h2>
+      <button className="btn btn-success mb-2" onClick={() => setShowForm(true)}>Registrar ajuste</button>
       <div style={{width: '100%'}}>
         <table className="table table-dark dataTable" data-bs-theme="dark" style={{width: '100%'}}>
           <thead>
@@ -64,44 +57,35 @@ export default function SalidasList() {
               <th>ID</th>
               <th>Artículo</th>
               <th>Cantidad</th>
-              <th>Fecha</th>
               <th>Motivo</th>
               <th>Usuario</th>
-              <th>Acciones</th>
+              <th>Fecha</th>
             </tr>
           </thead>
           <tbody>
-            {salidas.map(s => (
-              <tr key={s.exit_id}>
-                <td>{s.exit_id}</td>
-                <td>{s.articulo_nombre || s.article_id}</td>
-                <td>{s.quantity}</td>
-                <td>{s.date}</td>
-                <td>{s.reason}</td>
-                <td>{s.usuario_nombre || s.user_id}</td>
-                {/* Acciones deshabilitadas por política */}
-                <td><span className="text-muted">No permitido</span></td>
+            {ajustes.map(a => (
+              <tr key={a.adjustment_id}>
+                <td>{a.adjustment_id}</td>
+                <td>{a.articulo_nombre || a.article_id}</td>
+                <td>{a.quantity}</td>
+                <td>{a.reason}</td>
+                <td>{a.usuario_nombre || a.user_id}</td>
+                <td>{a.date}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      {/* Modal para alta */}
       {showForm && (
         <div className="modal fade show d-block modal-dark" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.5)' }} data-bs-theme="dark">
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Registrar salida</h5>
+                <h5 className="modal-title">Registrar ajuste</h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setShowForm(false)}></button>
               </div>
               <div className="modal-body">
-                <SalidaForm
-                  onClose={() => {
-                    setShowForm(false);
-                    fetchSalidas();
-                  }}
-                />
+                <AjusteForm onClose={() => { setShowForm(false); fetchAjustes(); }} />
               </div>
             </div>
           </div>
