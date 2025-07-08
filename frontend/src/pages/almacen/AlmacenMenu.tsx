@@ -16,22 +16,16 @@ const almacenMenus = [
 const AlmacenMenu: React.FC = () => {
   const [submenu, setSubmenu] = useState('articulos');
   let content = null;
-  let extraMenu = null;
   if (submenu === 'articulos') {
     content = <ArticulosList />;
-    extraMenu = 'articulos';
   } else if (submenu === 'entradas') {
     content = <EntradasList />;
-    extraMenu = 'entradas';
   } else if (submenu === 'salidas') {
     content = <SalidasList />;
-    extraMenu = 'salidas';
   } else if (submenu === 'stock') {
     content = <StockList />;
-    extraMenu = 'stock';
   } else if (submenu === 'ajustes') {
     content = <AjustesList />;
-    extraMenu = 'ajustes';
   }
 
   return (
