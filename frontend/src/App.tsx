@@ -11,20 +11,22 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 function DashboardHome() {
 	const [stock, setStock] = useState<any[]>([]);
+	const [entradas, setEntradas] = useState<any[]>([]);
+	const [salidas, setSalidas] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [stats, setStats] = useState({ totalArticulos: 0, stockBajo: 0, totalStock: 0 });
 
 	useEffect(() => {
-		const fetchStock = async () => {
+		const fetchAll = async () => {
 			setLoading(true);
 			try {
-				const res = await fetch(`${API_URL}/almacen/stock`, {
+				// Stock
+				const resStock = await fetch(`${API_URL}/almacen/stock`, {
 					headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
 				});
-				if (!res.ok) throw new Error('Error al cargar stock');
-				const data = await res.json();
-				// Asegurarse de que el stock sea numérico
+				if (!resStock.ok) throw new Error('Error al cargar stock');
+				const data = await resStock.json();
 				const dataFixed = data.map((a: any) => ({ ...a, stock: Number(a.stock || 0) }));
 				setStock(dataFixed);
 				setStats({
@@ -32,18 +34,44 @@ function DashboardHome() {
 					stockBajo: dataFixed.filter((a: any) => a.stock < 5).length,
 					totalStock: dataFixed.reduce((acc: number, a: any) => acc + a.stock, 0)
 				});
+				// Entradas
+				const resEntradas = await fetch(`${API_URL}/almacen/entradas`, {
+					headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+				});
+				if (!resEntradas.ok) throw new Error('Error al cargar entradas');
+				const dataEntradas = await resEntradas.json();
+				setEntradas(dataEntradas);
+				// Salidas
+				const resSalidas = await fetch(`${API_URL}/almacen/salidas`, {
+					headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+				});
+				if (!resSalidas.ok) throw new Error('Error al cargar salidas');
+				const dataSalidas = await resSalidas.json();
+				setSalidas(dataSalidas);
 			} catch (err: any) {
 				setError(err.message);
 			} finally {
 				setLoading(false);
 			}
 		};
-		fetchStock();
+		fetchAll();
 	}, []);
 
 	if (loading) return <div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando dashboard...</span></div>;
 	if (error) return <div className="alert alert-danger">Error: {error}</div>;
 
+	// Entradas y salidas del mes actual
+	const now = new Date();
+	const mes = now.getMonth();
+	const anio = now.getFullYear();
+	const entradasMes = entradas.filter((e: any) => {
+		const d = new Date(e.date);
+		return d.getMonth() === mes && d.getFullYear() === anio;
+	});
+	const salidasMes = salidas.filter((s: any) => {
+		const d = new Date(s.date);
+		return d.getMonth() === mes && d.getFullYear() === anio;
+	});
 	return (
 		<div className="row g-4">
 			<div className="col-12 col-md-4">
@@ -70,7 +98,8 @@ function DashboardHome() {
 					</div>
 				</div>
 			</div>
-			<div className="col-12">
+			{/* Top 10 más stock */}
+			<div className="col-12 col-md-6">
 				<div className="card bg-dark text-white mb-4">
 					<div className="card-body">
 						<h4 className="card-title mb-3">Top 10 artículos con más stock</h4>
@@ -85,6 +114,50 @@ function DashboardHome() {
 									<YAxis stroke="#fff" />
 									<Tooltip contentStyle={{ background: '#222', color: '#fff' }} />
 									<Bar dataKey="stock" fill="#0d6efd" />
+								</BarChart>
+							</ResponsiveContainer>
+						</div>
+					</div>
+				</div>
+			</div>
+			{/* Top 10 menos stock */}
+			<div className="col-12 col-md-6">
+				<div className="card bg-dark text-white mb-4">
+					<div className="card-body">
+						<h4 className="card-title mb-3">Top 10 artículos con menor stock</h4>
+						<div style={{ width: '100%', height: 300 }}>
+							<ResponsiveContainer width="100%" height="100%">
+								<BarChart data={stock
+									.filter(a => a.stock > 0)
+									.sort((a, b) => a.stock - b.stock)
+									.slice(0, 10)} margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
+									<CartesianGrid strokeDasharray="3 3" stroke="#444" />
+									<XAxis dataKey="name" stroke="#fff" tick={{ fontSize: 12 }} />
+									<YAxis stroke="#fff" />
+									<Tooltip contentStyle={{ background: '#222', color: '#fff' }} />
+									<Bar dataKey="stock" fill="#dc3545" />
+								</BarChart>
+							</ResponsiveContainer>
+						</div>
+					</div>
+				</div>
+			</div>
+			{/* Entradas vs Salidas del mes */}
+			<div className="col-12">
+				<div className="card bg-dark text-white mb-4">
+					<div className="card-body">
+						<h4 className="card-title mb-3">Entradas vs Salidas (mes actual)</h4>
+						<div style={{ width: '100%', height: 300 }}>
+							<ResponsiveContainer width="100%" height="100%">
+								<BarChart data={[
+									{ name: 'Entradas', cantidad: entradasMes.reduce((acc, e) => acc + Number(e.quantity), 0) },
+									{ name: 'Salidas', cantidad: salidasMes.reduce((acc, s) => acc + Number(s.quantity), 0) }
+								]} margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
+									<CartesianGrid strokeDasharray="3 3" stroke="#444" />
+									<XAxis dataKey="name" stroke="#fff" tick={{ fontSize: 12 }} />
+									<YAxis stroke="#fff" />
+									<Tooltip contentStyle={{ background: '#222', color: '#fff' }} />
+									<Bar dataKey="cantidad" fill="#198754" />
 								</BarChart>
 							</ResponsiveContainer>
 						</div>
