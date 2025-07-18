@@ -24,11 +24,13 @@ function DashboardHome() {
 				});
 				if (!res.ok) throw new Error('Error al cargar stock');
 				const data = await res.json();
-				setStock(data);
+				// Asegurarse de que el stock sea numérico
+				const dataFixed = data.map((a: any) => ({ ...a, stock: Number(a.stock || 0) }));
+				setStock(dataFixed);
 				setStats({
-					totalArticulos: data.length,
-					stockBajo: data.filter((a: any) => a.stock < 5).length,
-					totalStock: data.reduce((acc: number, a: any) => acc + (a.stock || 0), 0)
+					totalArticulos: dataFixed.length,
+					stockBajo: dataFixed.filter((a: any) => a.stock < 5).length,
+					totalStock: dataFixed.reduce((acc: number, a: any) => acc + a.stock, 0)
 				});
 			} catch (err: any) {
 				setError(err.message);
@@ -71,10 +73,13 @@ function DashboardHome() {
 			<div className="col-12">
 				<div className="card bg-dark text-white mb-4">
 					<div className="card-body">
-						<h4 className="card-title mb-3">Stock por artículo</h4>
+						<h4 className="card-title mb-3">Top 10 artículos con más stock</h4>
 						<div style={{ width: '100%', height: 300 }}>
 							<ResponsiveContainer width="100%" height="100%">
-								<BarChart data={stock.slice(0, 10)} margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
+								<BarChart data={stock
+									.filter(a => a.stock > 0)
+									.sort((a, b) => b.stock - a.stock)
+									.slice(0, 10)} margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
 									<CartesianGrid strokeDasharray="3 3" stroke="#444" />
 									<XAxis dataKey="name" stroke="#fff" tick={{ fontSize: 12 }} />
 									<YAxis stroke="#fff" />
