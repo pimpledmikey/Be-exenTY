@@ -7,6 +7,8 @@ interface Articulo {
   article_id: string;
   code: string;
   name: string;
+  size?: string;
+  measure?: string;
   description: string;
   unit: string;
   min_stock: number;
@@ -95,6 +97,8 @@ export default function ArticulosList() {
               <th>ID</th>
               <th>Código</th>
               <th>Nombre</th>
+              <th>Tamaño</th>
+              <th>Medida</th>
               <th>Descripción</th>
               <th>Unidad</th>
               <th>Stock Mín</th>
@@ -109,6 +113,8 @@ export default function ArticulosList() {
                 <td>{a.article_id}</td>
                 <td>{a.code}</td>
                 <td>{a.name}</td>
+                <td>{a.size || ''}</td>
+                <td>{a.measure || ''}</td>
                 <td>{a.description}</td>
                 <td>{a.unit}</td>
                 <td>{a.min_stock}</td>

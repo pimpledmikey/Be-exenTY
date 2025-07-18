@@ -4,6 +4,8 @@ interface Articulo {
   article_id?: string;
   code: string;
   name: string;
+  size?: string;
+  measure?: string;
   description: string;
   unit: string;
   min_stock: number;
@@ -20,6 +22,8 @@ const initialState: Articulo = {
   article_id: undefined,
   code: '',
   name: '',
+  size: '',
+  measure: '',
   description: '',
   unit: '',
   min_stock: 0,
@@ -61,6 +65,8 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
         body: JSON.stringify({
           code: form.code,
           name: form.name,
+          size: form.size,
+          measure: form.measure,
           description: form.description,
           unit: form.unit,
           min_stock: Number(form.min_stock),
@@ -91,6 +97,14 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
         <div className="mb-3">
           <label className="form-label">Nombre</label>
           <input className="form-control" name="name" placeholder="Nombre" value={form.name} onChange={handleChange} required />
+        </div>
+        <div className="mb-3">
+          <label className="form-label">Tamaño</label>
+          <input className="form-control" name="size" placeholder="Tamaño" value={form.size} onChange={handleChange} />
+        </div>
+        <div className="mb-3">
+          <label className="form-label">Medida</label>
+          <input className="form-control" name="measure" placeholder="Medida" value={form.measure} onChange={handleChange} />
         </div>
         <div className="mb-3">
           <label className="form-label">Descripción</label>

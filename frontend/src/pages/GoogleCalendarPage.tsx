@@ -23,11 +23,14 @@ type CalendarEvent = {
   start: Date;
   end: Date;
   allDay?: boolean;
+  description?: string;
+  location?: string;
 };
 
 const GoogleCalendarPage: React.FC = () => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [token, setToken] = useState<string | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
   // Login handler
   const login = useGoogleLogin({
@@ -52,6 +55,8 @@ const GoogleCalendarPage: React.FC = () => {
           start: item.start.dateTime ? new Date(item.start.dateTime) : new Date(item.start.date),
           end: item.end.dateTime ? new Date(item.end.dateTime) : new Date(item.end.date),
           allDay: !item.start.dateTime,
+          description: item.description || '',
+          location: item.location || '',
         }));
         setEvents(mappedEvents);
       });
@@ -112,8 +117,45 @@ const GoogleCalendarPage: React.FC = () => {
                 event: 'Evento',
                 noEventsInRange: 'No hay eventos en este rango.',
               }}
+              onSelectEvent={(event) => setSelectedEvent(event)}
             />
           </div>
+          {/* Modal de detalles del evento */}
+          {selectedEvent && (
+            <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              background: 'rgba(0,0,0,0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+            }}
+              onClick={() => setSelectedEvent(null)}
+            >
+              <div style={{
+                background: '#fff',
+                borderRadius: 10,
+                padding: 32,
+                minWidth: 320,
+                maxWidth: 400,
+                boxShadow: '0 4px 24px rgba(0,0,0,0.15)',
+                position: 'relative',
+              }}
+                onClick={e => e.stopPropagation()}
+              >
+                <h3 style={{marginTop:0}}>{selectedEvent.title}</h3>
+                <p><b>Inicio:</b> {selectedEvent.start.toLocaleString()}</p>
+                <p><b>Fin:</b> {selectedEvent.end.toLocaleString()}</p>
+                {selectedEvent.location && <p><b>Ubicación:</b> {selectedEvent.location}</p>}
+                {selectedEvent.description && <p><b>Descripción:</b> {selectedEvent.description}</p>}
+                <button onClick={() => setSelectedEvent(null)} style={{marginTop:16, background:'#4285F4', color:'#fff', border:'none', borderRadius:6, padding:'8px 16px', fontWeight:600, cursor:'pointer'}}>Cerrar</button>
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>

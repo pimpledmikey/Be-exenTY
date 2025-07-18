@@ -11,10 +11,10 @@ export const getArticulos = async (req, res) => {
 
 export const createArticulo = async (req, res) => {
   try {
-    const { code, name, description, unit, min_stock, max_stock, status } = req.body;
+    const { code, name, size, measure, description, unit, min_stock, max_stock, status } = req.body;
     await pool.query(
-      'INSERT INTO articles (code, name, description, unit, min_stock, max_stock, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [code, name, description, unit, min_stock, max_stock, status || 'activo']
+      'INSERT INTO articles (code, name, size, measure, description, unit, min_stock, max_stock, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [code, name, size, measure, description, unit, min_stock, max_stock, status || 'activo']
     );
     res.json({ success: true });
   } catch (error) {
@@ -86,7 +86,7 @@ export const getStock = async (req, res) => {
 
 export const getArticulosSimple = async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT article_id, name FROM articles WHERE status = "activo"');
+    const [rows] = await pool.query('SELECT article_id, name, size, measure FROM articles WHERE status = "activo"');
     res.json(rows);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -96,14 +96,14 @@ export const getArticulosSimple = async (req, res) => {
 export const updateArticulo = async (req, res) => {
   try {
     const { id } = req.params;
-    const { code, name, description, unit, min_stock, max_stock, status } = req.body;
+    const { code, name, size, measure, description, unit, min_stock, max_stock, status } = req.body;
     // Validación de campos requeridos
     if (!code || !name || !unit || min_stock == null || max_stock == null || !status) {
       return res.status(400).json({ error: 'Faltan campos requeridos' });
     }
     await pool.query(
-      'UPDATE articles SET code=?, name=?, description=?, unit=?, min_stock=?, max_stock=?, status=? WHERE article_id=?',
-      [code, name, description, unit, min_stock, max_stock, status, id]
+      'UPDATE articles SET code=?, name=?, size=?, measure=?, description=?, unit=?, min_stock=?, max_stock=?, status=? WHERE article_id=?',
+      [code, name, size, measure, description, unit, min_stock, max_stock, status, id]
     );
     res.json({ success: true });
   } catch (error) {
