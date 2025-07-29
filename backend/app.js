@@ -5,6 +5,7 @@ import userRoutes from './routes/userRoutes.js';
 import permisosRoutes from './routes/permisosRoutes.js';
 import loginRoutes from './routes/loginRoutes.js';
 import ajustesRoutes from './routes/ajustesRoutes.js';
+import catalogosRoutes from './routes/catalogosRoutes.js';
 
 const app = express();
 
@@ -28,5 +29,6 @@ app.use('/api/user', userRoutes);
 app.use('/api/permiso-modulo', permisosRoutes);
 app.use('/api/login', loginRoutes);
 app.use('/api/ajustes', ajustesRoutes);
+app.use('/api/catalogos', catalogosRoutes);
 
 export default app;
