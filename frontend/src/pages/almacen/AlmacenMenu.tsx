@@ -4,7 +4,9 @@ import EntradasList from './EntradasList';
 import SalidasList from './SalidasList';
 import StockList from './StockList';
 import AjustesList from './AjustesList';
-import CatalogosList from './CatalogosList';
+import GruposList from './GruposList';
+import MedidasList from './MedidasList';
+import UnidadesList from './UnidadesList';
 
 const almacenMenus = [
   { key: 'articulos', label: 'Artículos' },
@@ -12,11 +14,18 @@ const almacenMenus = [
   { key: 'salidas', label: 'Salidas' },
   { key: 'stock', label: 'Stock' },
   { key: 'ajustes', label: 'Ajustes' },
-  { key: 'catalogos', label: 'Catálogos' },
+  { key: 'configuracion', label: 'Configuración' },
+];
+
+const configuracionMenus = [
+  { key: 'grupos', label: 'Grupos' },
+  { key: 'medidas', label: 'Medidas' },
+  { key: 'unidades', label: 'Unidades' },
 ];
 
 const AlmacenMenu: React.FC = () => {
   const [submenu, setSubmenu] = useState('articulos');
+  const [configSubmenu, setConfigSubmenu] = useState('grupos');
   let content = null;
   if (submenu === 'articulos') {
     content = <ArticulosList />;
@@ -28,8 +37,28 @@ const AlmacenMenu: React.FC = () => {
     content = <StockList />;
   } else if (submenu === 'ajustes') {
     content = <AjustesList />;
-  } else if (submenu === 'catalogos') {
-    content = <CatalogosList />;
+  } else if (submenu === 'configuracion') {
+    let configContent = null;
+    if (configSubmenu === 'grupos') configContent = <GruposList />;
+    else if (configSubmenu === 'medidas') configContent = <MedidasList />;
+    else if (configSubmenu === 'unidades') configContent = <UnidadesList />;
+    content = (
+      <div>
+        <div className="d-flex gap-2 flex-wrap mb-3">
+          {configuracionMenus.map(m => (
+            <button
+              key={m.key}
+              className={`btn btn-outline-secondary${configSubmenu === m.key ? ' active' : ''}`}
+              style={{ background: 'transparent', boxShadow: 'none', border: '1px solid #6c757d', color: '#6c757d', borderRadius: 4, fontWeight: 500, padding: '4px 12px', minWidth: 80, fontSize: 'clamp(12px,2vw,16px)' }}
+              onClick={() => setConfigSubmenu(m.key)}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
+        {configContent}
+      </div>
+    );
   }
 
   return (
