@@ -5,9 +5,10 @@ interface Articulo {
   code: string;
   name: string;
   size?: string;
-  measure?: string;
+  group_code?: string;
+  measure_code?: string;
   description: string;
-  unit: string;
+  unit_code?: string;
   min_stock: number;
   max_stock: number;
   status: string;
@@ -23,9 +24,10 @@ const initialState: Articulo = {
   code: '',
   name: '',
   size: '',
-  measure: '',
+  group_code: '',
+  measure_code: '',
   description: '',
-  unit: '',
+  unit_code: '',
   min_stock: 0,
   max_stock: 0,
   status: 'activo',
@@ -38,17 +40,84 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Catálogos
+  const [grupos, setGrupos] = useState<{ group_code: string; group_name: string }[]>([]);
+  const [medidas, setMedidas] = useState<{ measure_code: string; measure_name: string }[]>([]);
+  const [unidades, setUnidades] = useState<{ unit_code: string; unit_name: string }[]>([]);
+  // Artículos existentes para consecutivo
+  const [articulosGrupo, setArticulosGrupo] = useState<Articulo[]>([]);
 
+  // Cargar catálogos al montar
+  useEffect(() => {
+    fetch(`${API_URL}/catalogos/grupos`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+      .then(res => res.json()).then(setGrupos);
+    fetch(`${API_URL}/catalogos/medidas`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+      .then(res => res.json()).then(setMedidas);
+    fetch(`${API_URL}/catalogos/unidades`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+      .then(res => res.json()).then(setUnidades);
+  }, []);
+
+  // Si editando, setea el form con los nuevos campos
   useEffect(() => {
     if (articulo) {
-      setForm({ ...articulo, article_id: articulo.article_id ? String(articulo.article_id) : undefined });
+      setForm({
+        ...initialState,
+        ...articulo,
+        article_id: articulo.article_id ? String(articulo.article_id) : undefined,
+        group_code: articulo.group_code || '',
+        measure_code: articulo.measure_code || '',
+        unit_code: articulo.unit_code || '',
+      });
     } else {
       setForm(initialState);
     }
   }, [articulo]);
 
+  // Cargar artículos del grupo seleccionado para calcular consecutivo
+  useEffect(() => {
+    if (form.group_code) {
+      fetch(`${API_URL}/almacen/articulos?group_code=${form.group_code}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      })
+        .then(res => res.json())
+        .then(data => setArticulosGrupo(data));
+    } else {
+      setArticulosGrupo([]);
+    }
+  }, [form.group_code]);
+
+  // Actualiza el form y genera el código automáticamente
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    let newForm = { ...form, [name]: value };
+    // Si cambia grupo, tamaño o consecutivo, genera el código
+    if (name === 'group_code' || name === 'size') {
+      // Calcula el consecutivo
+      let consecutivo = 1;
+      if (name === 'group_code' && value) {
+        // Si cambia grupo, busca artículos del grupo
+        const articulos = articulosGrupo.filter(a => a.group_code === value);
+        if (articulos.length > 0) {
+          // Extrae el consecutivo del código (ej: COM_016_3/4)
+          const nums = articulos.map(a => {
+            const match = a.code.match(/^[A-Z]+_(\d+)_/);
+            return match ? parseInt(match[1], 10) : 0;
+          });
+          consecutivo = Math.max(...nums) + 1;
+        }
+      } else if (form.group_code && articulosGrupo.length > 0) {
+        const nums = articulosGrupo.map(a => {
+          const match = a.code.match(/^[A-Z]+_(\d+)_/);
+          return match ? parseInt(match[1], 10) : 0;
+        });
+        consecutivo = Math.max(...nums) + 1;
+      }
+      // Genera el código
+      const grupo = name === 'group_code' ? value : form.group_code;
+      const size = name === 'size' ? value : form.size;
+      newForm.code = grupo && size ? `${grupo}_${String(consecutivo).padStart(3, '0')}_${size}` : '';
+    }
+    setForm(newForm);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -66,9 +135,10 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
           code: form.code,
           name: form.name,
           size: form.size,
-          measure: form.measure,
+          group_code: form.group_code,
+          measure_code: form.measure_code,
           description: form.description,
-          unit: form.unit,
+          unit_code: form.unit_code,
           min_stock: Number(form.min_stock),
           max_stock: Number(form.max_stock),
           status: form.status
@@ -91,8 +161,17 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
     <div>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
+          <label className="form-label">Grupo</label>
+          <select className="form-select" name="group_code" value={form.group_code} onChange={handleChange} required>
+            <option value="">Seleccione grupo</option>
+            {grupos.map(g => (
+              <option key={g.group_code} value={g.group_code}>{g.group_name}</option>
+            ))}
+          </select>
+        </div>
+        <div className="mb-3">
           <label className="form-label">Código</label>
-          <input className="form-control" name="code" placeholder="Código" value={form.code} onChange={handleChange} required />
+          <input className="form-control" name="code" placeholder="Código" value={form.code} readOnly />
         </div>
         <div className="mb-3">
           <label className="form-label">Nombre</label>
@@ -104,7 +183,12 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
         </div>
         <div className="mb-3">
           <label className="form-label">Medida</label>
-          <input className="form-control" name="measure" placeholder="Medida" value={form.measure} onChange={handleChange} />
+          <select className="form-select" name="measure_code" value={form.measure_code} onChange={handleChange}>
+            <option value="">Seleccione medida</option>
+            {medidas.map(m => (
+              <option key={m.measure_code} value={m.measure_code}>{m.measure_name}</option>
+            ))}
+          </select>
         </div>
         <div className="mb-3">
           <label className="form-label">Descripción</label>
@@ -112,7 +196,12 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
         </div>
         <div className="mb-3">
           <label className="form-label">Unidad</label>
-          <input className="form-control" name="unit" placeholder="Unidad" value={form.unit} onChange={handleChange} />
+          <select className="form-select" name="unit_code" value={form.unit_code} onChange={handleChange}>
+            <option value="">Seleccione unidad</option>
+            {unidades.map(u => (
+              <option key={u.unit_code} value={u.unit_code}>{u.unit_name}</option>
+            ))}
+          </select>
         </div>
         <div className="mb-3">
           <label className="form-label">Stock Mínimo</label>

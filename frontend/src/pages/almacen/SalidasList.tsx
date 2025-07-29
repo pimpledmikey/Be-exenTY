@@ -20,6 +20,8 @@ export default function SalidasList() {
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [alerta, setAlerta] = useState<{ tipo: 'success' | 'danger'; mensaje: string } | null>(null);
+  // Filtro
+  const [filtro, setFiltro] = useState('');
 
   const fetchSalidas = async () => {
     setLoading(true);
@@ -47,6 +49,12 @@ export default function SalidasList() {
   if (loading) return <div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando salidas...</span></div>;
   if (error) return <div className="alert alert-danger">Error: {error}</div>;
 
+  // Filtrado
+  const salidasFiltradas = salidas.filter(s => {
+    const texto = `${s.exit_id} ${s.articulo_nombre || ''} ${s.article_id} ${s.quantity} ${s.date} ${s.reason} ${s.usuario_nombre || ''} ${s.user_id}`.toLowerCase();
+    return texto.includes(filtro.toLowerCase());
+  });
+
   return (
     <div style={{width: '100%', maxWidth: '100vw', paddingTop: 8}}>
       <h2 className="mb-0">Listado de Salidas</h2>
@@ -56,7 +64,17 @@ export default function SalidasList() {
           <button type="button" className="btn-close" onClick={() => setAlerta(null)}></button>
         </div>
       )}
-      <button className="btn btn-success mb-0" onClick={() => { setShowForm(true); }}>Crear salida</button>
+      <div className="d-flex justify-content-between align-items-center mb-2">
+        <button className="btn btn-success mb-0" onClick={() => { setShowForm(true); }}>Crear salida</button>
+        <input
+          type="text"
+          className="form-control ms-2"
+          style={{maxWidth: 300}}
+          placeholder="Buscar..."
+          value={filtro}
+          onChange={e => { setFiltro(e.target.value); }}
+        />
+      </div>
       <div style={{width: '100%'}}>
         <table className="table table-dark dataTable" data-bs-theme="dark" style={{width: '100%'}}>
           <thead>
@@ -71,7 +89,7 @@ export default function SalidasList() {
             </tr>
           </thead>
           <tbody>
-            {salidas.map(s => (
+            {salidasFiltradas.map(s => (
               <tr key={s.exit_id}>
                 <td>{s.exit_id}</td>
                 <td>{s.articulo_nombre || s.article_id}</td>

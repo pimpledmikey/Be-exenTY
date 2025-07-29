@@ -24,15 +24,11 @@ export default function EntradasList() {
   // Paginación y filtrado
   const [pagina, setPagina] = useState(1);
   const porPagina = 15;
-  const [filtro] = useState('');
-  const entradasFiltradas = entradas.filter(e =>
-    (e.articulo_nombre || String(e.article_id)).toLowerCase().includes(filtro.toLowerCase()) ||
-    String(e.entry_id).includes(filtro) ||
-    String(e.quantity).includes(filtro) ||
-    String(e.unit_cost).includes(filtro) ||
-    (e.invoice_number || '').toLowerCase().includes(filtro.toLowerCase()) ||
-    (e.supplier || '').toLowerCase().includes(filtro.toLowerCase())
-  );
+  const [filtro, setFiltro] = useState('');
+  const entradasFiltradas = entradas.filter(e => {
+    const texto = `${e.articulo_nombre || ''} ${e.article_id} ${e.entry_id} ${e.quantity} ${e.unit_cost} ${e.invoice_number || ''} ${e.supplier || ''}`.toLowerCase();
+    return texto.includes(filtro.toLowerCase());
+  });
   const totalPaginas = Math.ceil(entradasFiltradas.length / porPagina);
   const entradasPagina = entradasFiltradas.slice((pagina - 1) * porPagina, pagina * porPagina);
 
@@ -71,7 +67,17 @@ export default function EntradasList() {
           <button type="button" className="btn-close" onClick={() => setAlerta(null)}></button>
         </div>
       )}
-      <button className="btn btn-success mb-0" onClick={() => { setShowForm(true); }}>Crear entrada</button>
+      <div className="d-flex justify-content-between align-items-center mb-2">
+        <button className="btn btn-success mb-0" onClick={() => { setShowForm(true); }}>Crear entrada</button>
+        <input
+          type="text"
+          className="form-control ms-2"
+          style={{maxWidth: 300}}
+          placeholder="Buscar..."
+          value={filtro}
+          onChange={e => { setFiltro(e.target.value); setPagina(1); }}
+        />
+      </div>
       <div style={{width: '100%'}}>
         <table className="table table-dark dataTable" data-bs-theme="dark" style={{width: '100%'}}>
           <thead>

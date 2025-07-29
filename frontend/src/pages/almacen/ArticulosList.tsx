@@ -8,9 +8,10 @@ interface Articulo {
   code: string;
   name: string;
   size?: string;
-  measure?: string;
+  group_code?: string;
+  measure_code?: string;
   description: string;
-  unit: string;
+  unit_code?: string;
   min_stock: number;
   max_stock: number;
   status: string;
@@ -25,12 +26,30 @@ export default function ArticulosList() {
   const [alerta, setAlerta] = useState<{ tipo: 'success' | 'danger'; mensaje: string } | null>(null);
   const [articuloAEliminar, setArticuloAEliminar] = useState<Articulo | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
+  // Catálogos para mostrar nombres
+  const [medidas, setMedidas] = useState<{ measure_code: string; measure_name: string }[]>([]);
+  const [unidades, setUnidades] = useState<{ unit_code: string; unit_name: string }[]>([]);
+  // Filtro de búsqueda
+  const [filtro, setFiltro] = useState('');
 
   // Paginación
   const [pagina, setPagina] = useState(1);
   const porPagina = 15;
-  const totalPaginas = Math.ceil(articulos.length / porPagina);
-  const articulosPagina = articulos.slice((pagina - 1) * porPagina, pagina * porPagina);
+  // Filtrado
+  const articulosFiltrados = articulos.filter(a => {
+    const medida = medidas.find(m => m.measure_code === a.measure_code)?.measure_name || '';
+    const unidad = unidades.find(u => u.unit_code === a.unit_code)?.unit_name || '';
+    return (
+      (a.code || '').toLowerCase().includes(filtro.toLowerCase()) ||
+      (a.name || '').toLowerCase().includes(filtro.toLowerCase()) ||
+      (a.size || '').toLowerCase().includes(filtro.toLowerCase()) ||
+      medida.toLowerCase().includes(filtro.toLowerCase()) ||
+      unidad.toLowerCase().includes(filtro.toLowerCase()) ||
+      (a.description || '').toLowerCase().includes(filtro.toLowerCase())
+    );
+  });
+  const totalPaginas = Math.ceil(articulosFiltrados.length / porPagina);
+  const articulosPagina = articulosFiltrados.slice((pagina - 1) * porPagina, pagina * porPagina);
 
   const fetchArticulos = async () => {
     setLoading(true);
@@ -51,6 +70,14 @@ export default function ArticulosList() {
       setLoading(false);
     }
   };
+
+  // Cargar catálogos para mostrar nombres
+  useEffect(() => {
+    fetch(`${API_URL}/catalogos/medidas`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+      .then(res => res.json()).then(setMedidas);
+    fetch(`${API_URL}/catalogos/unidades`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+      .then(res => res.json()).then(setUnidades);
+  }, []);
 
   useEffect(() => {
     fetchArticulos();
@@ -77,6 +104,10 @@ export default function ArticulosList() {
     }
   };
 
+  // Helpers para mostrar nombres de catálogo
+  const getMedidaNombre = (code?: string) => medidas.find(m => m.measure_code === code)?.measure_name || '';
+  const getUnidadNombre = (code?: string) => unidades.find(u => u.unit_code === code)?.unit_name || '';
+
   if (loading) return <div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando artículos...</span></div>;
   if (error) return <div className="alert alert-danger">Error: {error}</div>;
 
@@ -89,7 +120,17 @@ export default function ArticulosList() {
           <button type="button" className="btn-close" onClick={() => setAlerta(null)}></button>
         </div>
       )}
-      <button className="btn btn-success mb-0" onClick={() => { setEditArticulo(null); setShowForm(true); }}>Crear artículo</button>
+      <div className="d-flex flex-wrap align-items-center gap-2 mb-2">
+        <button className="btn btn-success mb-0" onClick={() => { setEditArticulo(null); setShowForm(true); }}>Crear artículo</button>
+        <input
+          className="form-control ms-auto"
+          style={{maxWidth: 300}}
+          type="text"
+          placeholder="Buscar artículo, código, medida, unidad..."
+          value={filtro}
+          onChange={e => { setFiltro(e.target.value); setPagina(1); }}
+        />
+      </div>
       <div style={{width: '100%'}}>
         <table className="table table-dark dataTable" data-bs-theme="dark" style={{width: '100%'}}>
           <thead>
@@ -114,9 +155,9 @@ export default function ArticulosList() {
                 <td>{a.code}</td>
                 <td>{a.name}</td>
                 <td>{a.size || ''}</td>
-                <td>{a.measure || ''}</td>
+                <td>{getMedidaNombre(a.measure_code)}</td>
                 <td>{a.description}</td>
-                <td>{a.unit}</td>
+                <td>{getUnidadNombre(a.unit_code)}</td>
                 <td>{a.min_stock}</td>
                 <td>{a.max_stock}</td>
                 <td>{a.status}</td>

@@ -18,14 +18,13 @@ export default function StockList() {
   const [alerta, setAlerta] = useState<{ tipo: 'success' | 'danger'; mensaje: string } | null>(null);
 
   // Filtrado
-  const [filtro] = useState('');
+  const [filtro, setFiltro] = useState('');
   const [pagina, setPagina] = useState(1);
   const porPagina = 15;
-  const stockFiltrado = stock.filter(s =>
-    s.code.toLowerCase().includes(filtro.toLowerCase()) ||
-    s.name.toLowerCase().includes(filtro.toLowerCase()) ||
-    String(s.article_id).includes(filtro)
-  );
+  const stockFiltrado = stock.filter(s => {
+    const texto = `${s.article_id} ${s.code} ${s.name} ${s.stock} ${s.last_unit_cost} ${s.total_cost}`.toLowerCase();
+    return texto.includes(filtro.toLowerCase());
+  });
   const totalPaginas = Math.ceil(stockFiltrado.length / porPagina);
   const stockPagina = stockFiltrado.slice((pagina - 1) * porPagina, pagina * porPagina);
 
@@ -62,6 +61,16 @@ export default function StockList() {
           <button type="button" className="btn-close" onClick={() => setAlerta(null)}></button>
         </div>
       )}
+      <div className="d-flex justify-content-end align-items-center mb-2">
+        <input
+          type="text"
+          className="form-control ms-2"
+          style={{maxWidth: 300}}
+          placeholder="Buscar..."
+          value={filtro}
+          onChange={e => { setFiltro(e.target.value); setPagina(1); }}
+        />
+      </div>
       <div style={{width: '100%'}}>
         <table className="table table-dark dataTable" data-bs-theme="dark" style={{width: '100%'}}>
           <thead>
