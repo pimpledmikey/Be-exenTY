@@ -50,11 +50,28 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
   // Cargar catálogos al montar
   useEffect(() => {
     fetch(`${API_URL}/catalogos/grupos`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
-      .then(res => res.json()).then(setGrupos);
+      .then(res => {
+        if (!res.ok) throw new Error('Error al cargar grupos');
+        return res.json();
+      })
+      .then(setGrupos)
+      .catch(err => setError(err.message));
+
     fetch(`${API_URL}/catalogos/medidas`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
-      .then(res => res.json()).then(setMedidas);
+      .then(res => {
+        if (!res.ok) throw new Error('Error al cargar medidas');
+        return res.json();
+      })
+      .then(setMedidas)
+      .catch(err => setError(err.message));
+
     fetch(`${API_URL}/catalogos/unidades`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
-      .then(res => res.json()).then(setUnidades);
+      .then(res => {
+        if (!res.ok) throw new Error('Error al cargar unidades');
+        return res.json();
+      })
+      .then(setUnidades)
+      .catch(err => setError(err.message));
   }, []);
 
   // Si editando, setea el form con los nuevos campos
@@ -90,7 +107,8 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     let newForm = { ...form, [name]: value };
-    // Si cambia grupo, tamaño o consecutivo, genera el código
+
+    // Si cambia grupo o tamaño, genera el código
     if (name === 'group_code' || name === 'size') {
       // Calcula el consecutivo
       let consecutivo = 1;
@@ -117,6 +135,7 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
       const size = name === 'size' ? value : form.size;
       newForm.code = grupo && size ? `${grupo}_${String(consecutivo).padStart(3, '0')}_${size}` : '';
     }
+
     setForm(newForm);
   };
 
