@@ -2,7 +2,16 @@ import pool from '../db.js';
 
 export const getArticulos = async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM articles');
+    const [rows] = await pool.query(`
+      SELECT a.*, 
+             g.group_name AS grupo_nombre, 
+             m.measure_name AS medida_nombre, 
+             u.unit_name AS unidad_nombre
+      FROM articles a
+      LEFT JOIN article_groups g ON a.group_code = g.group_code
+      LEFT JOIN article_measures m ON a.measure_code = m.measure_code
+      LEFT JOIN article_units u ON a.unit_code = u.unit_code
+    `);
     res.json(rows);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -11,10 +20,20 @@ export const getArticulos = async (req, res) => {
 
 export const createArticulo = async (req, res) => {
   try {
-    const { code, name, size, measure, description, unit, min_stock, max_stock, status } = req.body;
+    const { code, name, size, group_code, measure_code, description, unit_code, min_stock, max_stock, status } = req.body;
+
+    // Validar códigos de grupo, medida y unidad
+    const [[grupo]] = await pool.query('SELECT * FROM article_groups WHERE group_code = ?', [group_code]);
+    const [[medida]] = await pool.query('SELECT * FROM article_measures WHERE measure_code = ?', [measure_code]);
+    const [[unidad]] = await pool.query('SELECT * FROM article_units WHERE unit_code = ?', [unit_code]);
+
+    if (!grupo) return res.status(400).json({ error: 'Código de grupo inválido' });
+    if (!medida) return res.status(400).json({ error: 'Código de medida inválido' });
+    if (!unidad) return res.status(400).json({ error: 'Código de unidad inválido' });
+
     await pool.query(
-      'INSERT INTO articles (code, name, size, measure, description, unit, min_stock, max_stock, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [code, name, size, measure, description, unit, min_stock, max_stock, status || 'activo']
+      'INSERT INTO articles (code, name, size, group_code, measure_code, description, unit_code, min_stock, max_stock, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [code, name, size, group_code, measure_code, description, unit_code, min_stock, max_stock, status || 'activo']
     );
     res.json({ success: true });
   } catch (error) {
