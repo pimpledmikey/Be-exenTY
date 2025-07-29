@@ -16,6 +16,9 @@ router.get('/salidas', auth, checkModuleAccess, almacenController.getSalidas);
 router.post('/salidas', auth, checkModuleAccess, validarStock, almacenController.createSalida);
 router.get('/stock', auth, checkModuleAccess, almacenController.getStock);
 router.get('/articulos-simple', auth, checkModuleAccess, almacenController.getArticulosSimple);
+router.get('/catalogos/grupos', auth, checkModuleAccess, almacenController.getCatalogoGrupos);
+router.get('/catalogos/medidas', auth, checkModuleAccess, almacenController.getCatalogoMedidas);
+router.get('/catalogos/unidades', auth, checkModuleAccess, almacenController.getCatalogoUnidades);
 
 export default router;
 

@@ -139,3 +139,30 @@ export const deleteArticulo = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const getCatalogoGrupos = async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT group_code, group_name FROM article_groups');
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getCatalogoMedidas = async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT measure_code, measure_name FROM article_measures');
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getCatalogoUnidades = async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT unit_code, unit_name FROM article_units');
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
