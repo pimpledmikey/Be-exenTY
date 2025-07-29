@@ -16,7 +16,7 @@ export default function CatalogosList() {
     const fetchCatalogos = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${API_URL}/catalogos/grupos`, {
+        const res = await fetch(`${API_URL}/almacen/catalogos/grupos`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
           }

@@ -73,9 +73,9 @@ export default function ArticulosList() {
 
   // Cargar catálogos para mostrar nombres
   useEffect(() => {
-    fetch(`${API_URL}/catalogos/medidas`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+    fetch(`${API_URL}/almacen/catalogos/medidas`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
       .then(res => res.json()).then(setMedidas);
-    fetch(`${API_URL}/catalogos/unidades`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+    fetch(`${API_URL}/almacen/catalogos/unidades`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
       .then(res => res.json()).then(setUnidades);
   }, []);
 

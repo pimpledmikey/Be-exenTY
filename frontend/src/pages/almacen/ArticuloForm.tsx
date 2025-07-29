@@ -49,7 +49,7 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
 
   // Cargar catálogos al montar
   useEffect(() => {
-    fetch(`${API_URL}/catalogos/grupos`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+    fetch(`${API_URL}/almacen/catalogos/grupos`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
       .then(res => {
         if (!res.ok) throw new Error('Error al cargar grupos');
         return res.json();
@@ -57,7 +57,7 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
       .then(setGrupos)
       .catch(err => setError(err.message));
 
-    fetch(`${API_URL}/catalogos/medidas`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+    fetch(`${API_URL}/almacen/catalogos/medidas`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
       .then(res => {
         if (!res.ok) throw new Error('Error al cargar medidas');
         return res.json();
@@ -65,7 +65,7 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
       .then(setMedidas)
       .catch(err => setError(err.message));
 
-    fetch(`${API_URL}/catalogos/unidades`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+    fetch(`${API_URL}/almacen/catalogos/unidades`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
       .then(res => {
         if (!res.ok) throw new Error('Error al cargar unidades');
         return res.json();
