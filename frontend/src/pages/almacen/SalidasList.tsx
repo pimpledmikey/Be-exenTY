@@ -56,27 +56,29 @@ export default function SalidasList() {
   });
 
   return (
-    <div style={{width: '100%', maxWidth: '100vw', paddingTop: 8}}>
-      <h2 className="mb-0">Listado de Salidas</h2>
+    <div className="card" data-bs-theme="dark">
+      <div className="card-header">
+        <h3 className="card-title">Listado de Salidas</h3>
+        <div className="card-actions d-flex">
+          <input
+            type="text"
+            className="form-control me-2"
+            style={{maxWidth: 300}}
+            placeholder="Buscar..."
+            value={filtro}
+            onChange={e => { setFiltro(e.target.value); }}
+          />
+          <button className="btn btn-success" onClick={() => { setShowForm(true); }}>Crear salida</button>
+        </div>
+      </div>
       {alerta && (
-        <div className={`alert alert-${alerta.tipo} alert-dismissible`} role="alert">
+        <div className="card-alert alert alert-success mb-0">
           {alerta.mensaje}
           <button type="button" className="btn-close" onClick={() => setAlerta(null)}></button>
         </div>
       )}
-      <div className="d-flex justify-content-between align-items-center mb-2">
-        <button className="btn btn-success mb-0" onClick={() => { setShowForm(true); }}>Crear salida</button>
-        <input
-          type="text"
-          className="form-control ms-2"
-          style={{maxWidth: 300}}
-          placeholder="Buscar..."
-          value={filtro}
-          onChange={e => { setFiltro(e.target.value); }}
-        />
-      </div>
-      <div style={{width: '100%'}}>
-        <table className="table table-dark dataTable" data-bs-theme="dark" style={{width: '100%'}}>
+      <div className="table-responsive">
+        <table className="table card-table table-vcenter text-nowrap datatable table-striped">
           <thead>
             <tr>
               <th>ID</th>
@@ -97,29 +99,24 @@ export default function SalidasList() {
                 <td>{s.date}</td>
                 <td>{s.reason}</td>
                 <td>{s.usuario_nombre || s.user_id}</td>
-                {/* Acciones deshabilitadas por política */}
-                <td><span className="text-muted">No permitido</span></td>
+                <td>
+                  {/* <button className="btn btn-sm btn-outline-primary">Editar</button> */}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      {/* Modal para alta */}
       {showForm && (
-        <div className="modal fade show d-block modal-dark" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.5)' }} data-bs-theme="dark">
+        <div className="modal fade show d-block" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
+            <div className="modal-content" data-bs-theme="dark">
               <div className="modal-header">
-                <h5 className="modal-title">Registrar salida</h5>
-                <button type="button" className="btn-close btn-close-white" onClick={() => setShowForm(false)}></button>
+                <h5 className="modal-title">Crear Salida</h5>
+                <button type="button" className="btn-close" onClick={() => setShowForm(false)}></button>
               </div>
               <div className="modal-body">
-                <SalidaForm
-                  onClose={() => {
-                    setShowForm(false);
-                    fetchSalidas();
-                  }}
-                />
+                <SalidaForm onClose={() => { setShowForm(false); fetchSalidas(); setAlerta({ tipo: 'success', mensaje: 'Salida creada con éxito' }); }} />
               </div>
             </div>
           </div>

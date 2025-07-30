@@ -59,27 +59,29 @@ export default function EntradasList() {
   if (error) return <div className="alert alert-danger">Error: {error}</div>;
 
   return (
-    <div style={{width: '100%', maxWidth: '100vw', paddingTop: 8}}>
-      <h2 className="mb-0">Listado de Entradas</h2>
+    <div className="card" data-bs-theme="dark">
+      <div className="card-header">
+        <h3 className="card-title">Listado de Entradas</h3>
+        <div className="card-actions d-flex">
+          <input
+            type="text"
+            className="form-control me-2"
+            style={{maxWidth: 300}}
+            placeholder="Buscar..."
+            value={filtro}
+            onChange={e => { setFiltro(e.target.value); setPagina(1); }}
+          />
+          <button className="btn btn-success" onClick={() => { setShowForm(true); }}>Crear entrada</button>
+        </div>
+      </div>
       {alerta && (
-        <div className={`alert alert-${alerta.tipo} alert-dismissible`} role="alert">
+        <div className="card-alert alert alert-success mb-0">
           {alerta.mensaje}
-          <button type="button" className="btn-close" onClick={() => setAlerta(null)}></button>
+           <button type="button" className="btn-close" onClick={() => setAlerta(null)}></button>
         </div>
       )}
-      <div className="d-flex justify-content-between align-items-center mb-2">
-        <button className="btn btn-success mb-0" onClick={() => { setShowForm(true); }}>Crear entrada</button>
-        <input
-          type="text"
-          className="form-control ms-2"
-          style={{maxWidth: 300}}
-          placeholder="Buscar..."
-          value={filtro}
-          onChange={e => { setFiltro(e.target.value); setPagina(1); }}
-        />
-      </div>
-      <div style={{width: '100%'}}>
-        <table className="table table-dark dataTable" data-bs-theme="dark" style={{width: '100%'}}>
+      <div className="table-responsive">
+        <table className="table card-table table-vcenter text-nowrap datatable table-striped">
           <thead>
             <tr>
               <th>ID</th>
@@ -103,45 +105,40 @@ export default function EntradasList() {
                 <td>{e.invoice_number}</td>
                 <td>{e.date}</td>
                 <td>{e.supplier}</td>
-                <td><span className="text-muted">No permitido</span></td>
+                <td>
+                  {/* <button className="btn btn-sm btn-outline-primary">Editar</button> */}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      {/* Paginación */}
-      <nav className="d-flex justify-content-center align-items-center my-3">
-        <ul className="pagination mb-0">
-          <li className={`page-item${pagina === 1 ? ' disabled' : ''}`}>
-            <button className="page-link" onClick={() => setPagina(p => Math.max(1, p - 1))}>&laquo;</button>
+      <div className="card-footer d-flex align-items-center">
+        <p className="m-0 text-secondary">Mostrando <span>{entradasPagina.length}</span> de <span>{entradasFiltradas.length}</span> entradas</p>
+        <ul className="pagination m-0 ms-auto">
+          <li className={`page-item ${pagina === 1 ? 'disabled' : ''}`}>
+            <a className="page-link" href="#" onClick={(e) => { e.preventDefault(); setPagina(p => p - 1); }}>Anterior</a>
           </li>
           {[...Array(totalPaginas)].map((_, i) => (
-            <li key={i} className={`page-item${pagina === i + 1 ? ' active' : ''}`}>
-              <button className="page-link" onClick={() => setPagina(i + 1)}>{i + 1}</button>
+            <li key={i} className={`page-item ${pagina === i + 1 ? 'active' : ''}`}>
+              <a className="page-link" href="#" onClick={(e) => { e.preventDefault(); setPagina(i + 1); }}>{i + 1}</a>
             </li>
           ))}
-          <li className={`page-item${pagina === totalPaginas ? ' disabled' : ''}`}>
-            <button className="page-link" onClick={() => setPagina(p => Math.min(totalPaginas, p + 1))}>&raquo;</button>
+          <li className={`page-item ${pagina === totalPaginas ? 'disabled' : ''}`}>
+            <a className="page-link" href="#" onClick={(e) => { e.preventDefault(); setPagina(p => p + 1); }}>Siguiente</a>
           </li>
         </ul>
-      </nav>
-      {/* Modal para alta */}
+      </div>
       {showForm && (
-        <div className="modal fade show d-block modal-dark" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.5)' }} data-bs-theme="dark">
+        <div className="modal fade show d-block" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
+            <div className="modal-content" data-bs-theme="dark">
               <div className="modal-header">
-                <h5 className="modal-title">Registrar entrada</h5>
-                <button type="button" className="btn-close btn-close-white" onClick={() => setShowForm(false)}></button>
+                <h5 className="modal-title">Crear Entrada</h5>
+                <button type="button" className="btn-close" onClick={() => setShowForm(false)}></button>
               </div>
               <div className="modal-body">
-                <EntradaForm
-                  entrada={null}
-                  onClose={() => {
-                    setShowForm(false);
-                    fetchEntradas();
-                  }}
-                />
+                <EntradaForm onClose={() => { setShowForm(false); fetchEntradas(); setAlerta({ tipo: 'success', mensaje: 'Entrada creada con éxito' }); }} />
               </div>
             </div>
           </div>

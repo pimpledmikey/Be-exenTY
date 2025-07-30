@@ -63,31 +63,27 @@ const UsuarioList: React.FC = () => {
     fetchUsuarios();
   }, []);
 
+  if (loading) return <div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando...</span></div>;
+
   return (
-    <div>
-      <h3 className="mb-4">Lista de Usuarios</h3>
+    <div className="card" data-bs-theme="dark">
+      <div className="card-header">
+        <h3 className="card-title">Lista de Usuarios</h3>
+        <div className="card-actions">
+          <button className="btn btn-success" onClick={() => { setEditUsuario(null); setShowForm(true); }}>
+            Crear usuario
+          </button>
+        </div>
+      </div>
       {alerta && (
-        <div className={`alert alert-${alerta.tipo} alert-dismissible`} role="alert">
+        <div className={`card-alert alert alert-${alerta.tipo} mb-0`}>
           {alerta.mensaje}
           <button type="button" className="btn-close" onClick={() => setAlerta(null)}></button>
         </div>
       )}
       {error && <div className="alert alert-danger">{error}</div>}
-      <button
-        className="btn btn-success mb-3"
-        onClick={() => {
-          setEditUsuario(null);
-          setShowForm(true);
-        }}
-      >
-        Crear usuario
-      </button>
-      {loading ? (
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Cargando...</span>
-        </div>
-      ) : (
-        <table className="table table-dark dataTable" data-bs-theme="dark">
+      <div className="table-responsive">
+        <table className="table card-table table-vcenter text-nowrap datatable table-striped">
           <thead>
             <tr>
               <th>ID</th>
@@ -95,7 +91,7 @@ const UsuarioList: React.FC = () => {
               <th>Nombre</th>
               <th>Email</th>
               <th>Grupo</th>
-              <th>Acciones</th>
+              <th className="w-1">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -106,23 +102,11 @@ const UsuarioList: React.FC = () => {
                 <td>{usuario.name}</td>
                 <td>{usuario.email}</td>
                 <td>{usuario.group}</td>
-                <td>
-                  <button
-                    className="btn btn-primary btn-sm me-2"
-                    onClick={() => {
-                      setEditUsuario(usuario);
-                      setShowForm(true);
-                    }}
-                  >
+                <td className="text-end">
+                  <button className="btn btn-sm btn-outline-primary me-2" onClick={() => { setEditUsuario(usuario); setShowForm(true); }}>
                     Editar
                   </button>
-                  <button
-                    className="btn btn-danger btn-sm"
-                    onClick={() => {
-                      setUsuarioAEliminar(usuario);
-                      setShowConfirm(true);
-                    }}
-                  >
+                  <button className="btn btn-sm btn-outline-danger" onClick={() => { setUsuarioAEliminar(usuario); setShowConfirm(true); }}>
                     Eliminar
                   </button>
                 </td>
@@ -130,44 +114,33 @@ const UsuarioList: React.FC = () => {
             ))}
           </tbody>
         </table>
-      )}
-      {/* Modal Tabler */}
+      </div>
       {showForm && (
-        <div className="modal fade show d-block modal-dark" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.5)' }} data-bs-theme="dark">
+        <div className="modal fade show d-block" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
+            <div className="modal-content" data-bs-theme="dark">
               <div className="modal-header">
-                <h5 className="modal-title">{editUsuario ? 'Editar usuario' : 'Crear usuario'}</h5>
-                <button type="button" className="btn-close btn-close-white" onClick={() => setShowForm(false)}></button>
+                <h5 className="modal-title">{editUsuario ? 'Editar Usuario' : 'Crear Usuario'}</h5>
+                <button type="button" className="btn-close" onClick={() => setShowForm(false)}></button>
               </div>
               <div className="modal-body">
-                <UsuarioForm
-                  usuario={editUsuario}
-                  onClose={() => {
-                    setShowForm(false);
-                    fetchUsuarios();
-                  }}
-                />
+                <UsuarioForm usuario={editUsuario} onClose={() => { setShowForm(false); fetchUsuarios(); }} />
               </div>
             </div>
           </div>
         </div>
       )}
-      {/* Modal de confirmación Tabler */}
-      {showConfirm && usuarioAEliminar && (
-        <div className="modal fade show d-block modal-dark" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.5)' }} data-bs-theme="dark">
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Confirmar eliminación</h5>
-                <button type="button" className="btn-close btn-close-white" onClick={() => setShowConfirm(false)}></button>
-              </div>
-              <div className="modal-body">
-                <p>¿Seguro que deseas eliminar el usuario <b>{usuarioAEliminar.username}</b>?</p>
+      {showConfirm && (
+        <div className="modal fade show d-block" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-sm modal-dialog-centered">
+            <div className="modal-content" data-bs-theme="dark">
+              <div className="modal-body text-center py-4">
+                <h3>¿Estás seguro?</h3>
+                <div className="text-secondary">¿Quieres eliminar al usuario "{usuarioAEliminar?.username}"?</div>
               </div>
               <div className="modal-footer">
                 <button className="btn btn-secondary" onClick={() => setShowConfirm(false)}>Cancelar</button>
-                <button className="btn btn-danger" onClick={eliminarUsuario}>Eliminar</button>
+                <button className="btn btn-danger" onClick={eliminarUsuario}>Sí, eliminar</button>
               </div>
             </div>
           </div>

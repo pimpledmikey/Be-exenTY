@@ -112,117 +112,107 @@ export default function ArticulosList() {
   if (error) return <div className="alert alert-danger">Error: {error}</div>;
 
   return (
-    <div style={{width: '100%', maxWidth: '100vw', paddingTop: 8}}>
-      <h2 className="mb-0">Listado de Artículos</h2>
+    <div className="card" data-bs-theme="dark">
+      <div className="card-header">
+        <h3 className="card-title">Catálogo de Artículos</h3>
+        <div className="card-actions d-flex">
+          <input
+            type="text"
+            className="form-control me-2"
+            style={{maxWidth: 300}}
+            placeholder="Buscar artículo..."
+            value={filtro}
+            onChange={e => { setFiltro(e.target.value); setPagina(1); }}
+          />
+          <button className="btn btn-success" onClick={() => { setEditArticulo(null); setShowForm(true); }}>
+            Crear Artículo
+          </button>
+        </div>
+      </div>
       {alerta && (
-        <div className={`alert alert-${alerta.tipo} alert-dismissible`} role="alert">
+        <div className={`card-alert alert alert-${alerta.tipo} mb-0`}>
           {alerta.mensaje}
           <button type="button" className="btn-close" onClick={() => setAlerta(null)}></button>
         </div>
       )}
-      <div className="d-flex flex-wrap align-items-center gap-2 mb-2">
-        <button className="btn btn-success mb-0" onClick={() => { setEditArticulo(null); setShowForm(true); }}>Crear artículo</button>
-        <input
-          className="form-control ms-auto"
-          style={{maxWidth: 300}}
-          type="text"
-          placeholder="Buscar artículo, código, medida, unidad..."
-          value={filtro}
-          onChange={e => { setFiltro(e.target.value); setPagina(1); }}
-        />
-      </div>
-      <div style={{width: '100%'}}>
-        <table className="table table-dark dataTable" data-bs-theme="dark" style={{width: '100%'}}>
+      <div className="table-responsive">
+        <table className="table card-table table-vcenter text-nowrap datatable table-striped">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Código</th>
               <th>Nombre</th>
-              <th>Tamaño</th>
               <th>Medida</th>
-              <th>Descripción</th>
               <th>Unidad</th>
-              <th>Stock Mín</th>
-              <th>Stock Máx</th>
+              <th>Stock Mín.</th>
+              <th>Stock Máx.</th>
               <th>Estado</th>
-              <th>Acciones</th>
+              <th className="w-1">Acciones</th>
             </tr>
           </thead>
           <tbody>
             {articulosPagina.map(a => (
               <tr key={a.article_id}>
-                <td>{a.article_id}</td>
                 <td>{a.code}</td>
                 <td>{a.name}</td>
-                <td>{a.size || ''}</td>
-                <td>{getMedidaNombre(a.measure_code)}</td>
-                <td>{a.description}</td>
-                <td>{getUnidadNombre(a.unit_code)}</td>
+                <td>{medidas.find(m => m.measure_code === a.measure_code)?.measure_name || a.measure_code}</td>
+                <td>{unidades.find(u => u.unit_code === a.unit_code)?.unit_name || a.unit_code}</td>
                 <td>{a.min_stock}</td>
                 <td>{a.max_stock}</td>
-                <td>{a.status}</td>
-                <td>
-                  <button className="btn btn-primary btn-sm me-2" onClick={() => { setEditArticulo(a); setShowForm(true); }}>Editar</button>
-                  <button className="btn btn-danger btn-sm" onClick={() => { setArticuloAEliminar(a); setShowConfirm(true); }}>Eliminar</button>
+                <td><span className={`badge ${a.status === 'A' ? 'bg-success' : 'bg-danger'}`}>{a.status === 'A' ? 'Activo' : 'Inactivo'}</span></td>
+                <td className="text-end">
+                  <button className="btn btn-sm btn-outline-primary me-2" onClick={() => { setEditArticulo(a); setShowForm(true); }}>Editar</button>
+                  <button className="btn btn-sm btn-outline-danger" onClick={() => { setArticuloAEliminar(a); setShowConfirm(true); }}>Eliminar</button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      {/* Paginación */}
-      <nav className="d-flex justify-content-center align-items-center my-3">
-        <ul className="pagination mb-0">
-          <li className={`page-item${pagina === 1 ? ' disabled' : ''}`}>
-            <button className="page-link" onClick={() => setPagina(p => Math.max(1, p - 1))}>&laquo;</button>
+      <div className="card-footer d-flex align-items-center">
+        <p className="m-0 text-secondary">Mostrando <span>{articulosPagina.length}</span> de <span>{articulosFiltrados.length}</span> artículos</p>
+        <ul className="pagination m-0 ms-auto">
+          <li className={`page-item ${pagina === 1 ? 'disabled' : ''}`}>
+            <a className="page-link" href="#" onClick={(e) => { e.preventDefault(); setPagina(p => p > 1 ? p - 1 : 1); }}>Anterior</a>
           </li>
           {[...Array(totalPaginas)].map((_, i) => (
-            <li key={i} className={`page-item${pagina === i + 1 ? ' active' : ''}`}>
-              <button className="page-link" onClick={() => setPagina(i + 1)}>{i + 1}</button>
+            <li key={i} className={`page-item ${pagina === i + 1 ? 'active' : ''}`}>
+              <a className="page-link" href="#" onClick={(e) => { e.preventDefault(); setPagina(i + 1); }}>{i + 1}</a>
             </li>
           ))}
-          <li className={`page-item${pagina === totalPaginas ? ' disabled' : ''}`}>
-            <button className="page-link" onClick={() => setPagina(p => Math.min(totalPaginas, p + 1))}>&raquo;</button>
+          <li className={`page-item ${pagina === totalPaginas ? 'disabled' : ''}`}>
+            <a className="page-link" href="#" onClick={(e) => { e.preventDefault(); setPagina(p => p < totalPaginas ? p + 1 : totalPaginas); }}>Siguiente</a>
           </li>
         </ul>
-      </nav>
-      {/* Modal para alta/edición */}
+      </div>
       {showForm && (
-        <div className="modal fade show d-block modal-dark" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.5)' }} data-bs-theme="dark">
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
+        <div className="modal fade show d-block" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-lg modal-dialog-centered">
+            <div className="modal-content" data-bs-theme="dark">
               <div className="modal-header">
-                <h5 className="modal-title">{editArticulo ? 'Editar artículo' : 'Crear artículo'}</h5>
-                <button type="button" className="btn-close btn-close-white" onClick={() => setShowForm(false)}></button>
+                <h5 className="modal-title">{editArticulo ? 'Editar Artículo' : 'Crear Artículo'}</h5>
+                <button type="button" className="btn-close" onClick={() => setShowForm(false)}></button>
               </div>
               <div className="modal-body">
                 <ArticuloForm
                   articulo={editArticulo}
-                  onClose={() => {
-                    setShowForm(false);
-                    fetchArticulos();
-                  }}
+                  onClose={() => { setShowForm(false); fetchArticulos(); setAlerta({ tipo: 'success', mensaje: `Artículo ${editArticulo ? 'actualizado' : 'creado'} con éxito` }); }}
                 />
               </div>
             </div>
           </div>
         </div>
       )}
-      {/* Modal de confirmación */}
-      {showConfirm && articuloAEliminar && (
-        <div className="modal fade show d-block modal-dark" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.5)' }} data-bs-theme="dark">
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Confirmar eliminación</h5>
-                <button type="button" className="btn-close btn-close-white" onClick={() => setShowConfirm(false)}></button>
-              </div>
-              <div className="modal-body">
-                <p>¿Seguro que deseas eliminar el artículo <b>{articuloAEliminar.name}</b>?</p>
+      {showConfirm && (
+        <div className="modal fade show d-block" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-sm modal-dialog-centered">
+            <div className="modal-content" data-bs-theme="dark">
+              <div className="modal-body text-center py-4">
+                <h3>¿Estás seguro?</h3>
+                <div className="text-secondary">¿Quieres eliminar el artículo "{articuloAEliminar?.name}"? Esta acción no se puede deshacer.</div>
               </div>
               <div className="modal-footer">
                 <button className="btn btn-secondary" onClick={() => setShowConfirm(false)}>Cancelar</button>
-                <button className="btn btn-danger" onClick={eliminarArticulo}>Eliminar</button>
+                <button className="btn btn-danger" onClick={eliminarArticulo}>Sí, eliminar</button>
               </div>
             </div>
           </div>

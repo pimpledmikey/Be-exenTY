@@ -47,11 +47,15 @@ export default function AjustesList() {
   if (error) return <div className="alert alert-danger">Error: {error}</div>;
 
   return (
-    <div style={{width: '100%', maxWidth: '100vw', paddingTop: 8}}>
-      <h2 className="mb-0">Ajustes de Inventario</h2>
-      <button className="btn btn-success mb-2" onClick={() => setShowForm(true)}>Registrar ajuste</button>
-      <div style={{width: '100%'}}>
-        <table className="table table-dark dataTable" data-bs-theme="dark" style={{width: '100%'}}>
+    <div className="card" data-bs-theme="dark">
+      <div className="card-header">
+        <h3 className="card-title">Ajustes de Inventario</h3>
+        <div className="card-actions">
+          <button className="btn btn-success" onClick={() => setShowForm(true)}>Registrar ajuste</button>
+        </div>
+      </div>
+      <div className="table-responsive">
+        <table className="table card-table table-vcenter text-nowrap datatable table-striped">
           <thead>
             <tr>
               <th>ID</th>
@@ -77,12 +81,12 @@ export default function AjustesList() {
         </table>
       </div>
       {showForm && (
-        <div className="modal fade show d-block modal-dark" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.5)' }} data-bs-theme="dark">
+        <div className="modal fade show d-block" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
+            <div className="modal-content" data-bs-theme="dark">
               <div className="modal-header">
                 <h5 className="modal-title">Registrar ajuste</h5>
-                <button type="button" className="btn-close btn-close-white" onClick={() => setShowForm(false)}></button>
+                <button type="button" className="btn-close" onClick={() => setShowForm(false)}></button>
               </div>
               <div className="modal-body">
                 <AjusteForm onClose={() => { setShowForm(false); fetchAjustes(); }} />
