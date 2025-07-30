@@ -23,6 +23,10 @@ export const createArticulo = async (req, res) => {
   try {
     const { code, name, size, group_code, measure_code, description, unit_code, min_stock, max_stock, status, supplier_code, supplier_name } = req.body;
 
+    console.log('📦 Datos recibidos en createArticulo:', {
+      code, name, size, group_code, measure_code, description, unit_code, min_stock, max_stock, status, supplier_code, supplier_name
+    });
+
     // Validar códigos de grupo, medida y unidad
     const [[grupo]] = await pool.query('SELECT * FROM article_groups WHERE group_code = ?', [group_code]);
     const [[medida]] = await pool.query('SELECT * FROM article_measures WHERE measure_code = ?', [measure_code]);
@@ -34,7 +38,7 @@ export const createArticulo = async (req, res) => {
 
     await pool.query(
       'INSERT INTO articles (code, name, size, group_code, measure_code, description, unit_code, min_stock, max_stock, status, supplier_code, supplier_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [code, name, size, group_code, measure_code, description, unit_code, min_stock, max_stock, status || 'activo', supplier_code, supplier_name]
+      [code, name, size, group_code, measure_code, description, unit_code, min_stock, max_stock, status || 'activo', supplier_code || null, supplier_name || null]
     );
     res.json({ success: true });
   } catch (error) {
@@ -134,7 +138,7 @@ export const updateArticulo = async (req, res) => {
 
     await pool.query(
       'UPDATE articles SET code=?, name=?, size=?, group_code=?, measure_code=?, description=?, unit_code=?, min_stock=?, max_stock=?, status=?, supplier_code=?, supplier_name=? WHERE article_id=?',
-      [code, name, size, group_code, measure_code, description, unit_code, min_stock, max_stock, status, supplier_code, supplier_name, id]
+      [code, name, size, group_code, measure_code, description, unit_code, min_stock, max_stock, status, supplier_code || null, supplier_name || null, id]
     );
     res.json({ success: true });
   } catch (error) {

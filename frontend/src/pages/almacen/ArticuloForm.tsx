@@ -160,6 +160,8 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
         status: form.status.toLowerCase()
       };
 
+      console.log('📝 Datos del formulario enviados:', body);
+
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
@@ -269,7 +271,7 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
             className="form-control" 
             name="supplier_code" 
             placeholder="Código del proveedor" 
-            value={form.supplier_code} 
+            value={form.supplier_code || ''} 
             onChange={handleChange} 
           />
           <div className="form-text">
@@ -284,7 +286,7 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
             className="form-control" 
             name="supplier_name" 
             placeholder="Nombre del proveedor" 
-            value={form.supplier_name} 
+            value={form.supplier_name || ''} 
             onChange={handleChange} 
           />
           <div className="form-text">
