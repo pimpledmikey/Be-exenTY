@@ -84,6 +84,8 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
         group_code: articulo.group_code || '',
         measure_code: articulo.measure_code || '',
         unit_code: articulo.unit_code || '',
+        // Convertir status a minúsculas para la base de datos
+        status: articulo.status ? articulo.status.toLowerCase() : 'activo',
       });
     } else {
       setForm(initialState);
@@ -151,7 +153,9 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
       const body = {
         ...form,
         min_stock: Number(form.min_stock),
-        max_stock: Number(form.max_stock)
+        max_stock: Number(form.max_stock),
+        // Asegurar que el status esté en minúsculas
+        status: form.status.toLowerCase()
       };
 
       const res = await fetch(url, {
