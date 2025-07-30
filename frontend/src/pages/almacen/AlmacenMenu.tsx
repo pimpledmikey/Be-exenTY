@@ -14,8 +14,12 @@ const almacenMenus = [
 ];
 
 
-const AlmacenMenu: React.FC = () => {
-  const [submenu, setSubmenu] = useState('articulos');
+interface AlmacenMenuProps {
+  initialTab: string;
+}
+
+const AlmacenMenu: React.FC<AlmacenMenuProps> = ({ initialTab }) => {
+  const [submenu, setSubmenu] = useState(initialTab || 'articulos');
   let content = null;
   if (submenu === 'articulos') {
     content = <ArticulosList />;
