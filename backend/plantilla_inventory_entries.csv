@@ -1,4 +1,0 @@
-# Tabla: inventory_entries
-article_id,quantity,unit_cost,invoice_number,date,supplier
-1,100,12.50,FAC-001,2025-06-23 10:00:00,Proveedor SA
-2,200,0.80,FAC-002,2025-06-23 11:00:00,Proveedor SRL

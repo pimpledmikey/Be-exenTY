@@ -8,6 +8,7 @@ const menu = [
   { key: 'dashboard', icon: 'ti ti-home', label: 'Dashboard' },
   { key: 'usuarios', icon: 'ti ti-users', label: 'Usuarios' },
   { key: 'stock', icon: 'ti ti-building-warehouse', label: 'Almacén' },
+  { key: 'administracion', icon: 'ti ti-settings', label: 'Administración' },
   // Agrega más opciones según tu sistema
 ];
 

@@ -3,22 +3,30 @@ import * as almacenController from '../controllers/almacenController.js';
 import checkModuleAccess from '../middlewares/checkModuleAccess.js';
 import auth from '../middlewares/auth.js';
 import validarStock from '../middlewares/validarStock.js';
+import { verifyAuth, checkPermission } from '../middleware/authMiddleware.js';
 
 const router = Router();
 
-router.get('/articulos', auth, checkModuleAccess, almacenController.getArticulos);
-router.post('/articulos', auth, checkModuleAccess, almacenController.createArticulo);
-router.put('/articulos/:id', auth, checkModuleAccess, almacenController.updateArticulo);
-router.delete('/articulos/:id', auth, checkModuleAccess, almacenController.deleteArticulo);
-router.get('/entradas', auth, checkModuleAccess, almacenController.getEntradas);
-router.post('/entradas', auth, checkModuleAccess, almacenController.createEntrada);
-router.get('/salidas', auth, checkModuleAccess, almacenController.getSalidas);
-router.post('/salidas', auth, checkModuleAccess, validarStock, almacenController.createSalida);
-router.get('/stock', auth, checkModuleAccess, almacenController.getStock);
-router.get('/articulos-simple', auth, checkModuleAccess, almacenController.getArticulosSimple);
-router.get('/catalogos/grupos', auth, checkModuleAccess, almacenController.getCatalogoGrupos);
-router.get('/catalogos/medidas', auth, checkModuleAccess, almacenController.getCatalogoMedidas);
-router.get('/catalogos/unidades', auth, checkModuleAccess, almacenController.getCatalogoUnidades);
+// Rutas de artículos con permisos granulares
+router.get('/articulos', verifyAuth, checkPermission('almacen', 'view'), almacenController.getArticulos);
+router.post('/articulos', verifyAuth, checkPermission('almacen', 'create'), almacenController.createArticulo);
+router.put('/articulos/:id', verifyAuth, checkPermission('almacen', 'edit'), almacenController.updateArticulo);
+router.delete('/articulos/:id', verifyAuth, checkPermission('almacen', 'delete'), almacenController.deleteArticulo);
+
+// Rutas de entradas con permisos granulares
+router.get('/entradas', verifyAuth, checkPermission('entradas', 'view'), almacenController.getEntradas);
+router.post('/entradas', verifyAuth, checkPermission('entradas', 'create'), almacenController.createEntrada);
+
+// Rutas de salidas con permisos granulares
+router.get('/salidas', verifyAuth, checkPermission('salidas', 'view'), almacenController.getSalidas);
+router.post('/salidas', verifyAuth, checkPermission('salidas', 'create'), validarStock, almacenController.createSalida);
+
+// Rutas de consulta (solo requieren permisos de vista)
+router.get('/stock', verifyAuth, checkPermission('almacen', 'view'), almacenController.getStock);
+router.get('/articulos-simple', verifyAuth, checkPermission('almacen', 'view'), almacenController.getArticulosSimple);
+router.get('/catalogos/grupos', verifyAuth, checkPermission('almacen', 'view'), almacenController.getCatalogoGrupos);
+router.get('/catalogos/medidas', verifyAuth, checkPermission('almacen', 'view'), almacenController.getCatalogoMedidas);
+router.get('/catalogos/unidades', verifyAuth, checkPermission('almacen', 'view'), almacenController.getCatalogoUnidades);
 
 export default router;
 

@@ -8,6 +8,7 @@ import AlmacenMenu from './pages/almacen/AlmacenMenu';
 import CambiarPassword from './pages/seguridad/CambiarPassword';
 import GoogleCalendarPage from './pages/GoogleCalendarPage';
 import CatalogosMenu from './pages/almacen/CatalogosMenu';
+import PermisosPanel from './pages/administracion/PermisosPanel';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -321,6 +322,8 @@ function Dashboard({ user }: { user: any }) {
 		content = <GoogleCalendarPage />;
 	} else if (current === 'seguridad') {
 		content = <CambiarPassword />;
+	} else if (current === 'administracion') {
+		content = <PermisosPanel />;
 	} else {
 		content = <DashboardHome />;
 	}

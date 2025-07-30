@@ -1,4 +1,0 @@
-# Tabla: inventory_exits
-article_id,quantity,date,reason,user_id
-1,5,2025-06-23 12:00:00,Consumo taller,2
-2,10,2025-06-23 13:00:00,Entrega cliente,3

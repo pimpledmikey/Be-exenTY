@@ -1,5 +1,0 @@
-# Plantilla para stock inicial (importar a inventory_entries)
-article_id,quantity,unit_cost,invoice_number,date,supplier
-1,100,0,INICIAL,2025-06-24 09:00:00,Inventario
-2,50,0,INICIAL,2025-06-24 09:00:00,Inventario
-# ...agrega más filas según tus artículos

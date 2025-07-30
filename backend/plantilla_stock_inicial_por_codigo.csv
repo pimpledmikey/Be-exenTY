@@ -1,5 +1,0 @@
-# Plantilla para stock inicial (rellenar por usuarios)
-code,name,stock_inicial,unit_cost,fecha,proveedor
-A001,Abrazadera omega,100,0,2025-06-24 09:00:00,Inventario
-A002,Tornillo hexagonal,50,0,2025-06-24 09:00:00,Inventario
-# ...agrega más filas según tus productos

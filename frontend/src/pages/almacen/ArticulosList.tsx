@@ -178,7 +178,7 @@ export default function ArticulosList() {
       </div>
       {showForm && (
         <div className="modal modal-blur fade show" style={{ display: 'block' }}>
-          <div className="modal-dialog modal-lg modal-dialog-centered">
+          <div className="modal-dialog modal-xl modal-dialog-centered">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">{editArticulo ? 'Editar Artículo' : 'Crear Artículo'}</h5>

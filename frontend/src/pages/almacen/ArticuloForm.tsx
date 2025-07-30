@@ -201,123 +201,132 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
         </div>
       )}
       <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label className="form-label">Grupo</label>
-          <select className="form-select" name="group_code" value={form.group_code} onChange={handleChange} required>
-            <option value="">Seleccione grupo</option>
-            {grupos.map(g => (
-              <option key={g.group_code} value={g.group_code}>
-                {g.group_code} - {g.group_name}
-              </option>
-            ))}
-          </select>
-          <div className="form-text">
-            <small className="text-muted">
-              Selecciona el grupo al que pertenece el artículo (será la parte amarilla del código)
-            </small>
+        <div className="row">
+          {/* Columna izquierda */}
+          <div className="col-md-6">
+            <div className="mb-3">
+              <label className="form-label">Grupo</label>
+              <select className="form-select" name="group_code" value={form.group_code} onChange={handleChange} required>
+                <option value="">Seleccione grupo</option>
+                {grupos.map(g => (
+                  <option key={g.group_code} value={g.group_code}>
+                    {g.group_code} - {g.group_name}
+                  </option>
+                ))}
+              </select>
+              <div className="form-text">
+                <small className="text-muted">
+                  Selecciona el grupo al que pertenece el artículo (será la parte amarilla del código)
+                </small>
+              </div>
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Código</label>
+              <input 
+                className="form-control" 
+                name="code" 
+                placeholder="El código se generará automáticamente: GRUPO_###_TAMAÑO" 
+                value={form.code} 
+                readOnly 
+              />
+              <div className="form-text">
+                <small className="text-muted">
+                  Formato: <span className="text-warning">GRUPO</span>_<span className="text-info">CONSECUTIVO</span>_<span className="text-primary">TAMAÑO</span>
+                  {form.group_code && <span> → Ejemplo: <strong>{form.group_code}_001_{form.size || 'TAMAÑO'}</strong></span>}
+                </small>
+              </div>
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Nombre</label>
+              <input className="form-control" name="name" placeholder="Nombre" value={form.name} onChange={handleChange} required />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Tamaño</label>
+              <input 
+                className="form-control" 
+                name="size" 
+                placeholder="Ej: 3/4, 10mm, 1.5, etc." 
+                value={form.size} 
+                onChange={handleChange} 
+              />
+              <div className="form-text">
+                <small className="text-muted">
+                  Especifica la medida del producto (será la parte azul del código)
+                </small>
+              </div>
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Medida</label>
+              <select className="form-select" name="measure_code" value={form.measure_code} onChange={handleChange}>
+                <option value="">Seleccione medida</option>
+                {medidas.map(m => (
+                  <option key={m.measure_code} value={m.measure_code}>{m.measure_name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Unidad</label>
+              <select className="form-select" name="unit_code" value={form.unit_code} onChange={handleChange}>
+                <option value="">Seleccione unidad</option>
+                {unidades.map(u => (
+                  <option key={u.unit_code} value={u.unit_code}>{u.unit_name}</option>
+                ))}
+              </select>
+            </div>
           </div>
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Código</label>
-          <input 
-            className="form-control" 
-            name="code" 
-            placeholder="El código se generará automáticamente: GRUPO_###_TAMAÑO" 
-            value={form.code} 
-            readOnly 
-          />
-          <div className="form-text">
-            <small className="text-muted">
-              Formato: <span className="text-warning">GRUPO</span>_<span className="text-info">CONSECUTIVO</span>_<span className="text-primary">TAMAÑO</span>
-              {form.group_code && <span> → Ejemplo: <strong>{form.group_code}_001_{form.size || 'TAMAÑO'}</strong></span>}
-            </small>
+          
+          {/* Columna derecha */}
+          <div className="col-md-6">
+            <div className="mb-3">
+              <label className="form-label">Descripción</label>
+              <input className="form-control" name="description" placeholder="Descripción" value={form.description} onChange={handleChange} />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Código del Proveedor</label>
+              <input 
+                className="form-control" 
+                name="supplier_code" 
+                placeholder="Código del proveedor" 
+                value={form.supplier_code || ''} 
+                onChange={handleChange} 
+              />
+              <div className="form-text">
+                <small className="text-muted">
+                  Código interno del proveedor para este artículo
+                </small>
+              </div>
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Nombre del Proveedor</label>
+              <input 
+                className="form-control" 
+                name="supplier_name" 
+                placeholder="Nombre del proveedor" 
+                value={form.supplier_name || ''} 
+                onChange={handleChange} 
+              />
+              <div className="form-text">
+                <small className="text-muted">
+                  Nombre de la empresa proveedora
+                </small>
+              </div>
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Stock Mínimo</label>
+              <input className="form-control" name="min_stock" type="number" placeholder="Stock Mínimo" value={form.min_stock} onChange={handleChange} />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Stock Máximo</label>
+              <input className="form-control" name="max_stock" type="number" placeholder="Stock Máximo" value={form.max_stock} onChange={handleChange} />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Estado</label>
+              <select className="form-select" name="status" value={form.status} onChange={handleChange}>
+                <option value="activo">Activo</option>
+                <option value="inactivo">Inactivo</option>
+              </select>
+            </div>
           </div>
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Nombre</label>
-          <input className="form-control" name="name" placeholder="Nombre" value={form.name} onChange={handleChange} required />
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Tamaño</label>
-          <input 
-            className="form-control" 
-            name="size" 
-            placeholder="Ej: 3/4, 10mm, 1.5, etc." 
-            value={form.size} 
-            onChange={handleChange} 
-          />
-          <div className="form-text">
-            <small className="text-muted">
-              Especifica la medida del producto (será la parte azul del código)
-            </small>
-          </div>
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Medida</label>
-          <select className="form-select" name="measure_code" value={form.measure_code} onChange={handleChange}>
-            <option value="">Seleccione medida</option>
-            {medidas.map(m => (
-              <option key={m.measure_code} value={m.measure_code}>{m.measure_name}</option>
-            ))}
-          </select>
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Descripción</label>
-          <input className="form-control" name="description" placeholder="Descripción" value={form.description} onChange={handleChange} />
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Código del Proveedor</label>
-          <input 
-            className="form-control" 
-            name="supplier_code" 
-            placeholder="Código del proveedor" 
-            value={form.supplier_code || ''} 
-            onChange={handleChange} 
-          />
-          <div className="form-text">
-            <small className="text-muted">
-              Código interno del proveedor para este artículo
-            </small>
-          </div>
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Nombre del Proveedor</label>
-          <input 
-            className="form-control" 
-            name="supplier_name" 
-            placeholder="Nombre del proveedor" 
-            value={form.supplier_name || ''} 
-            onChange={handleChange} 
-          />
-          <div className="form-text">
-            <small className="text-muted">
-              Nombre de la empresa proveedora
-            </small>
-          </div>
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Unidad</label>
-          <select className="form-select" name="unit_code" value={form.unit_code} onChange={handleChange}>
-            <option value="">Seleccione unidad</option>
-            {unidades.map(u => (
-              <option key={u.unit_code} value={u.unit_code}>{u.unit_name}</option>
-            ))}
-          </select>
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Stock Mínimo</label>
-          <input className="form-control" name="min_stock" type="number" placeholder="Stock Mínimo" value={form.min_stock} onChange={handleChange} />
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Stock Máximo</label>
-          <input className="form-control" name="max_stock" type="number" placeholder="Stock Máximo" value={form.max_stock} onChange={handleChange} />
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Estado</label>
-          <select className="form-select" name="status" value={form.status} onChange={handleChange}>
-            <option value="activo">Activo</option>
-            <option value="inactivo">Inactivo</option>
-          </select>
         </div>
         <div className="d-flex justify-content-end gap-2">
           <button type="button" className="btn btn-secondary" onClick={onClose}>Cancelar</button>
