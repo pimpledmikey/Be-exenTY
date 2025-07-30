@@ -154,57 +154,28 @@ export default function ArticulosList() {
                 <td>{unidades.find(u => u.unit_code === a.unit_code)?.unit_name || a.unit_code}</td>
                 <td>{a.min_stock}</td>
                 <td>{a.max_stock}</td>
-                <td><span className={`badge ${a.status === 'A' ? 'bg-success' : 'bg-danger'}`}>{a.status === 'A' ? 'Activo' : 'Inactivo'}</span></td>
+                <td><span className={`badge ${a.status.toUpperCase().startsWith('A') ? 'bg-success' : 'bg-danger'}`}>{a.status.toUpperCase().startsWith('A') ? 'Activo' : 'Inactivo'}</span></td>
                 <td className="text-end">
-                  <button className="btn btn-sm btn-outline-primary me-2" onClick={() => { setEditArticulo(a); setShowForm(true); }}>Editar</button>
-                  <button className="btn btn-sm btn-outline-danger" onClick={() => { setArticuloAEliminar(a); setShowConfirm(true); }}>Eliminar</button>
+                  <button className="btn btn-primary btn-sm me-2" onClick={() => { setEditArticulo(a); setShowForm(true); }}>
+                    Editar
+                  </button>
+                  <button className="btn btn-danger btn-sm" onClick={() => { setArticuloAEliminar(a); setShowConfirm(true); }}>
+                    Eliminar
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <div className="card-footer d-flex align-items-center">
-        <p className="m-0 text-secondary">Mostrando <span>{articulosPagina.length}</span> de <span>{articulosFiltrados.length}</span> artículos</p>
-        <ul className="pagination m-0 ms-auto">
-          <li className={`page-item ${pagina === 1 ? 'disabled' : ''}`}>
-            <a className="page-link" href="#" onClick={(e) => { e.preventDefault(); setPagina(p => p > 1 ? p - 1 : 1); }}>Anterior</a>
-          </li>
-          {[...Array(totalPaginas)].map((_, i) => (
-            <li key={i} className={`page-item ${pagina === i + 1 ? 'active' : ''}`}>
-              <a className="page-link" href="#" onClick={(e) => { e.preventDefault(); setPagina(i + 1); }}>{i + 1}</a>
-            </li>
-          ))}
-          <li className={`page-item ${pagina === totalPaginas ? 'disabled' : ''}`}>
-            <a className="page-link" href="#" onClick={(e) => { e.preventDefault(); setPagina(p => p < totalPaginas ? p + 1 : totalPaginas); }}>Siguiente</a>
-          </li>
-        </ul>
-      </div>
-      {showForm && (
-        <div className="modal fade show d-block" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-lg modal-dialog-centered">
-            <div className="modal-content" data-bs-theme="dark">
-              <div className="modal-header">
-                <h5 className="modal-title">{editArticulo ? 'Editar Artículo' : 'Crear Artículo'}</h5>
-                <button type="button" className="btn-close" onClick={() => setShowForm(false)}></button>
-              </div>
-              <div className="modal-body">
-                <ArticuloForm
-                  articulo={editArticulo}
-                  onClose={() => { setShowForm(false); fetchArticulos(); setAlerta({ tipo: 'success', mensaje: `Artículo ${editArticulo ? 'actualizado' : 'creado'} con éxito` }); }}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {showForm && <ArticuloForm articulo={editArticulo} onClose={() => { setShowForm(false); fetchArticulos(); }} />}
       {showConfirm && (
-        <div className="modal fade show d-block" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.5)' }}>
+        <div className="modal modal-blur fade show" style={{ display: 'block' }}>
           <div className="modal-dialog modal-sm modal-dialog-centered">
-            <div className="modal-content" data-bs-theme="dark">
+            <div className="modal-content">
               <div className="modal-body text-center py-4">
                 <h3>¿Estás seguro?</h3>
-                <div className="text-secondary">¿Quieres eliminar el artículo "{articuloAEliminar?.name}"? Esta acción no se puede deshacer.</div>
+                <p>¿Realmente quieres eliminar el artículo "{articuloAEliminar?.name}"?</p>
               </div>
               <div className="modal-footer">
                 <button className="btn btn-secondary" onClick={() => setShowConfirm(false)}>Cancelar</button>
@@ -214,6 +185,23 @@ export default function ArticulosList() {
           </div>
         </div>
       )}
+      {/* Paginación */}
+      <div className="card-footer d-flex align-items-center">
+        <p className="m-0 text-muted">Mostrando <span>{articulosPagina.length}</span> de <span>{articulosFiltrados.length}</span> artículos</p>
+        <ul className="pagination m-0 ms-auto">
+          <li className={`page-item ${pagina === 1 ? 'disabled' : ''}`}>
+            <a className="page-link" href="#" onClick={() => setPagina(p => p - 1)}>anterior</a>
+          </li>
+          {[...Array(totalPaginas)].map((_, i) => (
+            <li key={i} className={`page-item ${pagina === i + 1 ? 'active' : ''}`}>
+              <a className="page-link" href="#" onClick={() => setPagina(i + 1)}>{i + 1}</a>
+            </li>
+          ))}
+          <li className={`page-item ${pagina === totalPaginas ? 'disabled' : ''}`}>
+            <a className="page-link" href="#" onClick={() => setPagina(p => p + 1)}>siguiente</a>
+          </li>
+        </ul>
+      </div>
     </div>
   );
 }

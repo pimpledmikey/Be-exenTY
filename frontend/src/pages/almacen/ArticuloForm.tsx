@@ -147,23 +147,25 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
     try {
       const method = articulo && articulo.article_id ? 'PUT' : 'POST';
       const url = articulo && articulo.article_id ? `${API_URL}/almacen/articulos/${articulo.article_id}` : `${API_URL}/almacen/articulos`;
+      
+      const body = {
+        ...form,
+        status: form.status.toUpperCase().startsWith('A') ? 'A' : 'I',
+        min_stock: Number(form.min_stock),
+        max_stock: Number(form.max_stock)
+      };
+
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
-        body: JSON.stringify({
-          code: form.code,
-          name: form.name,
-          size: form.size,
-          group_code: form.group_code,
-          measure_code: form.measure_code,
-          description: form.description,
-          unit_code: form.unit_code,
-          min_stock: Number(form.min_stock),
-          max_stock: Number(form.max_stock),
-          status: form.status
-        })
+        body: JSON.stringify(body)
       });
-      if (!res.ok) throw new Error('Error al guardar artículo');
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Error al guardar artículo');
+      }
+      
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
