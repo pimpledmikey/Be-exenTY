@@ -22,3 +22,5 @@ router.put('/unidades/:id', catalogosController.updateUnidad);
 router.delete('/unidades/:id', catalogosController.deleteUnidad);
 
 export default router;
+
+
