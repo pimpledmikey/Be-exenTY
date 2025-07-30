@@ -4,9 +4,6 @@ import EntradasList from './EntradasList';
 import SalidasList from './SalidasList';
 import StockList from './StockList';
 import AjustesList from './AjustesList';
-import GruposList from './GruposList';
-import MedidasList from './MedidasList';
-import UnidadesList from './UnidadesList';
 
 const almacenMenus = [
   { key: 'articulos', label: 'Artículos' },
@@ -16,11 +13,6 @@ const almacenMenus = [
   { key: 'ajustes', label: 'Ajustes' },
 ];
 
-const configuracionMenus = [
-  { key: 'grupos', label: 'Grupos' },
-  { key: 'medidas', label: 'Medidas' },
-  { key: 'unidades', label: 'Unidades' },
-];
 
 const AlmacenMenu: React.FC = () => {
   const [submenu, setSubmenu] = useState('articulos');
