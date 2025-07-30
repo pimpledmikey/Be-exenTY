@@ -1,12 +1,4 @@
-import React, { useState } from 'react';
-import ArticulosList from './ArticulosList';
-import EntradasList from './EntradasList';
-import SalidasList from './SalidasList';
-import StockList from './StockList';
-import AjustesList from './AjustesList';
-import GruposList from './GruposList';
-import MedidasList from './MedidasList';
-import UnidadesList from './UnidadesList';
+import React from 'react';
 
 
 const AlmacenMenu: React.FC<{ setCurrent: (key: string) => void }> = ({ setCurrent }) => {
