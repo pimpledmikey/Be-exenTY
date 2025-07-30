@@ -154,7 +154,7 @@ export default function ArticulosList() {
                 <td>{unidades.find(u => u.unit_code === a.unit_code)?.unit_name || a.unit_code}</td>
                 <td>{a.min_stock}</td>
                 <td>{a.max_stock}</td>
-                <td><span className={`badge ${a.status.toUpperCase().startsWith('A') ? 'bg-success' : 'bg-danger'}`}>{a.status.toUpperCase().startsWith('A') ? 'Activo' : 'Inactivo'}</span></td>
+                <td><span className={`badge ${a.status.toUpperCase().startsWith('A') ? 'bg-success' : 'bg-danger'} text-black`}>{a.status.toUpperCase().startsWith('A') ? 'Activo' : 'Inactivo'}</span></td>
                 <td className="text-end">
                   <button className="btn btn-primary btn-sm me-2" onClick={() => { setEditArticulo(a); setShowForm(true); }}>
                     Editar
