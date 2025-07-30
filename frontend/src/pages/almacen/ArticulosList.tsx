@@ -104,10 +104,6 @@ export default function ArticulosList() {
     }
   };
 
-  // Helpers para mostrar nombres de catálogo
-  const getMedidaNombre = (code?: string) => medidas.find(m => m.measure_code === code)?.measure_name || '';
-  const getUnidadNombre = (code?: string) => unidades.find(u => u.unit_code === code)?.unit_name || '';
-
   if (loading) return <div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando artículos...</span></div>;
   if (error) return <div className="alert alert-danger">Error: {error}</div>;
 
