@@ -5,6 +5,7 @@ import LoginPage from './pages/Login';
 import UsuarioList from './pages/usuarios/UsuarioList';
 import GrupoList from './pages/usuarios/GrupoList';
 import AlmacenMenu from './pages/almacen/AlmacenMenu';
+import CambiarPassword from './pages/seguridad/CambiarPassword';
 import GoogleCalendarPage from './pages/GoogleCalendarPage';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -171,7 +172,7 @@ function DashboardHome() {
 function Dashboard({ user }: { user: any }) {
 	const [current, setCurrent] = useState('dashboard');
 
-	const sidebarItems = [
+const sidebarItems = [
 		{
 			label: 'Home',
 			key: 'dashboard',
@@ -265,42 +266,51 @@ function Dashboard({ user }: { user: any }) {
 				},
 			]
 			: []),
-		{
-			label: 'Calendario',
-			key: 'calendar',
-			icon: (
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="24"
-					height="24"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					strokeWidth="2"
-					strokeLinecap="round"
-					strokeLinejoin="round"
-					className="icon icon-1"
-				>
-					<rect x="3" y="3" width="18" height="18" rx="2" />
-					<path d="M3 10h18" />
-					<path d="M10 3v18" />
-				</svg>
-			),
-		},
+{
+  label: 'Calendario',
+  key: 'calendar',
+  icon: (
+	<svg
+	  xmlns="http://www.w3.org/2000/svg"
+	  width="24"
+	  height="24"
+	  viewBox="0 0 24 24"
+	  fill="none"
+	  stroke="currentColor"
+	  strokeWidth="2"
+	  strokeLinecap="round"
+	  strokeLinejoin="round"
+	  className="icon icon-1"
+	>
+	  <rect x="3" y="3" width="18" height="18" rx="2" />
+	  <path d="M3 10h18" />
+	  <path d="M10 3v18" />
+	</svg>
+  ),
+},
+{
+  label: 'Seguridad',
+  key: 'seguridad',
+  icon: (
+	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-1"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><circle cx="12" cy="12" r="3" /></svg>
+  ),
+},
 	];
 
-	let content = null;
-	if (current === 'usuarios') {
-		content = <UsuarioList />;
-	} else if (current === 'grupos') {
-		content = <GrupoList />;
-	} else if (current === 'almacen') {
-		content = <AlmacenMenu />;
-	} else if (current === 'calendar') {
-		content = <GoogleCalendarPage />;
-	} else {
-		content = <DashboardHome />;
-	}
+let content = null;
+if (current === 'usuarios') {
+  content = <UsuarioList />;
+} else if (current === 'grupos') {
+  content = <GrupoList />;
+} else if (current === 'almacen') {
+  content = <AlmacenMenu />;
+} else if (current === 'calendar') {
+  content = <GoogleCalendarPage />;
+} else if (current === 'seguridad') {
+  content = <CambiarPassword />;
+} else {
+  content = <DashboardHome />;
+}
 	return (
 		<div
 			className="page"
