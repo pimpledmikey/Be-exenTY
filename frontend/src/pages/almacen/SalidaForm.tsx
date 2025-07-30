@@ -15,7 +15,7 @@ interface Salida {
   exit_id?: number;
   article_id: string;
   quantity: number;
-  reason: string;
+  reason: string; // Nombre del proyecto
   user_id: string;
 }
 
@@ -106,8 +106,20 @@ const SalidaForm: React.FC<SalidaFormProps> = ({ salida, onClose }) => {
         <input className="form-control" name="quantity" type="number" value={form.quantity} onChange={handleChange} required />
       </div>
       <div className="mb-3">
-        <label className="form-label">Motivo</label>
-        <input className="form-control" name="reason" value={form.reason} onChange={handleChange} required />
+        <label className="form-label">Nombre del Proyecto</label>
+        <input 
+          className="form-control" 
+          name="reason" 
+          placeholder="Ingrese el nombre del proyecto"
+          value={form.reason} 
+          onChange={handleChange} 
+          required 
+        />
+        <div className="form-text">
+          <small className="text-muted">
+            Especifique el proyecto para el cual se requieren los materiales
+          </small>
+        </div>
       </div>
       <div className="mb-3">
         <label className="form-label">Usuario</label>

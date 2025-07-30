@@ -8,7 +8,7 @@ interface Salida {
   article_id: string;
   quantity: number;
   date: string;
-  reason: string;
+  reason: string; // Nombre del proyecto
   user_id: string;
   articulo_nombre?: string;
   usuario_nombre?: string;
@@ -85,7 +85,7 @@ export default function SalidasList() {
               <th>Artículo</th>
               <th>Cantidad</th>
               <th>Fecha</th>
-              <th>Motivo</th>
+              <th>Proyecto</th>
               <th>Usuario</th>
               <th>Acciones</th>
             </tr>
