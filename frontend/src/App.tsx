@@ -172,62 +172,63 @@ function DashboardHome() {
 
 function Dashboard({ user }: { user: any }) {
 	const [current, setCurrent] = useState('dashboard');
-	const [openAlmacen, setOpenAlmacen] = useState(false);
+	const [openAlmacenNavbar, setOpenAlmacenNavbar] = useState(false);
+	const [openAlmacenSidebar, setOpenAlmacenSidebar] = useState(false);
 
-const sidebarItems = [
-  {
-	label: 'Home',
-	key: 'dashboard',
-	icon: (
-	  <svg
-		xmlns="http://www.w3.org/2000/svg"
-		width="24"
-		height="24"
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		strokeWidth="2"
-		strokeLinecap="round"
-		strokeLinejoin="round"
-		className="icon icon-1"
-	  >
-		<path d="M5 12l-2 0l9 -9l9 9l-2 0" />
-		<path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
-		<path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
-	  </svg>
-	),
-  },
-  {
-	label: 'Almacén',
-	key: 'almacen',
-	icon: (
-	  <svg
-		xmlns="http://www.w3.org/2000/svg"
-		width="24"
-		height="24"
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		strokeWidth="2"
-		strokeLinecap="round"
-		strokeLinejoin="round"
-		className="icon icon-1"
-	  >
-		<rect x="3" y="7" width="18" height="13" rx="2" />
-		<path d="M16 3v4" />
-		<path d="M8 3v4" />
-		<path d="M3 11h18" />
-	  </svg>
-	),
-	children: [
-	  { label: 'Artículos', key: 'articulos' },
-	  { label: 'Entradas', key: 'entradas' },
-	  { label: 'Salidas', key: 'salidas' },
-	  { label: 'Stock', key: 'stock' },
-	  { label: 'Ajustes', key: 'ajustes' },
-	  { label: 'Catálogos', key: 'catalogos' },
-	],
-  },
+	const sidebarItems = [
+		{
+			label: 'Home',
+			key: 'dashboard',
+			icon: (
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="24"
+					height="24"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					strokeWidth="2"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+					className="icon icon-1"
+				>
+					<path d="M5 12l-2 0l9 -9l9 9l-2 0" />
+					<path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+					<path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+				</svg>
+			),
+		},
+		{
+			label: 'Almacén',
+			key: 'almacen',
+			icon: (
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="24"
+					height="24"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					strokeWidth="2"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+					className="icon icon-1"
+				>
+					<rect x="3" y="7" width="18" height="13" rx="2" />
+					<path d="M16 3v4" />
+					<path d="M8 3v4" />
+					<path d="M3 11h18" />
+				</svg>
+			),
+			children: [
+				{ label: 'Artículos', key: 'articulos' },
+				{ label: 'Entradas', key: 'entradas' },
+				{ label: 'Salidas', key: 'salidas' },
+				{ label: 'Stock', key: 'stock' },
+				{ label: 'Ajustes', key: 'ajustes' },
+				{ label: 'Catálogos', key: 'catalogos' },
+			],
+		},
 		...(user?.group === 'admin'
 			? [
 				{
@@ -237,7 +238,7 @@ const sidebarItems = [
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							width="24"
-						height="24"
+							height="24"
 							viewBox="0 0 24 24"
 							fill="none"
 							stroke="currentColor"
@@ -259,7 +260,7 @@ const sidebarItems = [
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							width="24"
-						height="24"
+							height="24"
 							viewBox="0 0 24 24"
 							fill="none"
 							stroke="currentColor"
@@ -276,53 +277,53 @@ const sidebarItems = [
 				},
 			]
 			: []),
-{
-  label: 'Calendario',
-  key: 'calendar',
-  icon: (
-	<svg
-	  xmlns="http://www.w3.org/2000/svg"
-	  width="24"
-	  height="24"
-	  viewBox="0 0 24 24"
-	  fill="none"
-	  stroke="currentColor"
-	  strokeWidth="2"
-	  strokeLinecap="round"
-	  strokeLinejoin="round"
-	  className="icon icon-1"
-	>
-	  <rect x="3" y="3" width="18" height="18" rx="2" />
-	  <path d="M3 10h18" />
-	  <path d="M10 3v18" />
-	</svg>
-  ),
-},
-{
-  label: 'Seguridad',
-  key: 'seguridad',
-  icon: (
-	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-1"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><circle cx="12" cy="12" r="3" /></svg>
-  ),
-},
+		{
+			label: 'Calendario',
+			key: 'calendar',
+			icon: (
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="24"
+					height="24"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					strokeWidth="2"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+					className="icon icon-1"
+				>
+					<rect x="3" y="3" width="18" height="18" rx="2" />
+					<path d="M3 10h18" />
+					<path d="M10 3v18" />
+				</svg>
+			),
+		},
+		{
+			label: 'Seguridad',
+			key: 'seguridad',
+			icon: (
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-1"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><circle cx="12" cy="12" r="3" /></svg>
+			),
+		},
 	];
 
-let content = null;
-if (current === 'usuarios') {
-  content = <UsuarioList />;
-} else if (current === 'grupos') {
-  content = <GrupoList />;
-} else if (current === 'almacen') {
-  content = <AlmacenMenu />;
-} else if (current === 'catalogos') {
-  content = <CatalogosMenu />;
-} else if (current === 'calendar') {
-  content = <GoogleCalendarPage />;
-} else if (current === 'seguridad') {
-  content = <CambiarPassword />;
-} else {
-  content = <DashboardHome />;
-}
+	let content = null;
+	if (current === 'usuarios') {
+		content = <UsuarioList />;
+	} else if (current === 'grupos') {
+		content = <GrupoList />;
+	} else if (['articulos', 'entradas', 'salidas', 'stock', 'ajustes'].includes(current)) {
+		content = <AlmacenMenu initialTab={current} />;
+	} else if (current === 'catalogos') {
+		content = <CatalogosMenu />;
+	} else if (current === 'calendar') {
+		content = <GoogleCalendarPage />;
+	} else if (current === 'seguridad') {
+		content = <CambiarPassword />;
+	} else {
+		content = <DashboardHome />;
+	}
 	return (
 		<div
 			className="page"
@@ -355,75 +356,62 @@ if (current === 'usuarios') {
 						<ul className="navbar-nav flex-row d-none d-md-flex">
 							{sidebarItems.map(item => (
 								item.children ? (
-								  <li className="nav-item px-2 position-relative" key={item.key}>
-									<a
-									  className="nav-link"
-									  href="#"
-									  onClick={e => {
-										e.preventDefault();
-										setOpenAlmacen(open => !open);
-									  }}
-									>
-									  <span className="nav-link-icon">{item.icon}</span>
-									  <span className="nav-link-title"> {item.label} </span>
-									  <span style={{marginLeft: 4}}>&#9660;</span>
-									</a>
-									{openAlmacen && (
-									  <div className="dropdown-menu show" data-bs-popper="static">
-										<div className="dropdown-menu-columns">
-										  <div className="dropdown-menu-column">
-											{item.children.slice(0, Math.ceil(item.children.length / 2)).map(child => (
-											  <a
-												className={`dropdown-item${current === child.key ? ' active' : ''}`}
-												href="#"
-												onClick={e => {
-												  e.preventDefault();
-												  setCurrent(child.key);
-												  setOpenAlmacen(false);
-												}}
-											  >
-												{child.label}
-											  </a>
-											))}
-										  </div>
-										  <div className="dropdown-menu-column">
-											{item.children.slice(Math.ceil(item.children.length / 2)).map(child => (
-											  <a
-												className={`dropdown-item${current === child.key ? ' active' : ''}`}
-												href="#"
-												onClick={e => {
-												  e.preventDefault();
-												  setCurrent(child.key);
-												  setOpenAlmacen(false);
-												}}
-											  >
-												{child.label}
-											  </a>
-											))}
-										  </div>
-										</div>
-									  </div>
-									)}
-								  </li>
+									<li className="nav-item px-2 position-relative" key={item.key}>
+										<a
+											className="nav-link"
+											href="#"
+											onClick={e => {
+												e.preventDefault();
+												setOpenAlmacenNavbar(open => !open);
+											}}
+										>
+											<span className="nav-link-icon">{item.icon}</span>
+											<span className="nav-link-title"> {item.label} </span>
+											<span style={{ marginLeft: 4 }}>&#9660;</span>
+										</a>
+										{openAlmacenNavbar && (
+											<div className="dropdown-menu show position-absolute bg-dark border-0" style={{ top: '100%', left: 0, minWidth: 180, zIndex: 2000 }}>
+												<div className="dropdown-menu-columns">
+													<div className="dropdown-menu-column">
+														{item.children.map(child => (
+															<a
+																key={child.key}
+																className={`dropdown-item${current === child.key ? ' active' : ''}`}
+																href="#"
+																style={{ color: '#fff', background: current === child.key ? '#0d6efd' : 'transparent' }}
+																onClick={e => {
+																	e.preventDefault();
+																	setCurrent(child.key);
+																	setOpenAlmacenNavbar(false);
+																}}
+															>
+																{child.label}
+															</a>
+														))}
+													</div>
+												</div>
+											</div>
+										)}
+									</li>
 								) : (
-								  <li
-									className={`nav-item px-2${current === item.key ? ' active' : ''}`}
-									key={item.key}
-								  >
-									<a
-									  className="nav-link"
-									  href="#"
-									  onClick={e => {
-										e.preventDefault();
-										setCurrent(item.key);
-									  }}
+									<li
+										className={`nav-item px-2${current === item.key ? ' active' : ''}`}
+										key={item.key}
 									>
-									  <span className="nav-link-icon">{item.icon}</span>
-									  <span className="nav-link-title"> {item.label} </span>
-									</a>
-								  </li>
+										<a
+											className="nav-link"
+											href="#"
+											onClick={e => {
+												e.preventDefault();
+												setCurrent(item.key);
+											}}
+										>
+											<span className="nav-link-icon">{item.icon}</span>
+											<span className="nav-link-title"> {item.label} </span>
+										</a>
+									</li>
 								)
-							  ))}
+							))}
 						</ul>
 					</div>
 					<div className="d-flex align-items-center">
@@ -464,146 +452,55 @@ if (current === 'usuarios') {
 						className="collapse navbar-collapse flex-grow-1"
 						id="sidebar-menu"
 					>
-<ul className="navbar-nav flex-row d-none d-md-flex">
-  {sidebarItems.map(item => (
-    item.children ? (
-      <li className="nav-item px-2 position-relative" key={item.key}>
-        <a
-          className="nav-link"
-          href="#"
-          onClick={e => {
-            e.preventDefault();
-            setOpenAlmacen(open => !open);
-          }}
-        >
-          <span className="nav-link-icon">{item.icon}</span>
-          <span className="nav-link-title"> {item.label} </span>
-          <span style={{marginLeft: 4}}>&#9660;</span>
-        </a>
-        {openAlmacen && (
-          <div className="dropdown-menu show" data-bs-popper="static">
-            <div className="dropdown-menu-columns">
-              <div className="dropdown-menu-column">
-                {item.children.slice(0, Math.ceil(item.children.length / 2)).map(child => (
-                  <a
-                    className={`dropdown-item${current === child.key ? ' active' : ''}`}
-                    href="#"
-                    onClick={e => {
-                      e.preventDefault();
-                      setCurrent(child.key);
-                      setOpenAlmacen(false);
-                    }}
-                  >
-                    {child.label}
-                  </a>
-                ))}
-              </div>
-              <div className="dropdown-menu-column">
-                {item.children.slice(Math.ceil(item.children.length / 2)).map(child => (
-                  <a
-                    className={`dropdown-item${current === child.key ? ' active' : ''}`}
-                    href="#"
-                    onClick={e => {
-                      e.preventDefault();
-                      setCurrent(child.key);
-                      setOpenAlmacen(false);
-                    }}
-                  >
-                    {child.label}
-                  </a>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-      </li>
-    ) : (
-      <li
-        className={`nav-item px-2${current === item.key ? ' active' : ''}`}
-        key={item.key}
-      >
-        <a
-          className="nav-link"
-          href="#"
-          onClick={e => {
-            e.preventDefault();
-            setCurrent(item.key);
-          }}
-        >
-          <span className="nav-link-icon">{item.icon}</span>
-          <span className="nav-link-title"> {item.label} </span>
-        </a>
-      </li>
-    )
-  ))}
-</ul>
-
-<ul className="navbar-nav pt-lg-3 flex-column">
-  {sidebarItems.map(item => (
-    item.children ? (
-      <li className="nav-item" key={item.key}>
-        <div className="nav-link" style={{cursor:'pointer', fontWeight:600, color:'#0d6efd'}} onClick={() => setOpenAlmacen(open => !open)}>
-          <span className="nav-link-icon">{item.icon}</span>
-          <span className="nav-link-title"> {item.label} </span>
-          <span style={{marginLeft: 4}}>&#9660;</span>
-        </div>
-        {openAlmacen && (
-          <div className="dropdown-menu show" data-bs-popper="static">
-            <div className="dropdown-menu-columns">
-              <div className="dropdown-menu-column">
-                {item.children.slice(0, Math.ceil(item.children.length / 2)).map(child => (
-                  <a
-                    className={`dropdown-item${current === child.key ? ' active' : ''}`}
-                    href="#"
-                    onClick={e => {
-                      e.preventDefault();
-                      setCurrent(child.key);
-                      setOpenAlmacen(false);
-                    }}
-                  >
-                    {child.label}
-                  </a>
-                ))}
-              </div>
-              <div className="dropdown-menu-column">
-                {item.children.slice(Math.ceil(item.children.length / 2)).map(child => (
-                  <a
-                    className={`dropdown-item${current === child.key ? ' active' : ''}`}
-                    href="#"
-                    onClick={e => {
-                      e.preventDefault();
-                      setCurrent(child.key);
-                      setOpenAlmacen(false);
-                    }}
-                  >
-                    {child.label}
-                  </a>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-      </li>
-    ) : (
-      <li
-        className={`nav-item px-2${current === item.key ? ' active' : ''}`}
-        key={item.key}
-      >
-        <a
-          className="nav-link"
-          href="#"
-          onClick={e => {
-            e.preventDefault();
-            setCurrent(item.key);
-          }}
-        >
-          <span className="nav-link-icon">{item.icon}</span>
-          <span className="nav-link-title"> {item.label} </span>
-        </a>
-      </li>
-    )
-  ))}
-</ul>
+						<ul className="navbar-nav pt-lg-3 flex-column">
+							{sidebarItems.map(item => (
+								item.children ? (
+									<li className="nav-item" key={item.key}>
+										<div className="nav-link" style={{ cursor: 'pointer', fontWeight: 600, color: '#0d6efd' }} onClick={() => setOpenAlmacenSidebar(open => !open)}>
+											<span className="nav-link-icon">{item.icon}</span>
+											<span className="nav-link-title"> {item.label} </span>
+											<span style={{ marginLeft: 4 }}>&#9660;</span>
+										</div>
+										{openAlmacenSidebar && (
+											<ul className="navbar-nav flex-column ms-3">
+												{item.children.map(child => (
+													<li className="nav-item" key={child.key}>
+														<a
+															className={`nav-link${current === child.key ? ' active' : ''}`}
+															href="#"
+															style={{ color: current === child.key ? '#fff' : '#6c757d', background: current === child.key ? '#0d6efd' : 'transparent', borderRadius: 4, fontWeight: 500, margin: '2px 0' }}
+															onClick={e => {
+																e.preventDefault();
+																setCurrent(child.key);
+															}}
+														>
+															{child.label}
+														</a>
+													</li>
+												))}
+											</ul>
+										)}
+									</li>
+								) : (
+									<li
+										className={`nav-item px-2${current === item.key ? ' active' : ''}`}
+										key={item.key}
+									>
+										<a
+											className="nav-link"
+											href="#"
+											onClick={e => {
+												e.preventDefault();
+												setCurrent(item.key);
+											}}
+										>
+											<span className="nav-link-icon">{item.icon}</span>
+											<span className="nav-link-title"> {item.label} </span>
+										</a>
+									</li>
+								)
+							))}
+						</ul>
 					</div>
 				</div>
 			</aside>
