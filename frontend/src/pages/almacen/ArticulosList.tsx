@@ -15,6 +15,8 @@ interface Articulo {
   min_stock: number;
   max_stock: number;
   status: string;
+  supplier_code?: string;
+  supplier_name?: string;
 }
 
 export default function ArticulosList() {
@@ -45,7 +47,9 @@ export default function ArticulosList() {
       (a.size || '').toLowerCase().includes(filtro.toLowerCase()) ||
       medida.toLowerCase().includes(filtro.toLowerCase()) ||
       unidad.toLowerCase().includes(filtro.toLowerCase()) ||
-      (a.description || '').toLowerCase().includes(filtro.toLowerCase())
+      (a.description || '').toLowerCase().includes(filtro.toLowerCase()) ||
+      (a.supplier_code || '').toLowerCase().includes(filtro.toLowerCase()) ||
+      (a.supplier_name || '').toLowerCase().includes(filtro.toLowerCase())
     );
   });
   const totalPaginas = Math.ceil(articulosFiltrados.length / porPagina);
@@ -142,6 +146,8 @@ export default function ArticulosList() {
               <th>Stock Mín.</th>
               <th>Stock Máx.</th>
               <th>Estado</th>
+              <th>Cód. Proveedor</th>
+              <th>Proveedor</th>
               <th className="w-1">Acciones</th>
             </tr>
           </thead>
@@ -155,6 +161,8 @@ export default function ArticulosList() {
                 <td>{a.min_stock}</td>
                 <td>{a.max_stock}</td>
                 <td><span className={`badge ${a.status === 'Activo' ? 'bg-success' : 'bg-danger'} text-black`}>{a.status}</span></td>
+                <td>{a.supplier_code || '-'}</td>
+                <td>{a.supplier_name || '-'}</td>
                 <td className="text-end">
                   <button className="btn btn-primary btn-sm me-2" onClick={() => { setEditArticulo(a); setShowForm(true); }}>
                     Editar

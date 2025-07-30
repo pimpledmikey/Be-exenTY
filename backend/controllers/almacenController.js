@@ -21,7 +21,7 @@ export const getArticulos = async (req, res) => {
 
 export const createArticulo = async (req, res) => {
   try {
-    const { code, name, size, group_code, measure_code, description, unit_code, min_stock, max_stock, status } = req.body;
+    const { code, name, size, group_code, measure_code, description, unit_code, min_stock, max_stock, status, supplier_code, supplier_name } = req.body;
 
     // Validar códigos de grupo, medida y unidad
     const [[grupo]] = await pool.query('SELECT * FROM article_groups WHERE group_code = ?', [group_code]);
@@ -33,8 +33,8 @@ export const createArticulo = async (req, res) => {
     if (!unidad) return res.status(400).json({ error: 'Código de unidad inválido' });
 
     await pool.query(
-      'INSERT INTO articles (code, name, size, group_code, measure_code, description, unit_code, min_stock, max_stock, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [code, name, size, group_code, measure_code, description, unit_code, min_stock, max_stock, status || 'activo']
+      'INSERT INTO articles (code, name, size, group_code, measure_code, description, unit_code, min_stock, max_stock, status, supplier_code, supplier_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [code, name, size, group_code, measure_code, description, unit_code, min_stock, max_stock, status || 'activo', supplier_code, supplier_name]
     );
     res.json({ success: true });
   } catch (error) {
@@ -116,7 +116,7 @@ export const getArticulosSimple = async (req, res) => {
 export const updateArticulo = async (req, res) => {
   try {
     const { id } = req.params;
-    const { code, name, size, group_code, measure_code, description, unit_code, min_stock, max_stock, status } = req.body;
+    const { code, name, size, group_code, measure_code, description, unit_code, min_stock, max_stock, status, supplier_code, supplier_name } = req.body;
     
     // Validación de campos requeridos
     if (!code || !name || !group_code || !measure_code || !unit_code || min_stock == null || max_stock == null || !status) {
@@ -133,8 +133,8 @@ export const updateArticulo = async (req, res) => {
     if (!unidad) return res.status(400).json({ error: 'Código de unidad inválido' });
 
     await pool.query(
-      'UPDATE articles SET code=?, name=?, size=?, group_code=?, measure_code=?, description=?, unit_code=?, min_stock=?, max_stock=?, status=? WHERE article_id=?',
-      [code, name, size, group_code, measure_code, description, unit_code, min_stock, max_stock, status, id]
+      'UPDATE articles SET code=?, name=?, size=?, group_code=?, measure_code=?, description=?, unit_code=?, min_stock=?, max_stock=?, status=?, supplier_code=?, supplier_name=? WHERE article_id=?',
+      [code, name, size, group_code, measure_code, description, unit_code, min_stock, max_stock, status, supplier_code, supplier_name, id]
     );
     res.json({ success: true });
   } catch (error) {

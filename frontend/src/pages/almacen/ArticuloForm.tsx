@@ -12,6 +12,8 @@ interface Articulo {
   min_stock: number;
   max_stock: number;
   status: string;
+  supplier_code?: string;
+  supplier_name?: string;
 }
 
 interface ArticuloFormProps {
@@ -31,6 +33,8 @@ const initialState: Articulo = {
   min_stock: 0,
   max_stock: 0,
   status: 'activo',
+  supplier_code: '',
+  supplier_name: '',
 };
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -84,6 +88,8 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
         group_code: articulo.group_code || '',
         measure_code: articulo.measure_code || '',
         unit_code: articulo.unit_code || '',
+        supplier_code: articulo.supplier_code || '',
+        supplier_name: articulo.supplier_name || '',
         // Convertir status a minúsculas para la base de datos
         status: articulo.status ? articulo.status.toLowerCase() : 'activo',
       });
@@ -256,6 +262,36 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
         <div className="mb-3">
           <label className="form-label">Descripción</label>
           <input className="form-control" name="description" placeholder="Descripción" value={form.description} onChange={handleChange} />
+        </div>
+        <div className="mb-3">
+          <label className="form-label">Código del Proveedor</label>
+          <input 
+            className="form-control" 
+            name="supplier_code" 
+            placeholder="Código del proveedor" 
+            value={form.supplier_code} 
+            onChange={handleChange} 
+          />
+          <div className="form-text">
+            <small className="text-muted">
+              Código interno del proveedor para este artículo
+            </small>
+          </div>
+        </div>
+        <div className="mb-3">
+          <label className="form-label">Nombre del Proveedor</label>
+          <input 
+            className="form-control" 
+            name="supplier_name" 
+            placeholder="Nombre del proveedor" 
+            value={form.supplier_name} 
+            onChange={handleChange} 
+          />
+          <div className="form-text">
+            <small className="text-muted">
+              Nombre de la empresa proveedora
+            </small>
+          </div>
         </div>
         <div className="mb-3">
           <label className="form-label">Unidad</label>
