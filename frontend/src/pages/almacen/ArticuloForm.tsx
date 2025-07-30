@@ -105,40 +105,36 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
     }
   }, [form.group_code]);
 
-  // Actualiza el form y genera el código automáticamente
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    let newForm = { ...form, [name]: value };
-
-    // Si cambia grupo o tamaño, genera el código
-    if (name === 'group_code' || name === 'size') {
+  // Actualizar código automáticamente cuando cambie grupo o tamaño (solo para artículos nuevos)
+  useEffect(() => {
+    if (!articulo?.article_id && form.group_code) {
       // Calcula el consecutivo
       let consecutivo = 1;
-      if (name === 'group_code' && value) {
-        // Si cambia grupo, busca artículos del grupo
-        const articulos = articulosGrupo.filter(a => a.group_code === value);
-        if (articulos.length > 0) {
-          // Extrae el consecutivo del código (ej: COM_016_3/4)
-          const nums = articulos.map(a => {
-            const match = a.code.match(/^[A-Z]+_(\d+)_/);
-            return match ? parseInt(match[1], 10) : 0;
-          });
-          consecutivo = Math.max(...nums) + 1;
-        }
-      } else if (form.group_code && articulosGrupo.length > 0) {
+      if (articulosGrupo.length > 0) {
         const nums = articulosGrupo.map(a => {
           const match = a.code.match(/^[A-Z]+_(\d+)_/);
           return match ? parseInt(match[1], 10) : 0;
         });
         consecutivo = Math.max(...nums) + 1;
       }
+      
       // Genera el código
-      const grupo = name === 'group_code' ? value : form.group_code;
-      const size = name === 'size' ? value : form.size;
-      newForm.code = grupo && size ? `${grupo}_${String(consecutivo).padStart(3, '0')}_${size}` : '';
+      const newCode = form.group_code && form.size 
+        ? `${form.group_code}_${String(consecutivo).padStart(3, '0')}_${form.size}`
+        : form.group_code 
+        ? `${form.group_code}_${String(consecutivo).padStart(3, '0')}_`
+        : '';
+      
+      if (newCode !== form.code) {
+        setForm(prev => ({ ...prev, code: newCode }));
+      }
     }
+  }, [form.group_code, form.size, articulosGrupo, articulo?.article_id]);
 
-    setForm(newForm);
+  // Actualiza el form
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -183,19 +179,51 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
 
   return (
     <div>
+      {!articulo?.article_id && (
+        <div className="alert alert-info mb-3">
+          <h6 className="alert-heading">📋 Nomenclatura de Códigos</h6>
+          <p className="mb-2">
+            <span className="badge bg-warning text-dark me-2">GRUPO</span>
+            <span className="badge bg-info me-2">CONSECUTIVO</span>
+            <span className="badge bg-primary">TAMAÑO</span>
+          </p>
+          <small className="mb-0">
+            Ejemplo: <strong>COM_016_3/4</strong> → Componentes, artículo #16, tamaño 3/4
+          </small>
+        </div>
+      )}
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
           <label className="form-label">Grupo</label>
           <select className="form-select" name="group_code" value={form.group_code} onChange={handleChange} required>
             <option value="">Seleccione grupo</option>
             {grupos.map(g => (
-              <option key={g.group_code} value={g.group_code}>{g.group_name}</option>
+              <option key={g.group_code} value={g.group_code}>
+                {g.group_code} - {g.group_name}
+              </option>
             ))}
           </select>
+          <div className="form-text">
+            <small className="text-muted">
+              Selecciona el grupo al que pertenece el artículo (será la parte amarilla del código)
+            </small>
+          </div>
         </div>
         <div className="mb-3">
           <label className="form-label">Código</label>
-          <input className="form-control" name="code" placeholder="Código" value={form.code} readOnly />
+          <input 
+            className="form-control" 
+            name="code" 
+            placeholder="El código se generará automáticamente: GRUPO_###_TAMAÑO" 
+            value={form.code} 
+            readOnly 
+          />
+          <div className="form-text">
+            <small className="text-muted">
+              Formato: <span className="text-warning">GRUPO</span>_<span className="text-info">CONSECUTIVO</span>_<span className="text-primary">TAMAÑO</span>
+              {form.group_code && <span> → Ejemplo: <strong>{form.group_code}_001_{form.size || 'TAMAÑO'}</strong></span>}
+            </small>
+          </div>
         </div>
         <div className="mb-3">
           <label className="form-label">Nombre</label>
@@ -203,7 +231,18 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
         </div>
         <div className="mb-3">
           <label className="form-label">Tamaño</label>
-          <input className="form-control" name="size" placeholder="Tamaño" value={form.size} onChange={handleChange} />
+          <input 
+            className="form-control" 
+            name="size" 
+            placeholder="Ej: 3/4, 10mm, 1.5, etc." 
+            value={form.size} 
+            onChange={handleChange} 
+          />
+          <div className="form-text">
+            <small className="text-muted">
+              Especifica la medida del producto (será la parte azul del código)
+            </small>
+          </div>
         </div>
         <div className="mb-3">
           <label className="form-label">Medida</label>
