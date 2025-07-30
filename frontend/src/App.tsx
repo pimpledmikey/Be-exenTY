@@ -172,6 +172,7 @@ function DashboardHome() {
 
 function Dashboard({ user }: { user: any }) {
 	const [current, setCurrent] = useState('dashboard');
+	const [openAlmacen, setOpenAlmacen] = useState(false);
 
 const sidebarItems = [
   {
@@ -353,23 +354,76 @@ if (current === 'usuarios') {
 						<span style={{ fontWeight: 700, fontSize: 24, color: '#fff', letterSpacing: 1, marginRight: 24 }}>Be-exen</span>
 						<ul className="navbar-nav flex-row d-none d-md-flex">
 							{sidebarItems.map(item => (
-								<li
+								item.children ? (
+								  <li className="nav-item px-2 position-relative" key={item.key}>
+									<a
+									  className="nav-link"
+									  href="#"
+									  onClick={e => {
+										e.preventDefault();
+										setOpenAlmacen(open => !open);
+									  }}
+									>
+									  <span className="nav-link-icon">{item.icon}</span>
+									  <span className="nav-link-title"> {item.label} </span>
+									  <span style={{marginLeft: 4}}>&#9660;</span>
+									</a>
+									{openAlmacen && (
+									  <div className="dropdown-menu show" data-bs-popper="static">
+										<div className="dropdown-menu-columns">
+										  <div className="dropdown-menu-column">
+											{item.children.slice(0, Math.ceil(item.children.length / 2)).map(child => (
+											  <a
+												className={`dropdown-item${current === child.key ? ' active' : ''}`}
+												href="#"
+												onClick={e => {
+												  e.preventDefault();
+												  setCurrent(child.key);
+												  setOpenAlmacen(false);
+												}}
+											  >
+												{child.label}
+											  </a>
+											))}
+										  </div>
+										  <div className="dropdown-menu-column">
+											{item.children.slice(Math.ceil(item.children.length / 2)).map(child => (
+											  <a
+												className={`dropdown-item${current === child.key ? ' active' : ''}`}
+												href="#"
+												onClick={e => {
+												  e.preventDefault();
+												  setCurrent(child.key);
+												  setOpenAlmacen(false);
+												}}
+											  >
+												{child.label}
+											  </a>
+											))}
+										  </div>
+										</div>
+									  </div>
+									)}
+								  </li>
+								) : (
+								  <li
 									className={`nav-item px-2${current === item.key ? ' active' : ''}`}
 									key={item.key}
-								>
+								  >
 									<a
-										className="nav-link"
-										href="#"
-										onClick={e => {
-											e.preventDefault();
-											setCurrent(item.key);
-										}}
+									  className="nav-link"
+									  href="#"
+									  onClick={e => {
+										e.preventDefault();
+										setCurrent(item.key);
+									  }}
 									>
-										<span className="nav-link-icon">{item.icon}</span>
-										<span className="nav-link-title"> {item.label} </span>
+									  <span className="nav-link-icon">{item.icon}</span>
+									  <span className="nav-link-title"> {item.label} </span>
 									</a>
-								</li>
-							))}
+								  </li>
+								)
+							  ))}
 						</ul>
 					</div>
 					<div className="d-flex align-items-center">
@@ -410,50 +464,144 @@ if (current === 'usuarios') {
 						className="collapse navbar-collapse flex-grow-1"
 						id="sidebar-menu"
 					>
+<ul className="navbar-nav flex-row d-none d-md-flex">
+  {sidebarItems.map(item => (
+    item.children ? (
+      <li className="nav-item px-2 position-relative" key={item.key}>
+        <a
+          className="nav-link"
+          href="#"
+          onClick={e => {
+            e.preventDefault();
+            setOpenAlmacen(open => !open);
+          }}
+        >
+          <span className="nav-link-icon">{item.icon}</span>
+          <span className="nav-link-title"> {item.label} </span>
+          <span style={{marginLeft: 4}}>&#9660;</span>
+        </a>
+        {openAlmacen && (
+          <div className="dropdown-menu show" data-bs-popper="static">
+            <div className="dropdown-menu-columns">
+              <div className="dropdown-menu-column">
+                {item.children.slice(0, Math.ceil(item.children.length / 2)).map(child => (
+                  <a
+                    className={`dropdown-item${current === child.key ? ' active' : ''}`}
+                    href="#"
+                    onClick={e => {
+                      e.preventDefault();
+                      setCurrent(child.key);
+                      setOpenAlmacen(false);
+                    }}
+                  >
+                    {child.label}
+                  </a>
+                ))}
+              </div>
+              <div className="dropdown-menu-column">
+                {item.children.slice(Math.ceil(item.children.length / 2)).map(child => (
+                  <a
+                    className={`dropdown-item${current === child.key ? ' active' : ''}`}
+                    href="#"
+                    onClick={e => {
+                      e.preventDefault();
+                      setCurrent(child.key);
+                      setOpenAlmacen(false);
+                    }}
+                  >
+                    {child.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </li>
+    ) : (
+      <li
+        className={`nav-item px-2${current === item.key ? ' active' : ''}`}
+        key={item.key}
+      >
+        <a
+          className="nav-link"
+          href="#"
+          onClick={e => {
+            e.preventDefault();
+            setCurrent(item.key);
+          }}
+        >
+          <span className="nav-link-icon">{item.icon}</span>
+          <span className="nav-link-title"> {item.label} </span>
+        </a>
+      </li>
+    )
+  ))}
+</ul>
+
 <ul className="navbar-nav pt-lg-3 flex-column">
   {sidebarItems.map(item => (
-	item.children ? (
-	  <li className="nav-item" key={item.key}>
-		<div className="nav-link" style={{cursor:'pointer', fontWeight:600, color:'#0d6efd'}}>
-		  <span className="nav-link-icon">{item.icon}</span>
-		  <span className="nav-link-title"> {item.label} </span>
-		</div>
-		<ul className="navbar-nav flex-column ms-3">
-		  {item.children.map(child => (
-			<li className="nav-item" key={child.key}>
-			  <a
-				className={`nav-link${current === child.key ? ' active' : ''}`}
-				href="#"
-				style={{ color: current === child.key ? '#fff' : '#6c757d', background: current === child.key ? '#0d6efd' : 'transparent', borderRadius: 4, fontWeight: 500, margin: '2px 0' }}
-				onClick={e => {
-				  e.preventDefault();
-				  setCurrent(child.key);
-				}}
-			  >
-				{child.label}
-			  </a>
-			</li>
-		  ))}
-		</ul>
-	  </li>
-	) : (
-	  <li
-		className={`nav-item px-2${current === item.key ? ' active' : ''}`}
-		key={item.key}
-	  >
-		<a
-		  className="nav-link"
-		  href="#"
-		  onClick={e => {
-			e.preventDefault();
-			setCurrent(item.key);
-		  }}
-		>
-		  <span className="nav-link-icon">{item.icon}</span>
-		  <span className="nav-link-title"> {item.label} </span>
-		</a>
-	  </li>
-	)
+    item.children ? (
+      <li className="nav-item" key={item.key}>
+        <div className="nav-link" style={{cursor:'pointer', fontWeight:600, color:'#0d6efd'}} onClick={() => setOpenAlmacen(open => !open)}>
+          <span className="nav-link-icon">{item.icon}</span>
+          <span className="nav-link-title"> {item.label} </span>
+          <span style={{marginLeft: 4}}>&#9660;</span>
+        </div>
+        {openAlmacen && (
+          <div className="dropdown-menu show" data-bs-popper="static">
+            <div className="dropdown-menu-columns">
+              <div className="dropdown-menu-column">
+                {item.children.slice(0, Math.ceil(item.children.length / 2)).map(child => (
+                  <a
+                    className={`dropdown-item${current === child.key ? ' active' : ''}`}
+                    href="#"
+                    onClick={e => {
+                      e.preventDefault();
+                      setCurrent(child.key);
+                      setOpenAlmacen(false);
+                    }}
+                  >
+                    {child.label}
+                  </a>
+                ))}
+              </div>
+              <div className="dropdown-menu-column">
+                {item.children.slice(Math.ceil(item.children.length / 2)).map(child => (
+                  <a
+                    className={`dropdown-item${current === child.key ? ' active' : ''}`}
+                    href="#"
+                    onClick={e => {
+                      e.preventDefault();
+                      setCurrent(child.key);
+                      setOpenAlmacen(false);
+                    }}
+                  >
+                    {child.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </li>
+    ) : (
+      <li
+        className={`nav-item px-2${current === item.key ? ' active' : ''}`}
+        key={item.key}
+      >
+        <a
+          className="nav-link"
+          href="#"
+          onClick={e => {
+            e.preventDefault();
+            setCurrent(item.key);
+          }}
+        >
+          <span className="nav-link-icon">{item.icon}</span>
+          <span className="nav-link-title"> {item.label} </span>
+        </a>
+      </li>
+    )
   ))}
 </ul>
 					</div>
