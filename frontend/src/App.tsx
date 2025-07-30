@@ -7,6 +7,12 @@ import GrupoList from './pages/usuarios/GrupoList';
 import AlmacenMenu from './pages/almacen/AlmacenMenu';
 import CambiarPassword from './pages/seguridad/CambiarPassword';
 import GoogleCalendarPage from './pages/GoogleCalendarPage';
+import ArticulosList from './pages/almacen/ArticulosList';
+import EntradasList from './pages/almacen/EntradasList';
+import SalidasList from './pages/almacen/SalidasList';
+import StockList from './pages/almacen/StockList';
+import AjustesList from './pages/almacen/AjustesList';
+import CatalogosList from './pages/almacen/CatalogosList';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -173,51 +179,28 @@ function Dashboard({ user }: { user: any }) {
 	const [current, setCurrent] = useState('dashboard');
 
 const sidebarItems = [
-		{
-			label: 'Home',
-			key: 'dashboard',
-			icon: (
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="24"
-					height="24"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					strokeWidth="2"
-					strokeLinecap="round"
-					strokeLinejoin="round"
-					className="icon icon-1"
-				>
-					<path d="M5 12l-2 0l9 -9l9 9l-2 0" />
-					<path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
-					<path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
-				</svg>
-			),
-		},
-		{
-			label: 'Almacén',
-			key: 'almacen',
-			icon: (
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="24"
-				height="24"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					strokeWidth="2"
-					strokeLinecap="round"
-					strokeLinejoin="round"
-					className="icon icon-1"
-				>
-					<rect x="3" y="7" width="18" height="13" rx="2" />
-					<path d="M16 3v4" />
-					<path d="M8 3v4" />
-					<path d="M3 11h18" />
-				</svg>
-			),
-		},
+  {
+	label: 'Home',
+	key: 'dashboard',
+	icon: (
+	  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-1"><path d="M5 12l-2 0l9 -9l9 9l-2 0" /><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" /><path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" /></svg>
+	),
+  },
+  {
+	label: 'Almacén',
+	key: 'almacen',
+	icon: (
+	  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-1"><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M3 11h18" /></svg>
+	),
+	submenu: [
+	  { label: 'Artículos', key: 'articulos' },
+	  { label: 'Entradas', key: 'entradas' },
+	  { label: 'Salidas', key: 'salidas' },
+	  { label: 'Stock', key: 'stock' },
+	  { label: 'Ajustes', key: 'ajustes' },
+	  { label: 'Catálogos', key: 'catalogos' },
+	],
+  },
 		...(user?.group === 'admin'
 			? [
 				{
@@ -303,7 +286,19 @@ if (current === 'usuarios') {
 } else if (current === 'grupos') {
   content = <GrupoList />;
 } else if (current === 'almacen') {
-  content = <AlmacenMenu />;
+  content = <AlmacenMenu setCurrent={setCurrent} />;
+} else if (current === 'articulos') {
+  content = <ArticulosList />;
+} else if (current === 'entradas') {
+  content = <EntradasList />;
+} else if (current === 'salidas') {
+  content = <SalidasList />;
+} else if (current === 'stock') {
+  content = <StockList />;
+} else if (current === 'ajustes') {
+  content = <AjustesList />;
+} else if (current === 'catalogos') {
+  content = <CatalogosList />;
 } else if (current === 'calendar') {
   content = <GoogleCalendarPage />;
 } else if (current === 'seguridad') {

@@ -5,6 +5,7 @@ export const changePassword = async (req, res) => {
   try {
     const userId = req.user?.user_id;
     const { currentPassword, newPassword } = req.body;
+    console.log('DEBUG cambio password', { userId, body: req.body, reqUser: req.user });
     if (!userId || !currentPassword || !newPassword) {
       return res.status(400).json({ error: 'Faltan datos requeridos' });
     }
