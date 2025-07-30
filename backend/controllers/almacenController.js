@@ -7,7 +7,7 @@ export const getArticulos = async (req, res) => {
              g.group_name AS grupo_nombre, 
              m.measure_name AS medida_nombre, 
              u.unit_name AS unidad_nombre,
-             CASE WHEN a.status = 'A' THEN 'Activo' ELSE 'Inactivo' END AS estado_real
+             CASE WHEN a.status = 'activo' THEN 'Activo' ELSE 'Inactivo' END AS status
       FROM articles a
       LEFT JOIN article_groups g ON a.group_code = g.group_code
       LEFT JOIN article_measures m ON a.measure_code = m.measure_code

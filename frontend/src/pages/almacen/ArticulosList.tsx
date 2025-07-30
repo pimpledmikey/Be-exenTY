@@ -168,7 +168,21 @@ export default function ArticulosList() {
           </tbody>
         </table>
       </div>
-      {showForm && <ArticuloForm articulo={editArticulo} onClose={() => { setShowForm(false); fetchArticulos(); }} />}
+      {showForm && (
+        <div className="modal modal-blur fade show" style={{ display: 'block' }}>
+          <div className="modal-dialog modal-lg modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">{editArticulo ? 'Editar Artículo' : 'Crear Artículo'}</h5>
+                <button type="button" className="btn-close" onClick={() => setShowForm(false)}></button>
+              </div>
+              <div className="modal-body">
+                <ArticuloForm articulo={editArticulo} onClose={() => { setShowForm(false); fetchArticulos(); }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {showConfirm && (
         <div className="modal modal-blur fade show" style={{ display: 'block' }}>
           <div className="modal-dialog modal-sm modal-dialog-centered">

@@ -150,7 +150,6 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
       
       const body = {
         ...form,
-        status: form.status.toUpperCase().startsWith('A') ? 'A' : 'I',
         min_stock: Number(form.min_stock),
         max_stock: Number(form.max_stock)
       };
