@@ -37,10 +37,12 @@ export default function CatalogosList() {
   if (error) return <div className="alert alert-danger">Error: {error}</div>;
 
   return (
-    <div style={{ width: '100%', maxWidth: '100vw', paddingTop: 8 }}>
-      <h2 className="mb-0">Gestión de Catálogos</h2>
-      <div style={{ width: '100%' }}>
-        <table className="table table-dark dataTable" data-bs-theme="dark" style={{ width: '100%' }}>
+    <div className="card" data-bs-theme="dark">
+      <div className="card-header">
+        <h3 className="card-title">Gestión de Catálogos</h3>
+      </div>
+      <div className="table-responsive">
+        <table className="table card-table table-vcenter text-nowrap datatable table-striped">
           <thead>
             <tr>
               <th>Código</th>

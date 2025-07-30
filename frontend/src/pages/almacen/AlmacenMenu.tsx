@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ArticulosList from './ArticulosList';
 import EntradasList from './EntradasList';
 import SalidasList from './SalidasList';
@@ -20,6 +20,11 @@ interface AlmacenMenuProps {
 
 const AlmacenMenu: React.FC<AlmacenMenuProps> = ({ initialTab }) => {
   const [submenu, setSubmenu] = useState(initialTab || 'articulos');
+
+  useEffect(() => {
+    setSubmenu(initialTab);
+  }, [initialTab]);
+
   let content = null;
   if (submenu === 'articulos') {
     content = <ArticulosList />;
