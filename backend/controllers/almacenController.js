@@ -115,14 +115,25 @@ export const getArticulosSimple = async (req, res) => {
 export const updateArticulo = async (req, res) => {
   try {
     const { id } = req.params;
-    const { code, name, size, measure, description, unit, min_stock, max_stock, status } = req.body;
+    const { code, name, size, group_code, measure_code, description, unit_code, min_stock, max_stock, status } = req.body;
+    
     // Validación de campos requeridos
-    if (!code || !name || !unit || min_stock == null || max_stock == null || !status) {
+    if (!code || !name || !group_code || !measure_code || !unit_code || min_stock == null || max_stock == null || !status) {
       return res.status(400).json({ error: 'Faltan campos requeridos' });
     }
+
+    // Validar códigos de grupo, medida y unidad
+    const [[grupo]] = await pool.query('SELECT * FROM article_groups WHERE group_code = ?', [group_code]);
+    const [[medida]] = await pool.query('SELECT * FROM article_measures WHERE measure_code = ?', [measure_code]);
+    const [[unidad]] = await pool.query('SELECT * FROM article_units WHERE unit_code = ?', [unit_code]);
+
+    if (!grupo) return res.status(400).json({ error: 'Código de grupo inválido' });
+    if (!medida) return res.status(400).json({ error: 'Código de medida inválido' });
+    if (!unidad) return res.status(400).json({ error: 'Código de unidad inválido' });
+
     await pool.query(
-      'UPDATE articles SET code=?, name=?, size=?, measure=?, description=?, unit=?, min_stock=?, max_stock=?, status=? WHERE article_id=?',
-      [code, name, size, measure, description, unit, min_stock, max_stock, status, id]
+      'UPDATE articles SET code=?, name=?, size=?, group_code=?, measure_code=?, description=?, unit_code=?, min_stock=?, max_stock=?, status=? WHERE article_id=?',
+      [code, name, size, group_code, measure_code, description, unit_code, min_stock, max_stock, status, id]
     );
     res.json({ success: true });
   } catch (error) {
