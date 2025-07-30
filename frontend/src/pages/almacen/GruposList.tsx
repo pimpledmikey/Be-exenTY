@@ -87,26 +87,40 @@ export default function GruposList() {
   if (error) return <div className="alert alert-danger">Error: {error}</div>;
 
   return (
-    <div style={{ width: '100%', maxWidth: '100vw', paddingTop: 8 }}>
-      <div className="d-flex justify-content-between align-items-center mb-2">
-        <h4>Catálogo de Grupos</h4>
-        <button className="btn btn-success" onClick={() => handleOpen()}>Nuevo</button>
+    <div className="card" data-bs-theme="dark">
+      <div className="card-header">
+        <h3 className="card-title">Catálogo de Grupos</h3>
+        <div className="card-actions">
+          <button className="btn btn-success" onClick={() => handleOpen()}>Nuevo</button>
+        </div>
       </div>
-      <ul className="list-group">
-        {grupos.map(g => (
-          <li key={g.group_code} className="list-group-item d-flex justify-content-between align-items-center">
-            <span>{g.group_code} - {g.group_name}</span>
-            <span>
-              <button className="btn btn-sm btn-outline-primary me-2" onClick={() => handleOpen(g)}>Editar</button>
-              <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(g)}>Eliminar</button>
-            </span>
-          </li>
-        ))}
-      </ul>
+      <div className="table-responsive">
+        <table className="table card-table table-vcenter text-nowrap datatable table-striped">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Nombre</th>
+              <th className="w-1">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {grupos.map(g => (
+              <tr key={g.group_code}>
+                <td>{g.group_code}</td>
+                <td>{g.group_name}</td>
+                <td className="text-end">
+                  <button className="btn btn-sm btn-outline-primary me-2" onClick={() => handleOpen(g)}>Editar</button>
+                  <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(g)}>Eliminar</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       {/* Modal */}
       {showModal && (
         <div className="modal fade show" style={{ display: 'block', background: '#0008' }} tabIndex={-1}>
-          <div className="modal-dialog">
+          <div className="modal-dialog modal-dialog-centered">
             <form className="modal-content" onSubmit={handleSave}>
               <div className="modal-header">
                 <h5 className="modal-title">{editGrupo ? 'Editar Grupo' : 'Nuevo Grupo'}</h5>

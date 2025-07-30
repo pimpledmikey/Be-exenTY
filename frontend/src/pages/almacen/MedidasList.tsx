@@ -87,26 +87,40 @@ export default function MedidasList() {
   if (error) return <div className="alert alert-danger">Error: {error}</div>;
 
   return (
-    <div style={{ width: '100%', maxWidth: '100vw', paddingTop: 8 }}>
-      <div className="d-flex justify-content-between align-items-center mb-2">
-        <h4>Catálogo de Medidas</h4>
-        <button className="btn btn-success" onClick={() => handleOpen()}>Nuevo</button>
+    <div className="card" data-bs-theme="dark">
+      <div className="card-header">
+        <h3 className="card-title">Catálogo de Medidas</h3>
+        <div className="card-actions">
+          <button className="btn btn-success" onClick={() => handleOpen()}>Nuevo</button>
+        </div>
       </div>
-      <ul className="list-group">
-        {medidas.map(m => (
-          <li key={m.measure_code} className="list-group-item d-flex justify-content-between align-items-center">
-            <span>{m.measure_code} - {m.measure_name}</span>
-            <span>
-              <button className="btn btn-sm btn-outline-primary me-2" onClick={() => handleOpen(m)}>Editar</button>
-              <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(m)}>Eliminar</button>
-            </span>
-          </li>
-        ))}
-      </ul>
+      <div className="table-responsive">
+        <table className="table card-table table-vcenter text-nowrap datatable table-striped">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Nombre</th>
+              <th className="w-1">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {medidas.map(m => (
+              <tr key={m.measure_code}>
+                <td>{m.measure_code}</td>
+                <td>{m.measure_name}</td>
+                <td className="text-end">
+                  <button className="btn btn-sm btn-outline-primary me-2" onClick={() => handleOpen(m)}>Editar</button>
+                  <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(m)}>Eliminar</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       {/* Modal */}
       {showModal && (
         <div className="modal fade show" style={{ display: 'block', background: '#0008' }} tabIndex={-1}>
-          <div className="modal-dialog">
+          <div className="modal-dialog modal-dialog-centered">
             <form className="modal-content" onSubmit={handleSave}>
               <div className="modal-header">
                 <h5 className="modal-title">{editMedida ? 'Editar Medida' : 'Nueva Medida'}</h5>
