@@ -30,6 +30,13 @@ export default function AjustesList() {
   const fetchAjustes = async () => {
     setLoading(true);
     try {
+      // Verificar permisos antes de hacer la petición
+      if (!canPerform('ajustes', 'ajustes_view', 'view')) {
+        showPermissionError('No tienes permisos para ver los ajustes');
+        setLoading(false);
+        return;
+      }
+
       const res = await fetch(`${API_URL}/ajustes`, {
         headers: {
           'Content-Type': 'application/json',
@@ -47,12 +54,8 @@ export default function AjustesList() {
   };
 
   useEffect(() => {
-    if (!canPerform('ajustes', 'ajustes_view', 'view')) {
-      showPermissionError('No tienes permisos para ver los ajustes');
-      return;
-    }
     fetchAjustes();
-  }, [canPerform, showPermissionError]);
+  }, []);
 
   if (loading || permissionsLoading) return <div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando ajustes...</span></div>;
   if (error) return <div className="alert alert-danger">Error: {error}</div>;

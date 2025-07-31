@@ -39,6 +39,13 @@ export default function StockList() {
     const fetchStock = async () => {
       setLoading(true);
       try {
+        // Verificar permisos antes de hacer la petición
+        if (!canPerform('stock', 'stock_view', 'view')) {
+          showPermissionError('No tienes permisos para ver el stock');
+          setLoading(false);
+          return;
+        }
+
         const res = await fetch(`${API_URL}/almacen/stock`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -53,11 +60,6 @@ export default function StockList() {
         setLoading(false);
       }
     };
-    
-    if (!canPerform('stock', 'stock_view', 'view')) {
-      showPermissionError('No tienes permisos para ver el stock');
-      return;
-    }
     
     fetchStock();
   }, [canPerform, showPermissionError]);

@@ -52,12 +52,8 @@ export default function SalidasList() {
   };
 
   useEffect(() => {
-    if (!canPerform('salidas', 'salidas_view', 'view')) {
-      showPermissionError('No tienes permisos para ver las salidas');
-      return;
-    }
     fetchSalidas();
-  }, [canPerform, showPermissionError]);
+  }, []);
 
   if (loading || permissionsLoading) return <div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando salidas...</span></div>;
   if (error) return <div className="alert alert-danger">Error: {error}</div>;
