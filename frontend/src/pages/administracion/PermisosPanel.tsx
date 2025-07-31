@@ -3,6 +3,13 @@ import { Card, Table, Button, Form, Alert, Badge, Spinner } from 'react-bootstra
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+// Estilos para las tarjetas de roles
+const roleCardStyle = {
+  marginBottom: '0.75rem',
+  transition: 'all 0.2s ease',
+  cursor: 'pointer'
+};
+
 interface User {
   id: number;
   username: string;
@@ -208,47 +215,58 @@ const PermisosPanel: React.FC = () => {
           )}
 
           <div className="row row-deck row-cards">
-            {/* Lista de Usuarios y Roles */}
+            {/* Lista de Roles */}
             <div className="col-md-4">
               <Card>
                 <Card.Header>
-                  <Card.Title>Usuarios y Roles</Card.Title>
+                  <Card.Title>Gestión de Roles</Card.Title>
+                  <div className="text-muted small">
+                    Selecciona un rol para configurar sus permisos
+                  </div>
                 </Card.Header>
                 <Card.Body style={{ maxHeight: '600px', overflowY: 'auto' }}>
-                  <Table size="sm" hover>
-                    <thead>
-                      <tr>
-                        <th>Usuario</th>
-                        <th>Rol</th>
-                        <th>Acción</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {users.map(user => (
-                        <tr key={user.id}>
-                          <td>
-                            <div>
-                              <strong>{user.username}</strong>
-                              <br />
-                              <small className="text-muted">{user.name}</small>
+                  <div className="d-flex flex-column gap-3">
+                    {roles.map(role => {
+                      const usersWithRole = users.filter(u => u.role_id === role.id);
+                      return (
+                        <Card key={role.id} className={`role-card ${selectedRole === role.id ? 'border-primary' : ''}`} style={roleCardStyle}>
+                          <Card.Body className="p-3">
+                            <div className="d-flex justify-content-between align-items-start mb-2">
+                              <div>
+                                <h6 className="mb-1">{role.name}</h6>
+                                <small className="text-muted">{role.description}</small>
+                              </div>
+                              <Badge bg="info" className="ms-2">
+                                {usersWithRole.length} {usersWithRole.length === 1 ? 'usuario' : 'usuarios'}
+                              </Badge>
                             </div>
-                          </td>
-                          <td>
-                            <Badge bg="secondary">{user.role_name}</Badge>
-                          </td>
-                          <td>
+                            
+                            {usersWithRole.length > 0 && (
+                              <div className="mb-2">
+                                <small className="text-muted">Usuarios:</small>
+                                <div className="mt-1">
+                                  {usersWithRole.map(user => (
+                                    <Badge key={user.id} bg="light" text="dark" className="me-1 mb-1">
+                                      {user.username}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
                             <Button
                               size="sm"
-                              variant={selectedRole === user.role_id ? "primary" : "outline-primary"}
-                              onClick={() => loadRolePermissions(user.role_id)}
+                              variant={selectedRole === role.id ? "primary" : "outline-primary"}
+                              onClick={() => loadRolePermissions(role.id)}
+                              className="w-100"
                             >
-                              {selectedRole === user.role_id ? "Seleccionado" : "Editar"}
+                              {selectedRole === role.id ? "✓ Editando Permisos" : "Configurar Permisos"}
                             </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
+                          </Card.Body>
+                        </Card>
+                      );
+                    })}
+                  </div>
                 </Card.Body>
               </Card>
             </div>
@@ -276,8 +294,11 @@ const PermisosPanel: React.FC = () => {
                           <path d="M12 9h.01"/>
                           <path d="M11 12h1v4h1"/>
                         </svg>
-                        <h3>Selecciona un rol</h3>
-                        <p>Selecciona un rol de la lista de usuarios para configurar sus permisos</p>
+                        <h3>Selecciona un rol para configurar</h3>
+                        <p>Haz clic en "Configurar Permisos" de cualquier rol para establecer sus permisos.<br/>
+                        <small className="text-info">
+                          💡 Los cambios se aplicarán automáticamente a todos los usuarios con ese rol.
+                        </small></p>
                       </div>
                     </div>
                   ) : (
