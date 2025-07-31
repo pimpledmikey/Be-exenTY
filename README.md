@@ -59,3 +59,4 @@ npm run dev
 - El frontend y backend pueden desplegarse por separado en Render.
 - Si necesitas migrar la base de datos, usa los scripts SQL incluidos en `/backend`.
 - Si usas dominios personalizados, configura los CORS en el backend.
+# Sistema RBAC actualizado jueves, 31 de julio de 2025, 14:47:09 CST
