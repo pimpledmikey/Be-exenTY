@@ -28,7 +28,18 @@ export const verifyAuth = async (req, res, next) => {
 export const checkPermission = (module, action) => {
   return async (req, res, next) => {
     try {
-      const userId = req.user.id;
+      console.log('🔍 checkPermission - Usuario:', req.user);
+      console.log('🔍 checkPermission - Módulo:', module, 'Acción:', action);
+      
+      const userId = req.user.user_id;
+      
+      if (!userId) {
+        console.error('❌ checkPermission - user_id no encontrado en req.user');
+        return res.status(403).json({
+          success: false,
+          message: 'Usuario no válido'
+        });
+      }
       
       // Obtener permisos del usuario
       const [userPermissions] = await pool.execute(`
@@ -43,13 +54,16 @@ export const checkPermission = (module, action) => {
         JOIN roles r ON u.role_id = r.id
         JOIN role_permissions rp ON r.id = rp.role_id
         JOIN permissions p ON rp.permission_id = p.id
-        WHERE u.id = ? AND p.module = ?
+        WHERE u.user_id = ? AND p.module = ?
       `, [userId, module]);
 
+      console.log('🔍 checkPermission - Permisos encontrados:', userPermissions);
+
       if (userPermissions.length === 0) {
+        console.log('❌ checkPermission - Sin permisos para módulo:', module);
         return res.status(403).json({
           success: false,
-          message: 'No tienes acceso a este módulo'
+          message: `No tienes acceso al módulo ${module}`
         });
       }
 
@@ -69,16 +83,20 @@ export const checkPermission = (module, action) => {
         }
       });
 
+      console.log('🔍 checkPermission - Tiene permiso:', hasPermission);
+
       if (!hasPermission) {
+        console.log('❌ checkPermission - Sin permiso para acción:', action);
         return res.status(403).json({
           success: false,
           message: `No tienes permisos para ${action} en ${module}`
         });
       }
 
+      console.log('✅ checkPermission - Permiso concedido');
       next();
     } catch (error) {
-      console.error('Error verificando permisos:', error);
+      console.error('❌ Error verificando permisos:', error);
       return res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
@@ -90,25 +108,40 @@ export const checkPermission = (module, action) => {
 // Middleware para verificar si es administrador
 export const checkAdmin = async (req, res, next) => {
   try {
-    const userId = req.user.id;
+    console.log('🔍 checkAdmin - Usuario:', req.user);
+    const userId = req.user.user_id;
+    
+    if (!userId) {
+      console.error('❌ checkAdmin - user_id no encontrado en req.user');
+      return res.status(403).json({
+        success: false,
+        message: 'Usuario no válido'
+      });
+    }
+    
+    console.log('🔍 checkAdmin - Buscando rol para user_id:', userId);
     
     const [userRole] = await pool.execute(`
       SELECT r.name as role_name
       FROM users u
       JOIN roles r ON u.role_id = r.id
-      WHERE u.id = ?
+      WHERE u.user_id = ?
     `, [userId]);
 
+    console.log('🔍 checkAdmin - Resultado consulta:', userRole);
+
     if (userRole.length === 0 || userRole[0].role_name !== 'Administrador') {
+      console.log('❌ checkAdmin - No es administrador:', userRole[0]?.role_name || 'Sin rol');
       return res.status(403).json({
         success: false,
         message: 'Acceso denegado. Se requieren permisos de administrador'
       });
     }
 
+    console.log('✅ checkAdmin - Es administrador');
     next();
   } catch (error) {
-    console.error('Error verificando rol de administrador:', error);
+    console.error('❌ Error verificando rol de administrador:', error);
     return res.status(500).json({
       success: false,
       message: 'Error interno del servidor'
