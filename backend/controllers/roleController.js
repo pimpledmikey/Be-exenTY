@@ -100,3 +100,31 @@ export const updateRolePermissions = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+// Obtener permisos de un rol específico
+export const getRolePermissions = async (req, res) => {
+  try {
+    const { roleId } = req.params;
+    
+    const [rows] = await pool.query(`
+      SELECT 
+        rp.role_id,
+        rp.permission_id,
+        rp.can_view,
+        rp.can_create,
+        rp.can_edit,
+        rp.can_delete,
+        p.name as permission_name,
+        p.description as permission_description,
+        p.module
+      FROM role_permissions rp
+      JOIN permissions p ON rp.permission_id = p.id
+      WHERE rp.role_id = ?
+      ORDER BY p.module, p.name
+    `, [roleId]);
+
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};

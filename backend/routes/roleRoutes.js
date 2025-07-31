@@ -3,6 +3,7 @@ import {
   getUsersWithRoles, 
   getRoles, 
   getPermissions, 
+  getRolePermissions,
   updateUserRole, 
   updateRolePermissions 
 } from '../controllers/roleController.js';
@@ -51,6 +52,7 @@ router.get('/debug-users', async (req, res) => {
 router.get('/users', verifyAuth, checkAdmin, getUsersWithRoles);
 router.get('/roles', verifyAuth, checkAdmin, getRoles);
 router.get('/permissions', verifyAuth, checkAdmin, getPermissions);
+router.get('/:roleId/permissions', verifyAuth, checkAdmin, getRolePermissions);
 router.put('/user/:userId/role', verifyAuth, checkAdmin, updateUserRole);
 router.put('/role/:roleId/permissions', verifyAuth, checkAdmin, updateRolePermissions);
 
