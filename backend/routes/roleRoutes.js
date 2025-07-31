@@ -54,6 +54,7 @@ router.get('/permissions', verifyAuth, checkAdmin, getPermissions);
 router.get('/:roleId/permissions', verifyAuth, checkAdmin, getRolePermissions);
 router.get('/', verifyAuth, checkAdmin, getRoles);
 router.put('/user/:userId/role', verifyAuth, checkAdmin, updateUserRole);
+router.put('/permissions', verifyAuth, checkAdmin, updateRolePermissions);
 router.put('/role/:roleId/permissions', verifyAuth, checkAdmin, updateRolePermissions);
 
 export default router;
