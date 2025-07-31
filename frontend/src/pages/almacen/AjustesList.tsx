@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import AjusteForm from './AjusteForm';
+import { usePermissions } from '../../hooks/usePermissions';
+import { PermissionAlert, PermissionGuard } from '../../components/PermissionComponents';
+import { usePermissionError } from '../../utils/permissionUtils';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -19,6 +22,10 @@ export default function AjustesList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+
+  // Hook para verificar permisos del usuario
+  const { canPerform, loading: permissionsLoading } = usePermissions();
+  const { permissionError, showPermissionError, clearPermissionError } = usePermissionError();
 
   const fetchAjustes = async () => {
     setLoading(true);
@@ -40,18 +47,38 @@ export default function AjustesList() {
   };
 
   useEffect(() => {
+    if (!canPerform('ajustes', 'view', 'view')) {
+      showPermissionError('No tienes permisos para ver los ajustes');
+      return;
+    }
     fetchAjustes();
-  }, []);
+  }, [canPerform, showPermissionError]);
 
-  if (loading) return <div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando ajustes...</span></div>;
+  if (loading || permissionsLoading) return <div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando ajustes...</span></div>;
   if (error) return <div className="alert alert-danger">Error: {error}</div>;
 
   return (
     <div className="card" data-bs-theme="dark">
+      {permissionError && (
+        <PermissionAlert 
+          show={true}
+          onClose={clearPermissionError}
+          action="realizar esta acción"
+          module="ajustes"
+        />
+      )}
+      
       <div className="card-header">
         <h3 className="card-title">Ajustes de Inventario</h3>
         <div className="card-actions">
-          <button className="btn btn-success" onClick={() => setShowForm(true)}>Registrar ajuste</button>
+          <PermissionGuard 
+            canPerform={canPerform}
+            module="ajustes"
+            permission="create"
+            action="create"
+          >
+            <button className="btn btn-success" onClick={() => setShowForm(true)}>Registrar ajuste</button>
+          </PermissionGuard>
         </div>
       </div>
       <div className="table-responsive">

@@ -34,12 +34,13 @@ export default function SalidasList() {
   const fetchSalidas = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/almacen/salidas`, {
+      const res = await fetchWithPermissions(`${API_URL}/almacen/salidas`, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
-      });
+      }, showPermissionError);
+      
       if (!res.ok) throw new Error('Error al cargar salidas');
       const data = await res.json();
       setSalidas(data.map((s: any) => ({ ...s, article_id: String(s.article_id), user_id: String(s.user_id) })));
@@ -51,11 +52,25 @@ export default function SalidasList() {
   };
 
   useEffect(() => {
+    if (!canPerform('salidas', 'view', 'view')) {
+      showPermissionError('No tienes permisos para ver las salidas');
+      return;
+    }
     fetchSalidas();
-  }, []);
+  }, [canPerform, showPermissionError]);
 
-  if (loading) return <div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando salidas...</span></div>;
+  if (loading || permissionsLoading) return <div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando salidas...</span></div>;
   if (error) return <div className="alert alert-danger">Error: {error}</div>;
+  
+  // Verificar si el usuario tiene permisos para ver salidas
+  if (!canPerform('salidas', 'salidas_view', 'view')) {
+    return (
+      <div className="alert alert-warning">
+        <h4>Sin permisos</h4>
+        <p>No tienes permisos para ver las salidas de inventario. Contacta al administrador.</p>
+      </div>
+    );
+  }
 
   // Filtrado
   const salidasFiltradas = salidas.filter(s => {
@@ -76,9 +91,25 @@ export default function SalidasList() {
             value={filtro}
             onChange={e => { setFiltro(e.target.value); }}
           />
-          <button className="btn btn-success" onClick={() => { setShowForm(true); }}>Crear salida</button>
+          <PermissionGuard
+            module="salidas"
+            permission="salidas_create"
+            action="create"
+            canPerform={canPerform}
+          >
+            <button className="btn btn-success" onClick={() => { setShowForm(true); }}>Crear salida</button>
+          </PermissionGuard>
         </div>
       </div>
+      {permissionError && (
+        <PermissionAlert 
+          show={true}
+          onClose={clearPermissionError}
+          action="realizar esta acción"
+          module="salidas"
+        />
+      )}
+      
       {alerta && (
         <div className="card-alert alert alert-success mb-0">
           {alerta.mensaje}
@@ -108,7 +139,33 @@ export default function SalidasList() {
                 <td>{s.reason}</td>
                 <td>{s.usuario_nombre || s.user_id}</td>
                 <td>
-                  {/* <button className="btn btn-sm btn-outline-primary">Editar</button> */}
+                  <PermissionGuard 
+                    canPerform={canPerform}
+                    module="salidas"
+                    permission="edit"
+                    action="edit"
+                  >
+                    <button 
+                      className="btn btn-sm btn-outline-primary me-2"
+                      title="Editar salida"
+                    >
+                      Editar
+                    </button>
+                  </PermissionGuard>
+                  
+                  <PermissionGuard 
+                    canPerform={canPerform}
+                    module="salidas"
+                    permission="delete"
+                    action="delete"
+                  >
+                    <button 
+                      className="btn btn-sm btn-outline-danger"
+                      title="Eliminar salida"
+                    >
+                      Eliminar
+                    </button>
+                  </PermissionGuard>
                 </td>
               </tr>
             ))}

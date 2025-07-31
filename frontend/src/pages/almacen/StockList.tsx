@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react';
+import { usePermissions } from '../../hooks/usePermissions';
+import { PermissionAlert } from '../../components/PermissionComponents';
+import { usePermissionError } from '../../utils/permissionUtils';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -16,6 +19,10 @@ export default function StockList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [alerta, setAlerta] = useState<{ tipo: 'success' | 'danger'; mensaje: string } | null>(null);
+
+  // Hook para verificar permisos del usuario
+  const { canPerform, loading: permissionsLoading } = usePermissions();
+  const { permissionError, showPermissionError, clearPermissionError } = usePermissionError();
 
   // Filtrado
   const [filtro, setFiltro] = useState('');
@@ -46,14 +53,29 @@ export default function StockList() {
         setLoading(false);
       }
     };
+    
+    if (!canPerform('stock', 'view', 'view')) {
+      showPermissionError('No tienes permisos para ver el stock');
+      return;
+    }
+    
     fetchStock();
-  }, []);
+  }, [canPerform, showPermissionError]);
 
-  if (loading) return <div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando stock...</span></div>;
+  if (loading || permissionsLoading) return <div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando stock...</span></div>;
   if (error) return <div className="alert alert-danger">Error: {error}</div>;
 
   return (
     <div className="card" data-bs-theme="dark">
+      {permissionError && (
+        <PermissionAlert 
+          show={true}
+          onClose={clearPermissionError}
+          action="realizar esta acción"
+          module="stock"
+        />
+      )}
+      
       <div className="card-header">
         <h3 className="card-title">Stock de Artículos</h3>
         <div className="card-actions">
