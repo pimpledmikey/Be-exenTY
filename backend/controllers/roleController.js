@@ -3,100 +3,74 @@ import pool from '../db.js';
 // Obtener todos los usuarios con sus roles (compatible con sistema antiguo y nuevo)
 export const getUsersWithRoles = async (req, res) => {
   try {
-    console.log('🔍 getUsersWithRoles - Iniciando consulta...');
+    console.log('🔍 getUsersWithRoles - Iniciando...');
     
-    // Primero, una consulta muy simple para ver si hay usuarios
-    const [testUsers] = await pool.execute(`SELECT COUNT(*) as total FROM users`);
-    console.log('🔍 Total usuarios en DB:', testUsers[0].total);
-    
-    // Consulta simple sin JOINs para debugging
-    const [basicUsers] = await pool.execute(`
+    // Usar el mismo patrón que el controller de grupos que SÍ funciona
+    const [rows] = await pool.query(`
       SELECT 
-        u.user_id as id,
-        u.username,
-        u.name,
-        u.email,
-        u.group_id,
-        u.role_id
-      FROM users u
-      ORDER BY u.username
-      LIMIT 10
+        user_id as id,
+        username,
+        name,
+        email,
+        group_id,
+        role_id
+      FROM users 
+      ORDER BY username
     `);
     
-    console.log('✅ Usuarios básicos obtenidos:', basicUsers.length);
-    if (basicUsers.length > 0) {
-      console.log('🔍 Primer usuario básico:', basicUsers[0]);
-    }
+    console.log('✅ Usuarios obtenidos:', rows.length);
+    
+    // Formatear igual que el patrón que funciona
+    const formattedUsers = rows.map(user => ({
+      id: user.id,
+      username: user.username || 'sin_username',
+      name: user.name || 'Sin nombre', 
+      email: user.email || '',
+      group_id: user.group_id,
+      role_id: user.role_id,
+      group_name: user.group_id ? `Grupo ${user.group_id}` : 'Sin grupo',
+      role_name: user.role_id ? `Rol ${user.role_id}` : 'Sin rol',
+      system_type: user.role_id ? 'rbac' : 'legacy'
+    }));
 
-    // Respuesta simple para debugging
-    res.json({
-      success: true,
-      data: basicUsers.map(user => ({
-        id: user.id,
-        username: user.username,
-        name: user.name || 'Sin nombre',
-        email: user.email || 'Sin email',
-        group_name: `Grupo ${user.group_id}`,
-        group_id: user.group_id,
-        role_id: user.role_id,
-        role_name: user.role_id ? `Rol ${user.role_id}` : 'Sin rol',
-        role_description: 'Descripción pendiente',
-        system_type: user.role_id ? 'rbac' : 'legacy'
-      })),
-      message: 'Usuarios obtenidos exitosamente'
-    });
+    // Respuesta simple como el patrón que funciona
+    res.json(formattedUsers);
+    
   } catch (error) {
-    console.error('Error obteniendo usuarios:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error interno del servidor'
-    });
+    console.error('❌ Error getUsersWithRoles:', error);
+    res.status(500).json({ error: error.message });
   }
 };
 
 // Obtener todos los roles disponibles
 export const getRoles = async (req, res) => {
   try {
-    const [roles] = await pool.execute(`
+    const [roles] = await pool.query(`
       SELECT id, name, description, created_at, updated_at
       FROM roles
       ORDER BY name
     `);
 
-    res.json({
-      success: true,
-      data: roles,
-      message: 'Roles obtenidos exitosamente'
-    });
+    res.json(roles);
   } catch (error) {
     console.error('Error obteniendo roles:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error interno del servidor'
-    });
+    res.status(500).json({ error: error.message });
   }
 };
 
 // Obtener todos los permisos disponibles
 export const getPermissions = async (req, res) => {
   try {
-    const [permissions] = await pool.execute(`
+    const [permissions] = await pool.query(`
       SELECT id, name, description, module, created_at
       FROM permissions
       ORDER BY module, name
     `);
 
-    res.json({
-      success: true,
-      data: permissions,
-      message: 'Permisos obtenidos exitosamente'
-    });
+    res.json(permissions);
   } catch (error) {
     console.error('Error obteniendo permisos:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error interno del servidor'
-    });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -398,54 +372,39 @@ export const updateUserRole = async (req, res) => {
     
     // Validar datos
     if (!roleId) {
-      return res.status(400).json({
-        success: false,
-        message: 'roleId es requerido'
-      });
+      return res.status(400).json({ error: 'roleId es requerido' });
     }
 
     // Verificar que el usuario existe
-    const [userExists] = await pool.execute(`
+    const [userExists] = await pool.query(`
       SELECT user_id FROM users WHERE user_id = ?
     `, [userId]);
 
     if (userExists.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Usuario no encontrado'
-      });
+      return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    // Verificar que el rol existe
-    const [roleExists] = await pool.execute(`
+    // Verificar que el rol existe (usando columna 'id' no 'role_id')
+    const [roleExists] = await pool.query(`
       SELECT id FROM roles WHERE id = ?
     `, [roleId]);
 
     if (roleExists.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Rol no encontrado'
-      });
+      return res.status(404).json({ error: 'Rol no encontrado' });
     }
 
     // Actualizar el rol del usuario
-    await pool.execute(`
+    await pool.query(`
       UPDATE users 
       SET role_id = ?, updated_at = CURRENT_TIMESTAMP 
       WHERE user_id = ?
     `, [roleId, userId]);
 
     console.log('✅ Rol actualizado exitosamente');
-
-    res.json({
-      success: true,
-      message: 'Rol del usuario actualizado exitosamente'
-    });
+    res.json({ success: true, message: 'Rol del usuario actualizado exitosamente' });
+    
   } catch (error) {
     console.error('❌ Error actualizando rol del usuario:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error interno del servidor'
-    });
+    res.status(500).json({ error: error.message });
   }
 };
