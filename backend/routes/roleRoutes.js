@@ -1,26 +1,57 @@
-import { Router } from 'express';
-import {
-  getUsersWithRoles,
-  getRoles,
-  getPermissions,
-  getRolePermissions,
-  updateRolePermissions,
-  getUserPermissions,
-  migrateUserToRBAC
+import express from 'express';
+import { 
+  getUsersWithRoles, 
+  getRoles, 
+  getPermissions, 
+  updateUserRole, 
+  updateRolePermissions 
 } from '../controllers/roleController.js';
 import { verifyAuth, checkAdmin } from '../middleware/authMiddleware.js';
 
-const router = Router();
+const router = express.Router();
 
-// Rutas protegidas que requieren autenticación de administrador
+// Ruta de test muy simple
+router.get('/test', (req, res) => {
+  res.json({ 
+    message: 'Role routes funcionando', 
+    timestamp: new Date().toISOString(),
+    status: 'ok' 
+  });
+});
+
+// Ruta de debug sin autenticación
+router.get('/debug-users', async (req, res) => {
+  try {
+    console.log('🔧 Debug route - iniciando...');
+    const { getUsersWithRoles } = await import('../controllers/roleController.js');
+    
+    // Crear un objeto mock request/response
+    const mockReq = {};
+    const mockRes = {
+      json: (data) => {
+        console.log('🔧 Debug route - respuesta:', data);
+        res.json(data);
+      },
+      status: (code) => ({
+        json: (data) => {
+          console.log('🔧 Debug route - error:', code, data);
+          res.status(code).json(data);
+        }
+      })
+    };
+    
+    await getUsersWithRoles(mockReq, mockRes);
+  } catch (error) {
+    console.error('🔧 Debug route - error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Rutas protegidas
 router.get('/users', verifyAuth, checkAdmin, getUsersWithRoles);
-router.get('/', verifyAuth, checkAdmin, getRoles);
+router.get('/roles', verifyAuth, checkAdmin, getRoles);
 router.get('/permissions', verifyAuth, checkAdmin, getPermissions);
-router.get('/:roleId/permissions', verifyAuth, checkAdmin, getRolePermissions);
-router.put('/permissions', verifyAuth, checkAdmin, updateRolePermissions);
-
-// Rutas para gestión de usuarios individuales
-router.get('/users/:userId/permissions', verifyAuth, getUserPermissions);
-router.post('/users/:userId/migrate', verifyAuth, checkAdmin, migrateUserToRBAC);
+router.put('/user/:userId/role', verifyAuth, checkAdmin, updateUserRole);
+router.put('/role/:roleId/permissions', verifyAuth, checkAdmin, updateRolePermissions);
 
 export default router;
