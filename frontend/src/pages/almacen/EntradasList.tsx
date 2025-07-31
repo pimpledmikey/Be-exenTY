@@ -78,6 +78,17 @@ export default function EntradasList() {
 
   return (
     <div className="card" data-bs-theme="dark">
+      {/* Aviso de política de entradas */}
+      <div className="alert alert-info mb-0" style={{ borderRadius: '0', borderLeft: 'none', borderRight: 'none' }}>
+        <div className="d-flex align-items-center">
+          <span className="me-2">ℹ️</span>
+          <div>
+            <strong>Política de Entradas:</strong> Las entradas registradas no pueden editarse ni eliminarse. 
+            Para cualquier corrección, utilice el módulo de <strong>Ajustes de Inventario</strong>.
+          </div>
+        </div>
+      </div>
+      
       <div className="card-header">
         <h3 className="card-title">Listado de Entradas</h3>
         <div className="card-actions d-flex">
@@ -139,41 +150,11 @@ export default function EntradasList() {
                 <td>{e.date}</td>
                 <td>{e.supplier}</td>
                 <td>
-                  <div className="d-flex gap-1">
-                    <PermissionGuard
-                      module="entradas"
-                      permission="entradas_edit"
-                      action="edit"
-                      canPerform={canPerform}
-                    >
-                      <button 
-                        className="btn btn-sm btn-outline-primary" 
-                        title="Editar entrada"
-                        onClick={() => console.log('Editar', e.entry_id)}
-                      >
-                        ✏️
-                      </button>
-                    </PermissionGuard>
-                    
-                    <PermissionGuard
-                      module="entradas"
-                      permission="entradas_delete"
-                      action="delete"
-                      canPerform={canPerform}
-                    >
-                      <button 
-                        className="btn btn-sm btn-outline-danger" 
-                        title="Eliminar entrada"
-                        onClick={() => console.log('Eliminar', e.entry_id)}
-                      >
-                        🗑️
-                      </button>
-                    </PermissionGuard>
-                    
-                    {!canPerform('entradas', 'entradas_edit', 'edit') && 
-                     !canPerform('entradas', 'entradas_delete', 'delete') && (
-                      <small className="text-muted">Solo lectura</small>
-                    )}
+                  <div className="d-flex gap-1 align-items-center">
+                    <small className="text-muted">
+                      📝 Solo lectura - Para correcciones usar 
+                      <strong> Ajustes</strong>
+                    </small>
                   </div>
                 </td>
               </tr>
