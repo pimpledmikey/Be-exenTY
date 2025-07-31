@@ -12,7 +12,7 @@ export const getUsersWithRoles = async (req, res) => {
         u.name,
         u.email,
         u.theme,
-        COALESCE(g.name, g.group_name, 'Sin grupo') as group_name,
+        g.name as group_name,
         g.group_id,
         r.id as role_id,
         r.name as role_name,
