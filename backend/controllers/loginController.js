@@ -39,7 +39,7 @@ export const loginUser = async (req, res) => {
 
 export const getUserPermissions = async (req, res) => {
   try {
-    const userId = req.user.user_id;
+    const userId = req.user.user.user_id; // Corregir acceso al user_id
     
     // Obtener el role_id del usuario
     const [[user]] = await pool.query(
