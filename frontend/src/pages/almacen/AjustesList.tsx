@@ -47,7 +47,7 @@ export default function AjustesList() {
   };
 
   useEffect(() => {
-    if (!canPerform('ajustes', 'view', 'view')) {
+    if (!canPerform('ajustes', 'ajustes_view', 'view')) {
       showPermissionError('No tienes permisos para ver los ajustes');
       return;
     }
@@ -74,7 +74,7 @@ export default function AjustesList() {
           <PermissionGuard 
             canPerform={canPerform}
             module="ajustes"
-            permission="create"
+            permission="ajustes_create"
             action="create"
           >
             <button className="btn btn-success" onClick={() => setShowForm(true)}>Registrar ajuste</button>

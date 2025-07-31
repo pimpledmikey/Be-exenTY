@@ -52,7 +52,7 @@ export default function SalidasList() {
   };
 
   useEffect(() => {
-    if (!canPerform('salidas', 'view', 'view')) {
+    if (!canPerform('salidas', 'salidas_view', 'view')) {
       showPermissionError('No tienes permisos para ver las salidas');
       return;
     }
@@ -142,7 +142,7 @@ export default function SalidasList() {
                   <PermissionGuard 
                     canPerform={canPerform}
                     module="salidas"
-                    permission="edit"
+                    permission="salidas_edit"
                     action="edit"
                   >
                     <button 
@@ -156,7 +156,7 @@ export default function SalidasList() {
                   <PermissionGuard 
                     canPerform={canPerform}
                     module="salidas"
-                    permission="delete"
+                    permission="salidas_delete"
                     action="delete"
                   >
                     <button 

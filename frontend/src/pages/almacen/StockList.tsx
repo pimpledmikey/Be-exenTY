@@ -54,7 +54,7 @@ export default function StockList() {
       }
     };
     
-    if (!canPerform('stock', 'view', 'view')) {
+    if (!canPerform('stock', 'stock_view', 'view')) {
       showPermissionError('No tienes permisos para ver el stock');
       return;
     }
