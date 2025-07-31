@@ -25,7 +25,7 @@ export default function AjustesList() {
 
   // Hook para verificar permisos del usuario
   const { canPerform, loading: permissionsLoading } = usePermissions();
-  const { permissionError, showPermissionError, clearPermissionError } = usePermissionError();
+  const { permissionError, clearPermissionError } = usePermissionError();
 
   const fetchAjustes = async () => {
     setLoading(true);

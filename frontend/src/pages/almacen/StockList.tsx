@@ -22,7 +22,7 @@ export default function StockList() {
 
   // Hook para verificar permisos del usuario
   const { canPerform, loading: permissionsLoading } = usePermissions();
-  const { permissionError, showPermissionError, clearPermissionError } = usePermissionError();
+  const { permissionError, clearPermissionError } = usePermissionError();
 
   // Filtrado
   const [filtro, setFiltro] = useState('');
