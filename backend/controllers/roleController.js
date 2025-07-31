@@ -3,42 +3,35 @@ import pool from '../db.js';
 // Obtener todos los usuarios con sus roles (compatible con sistema antiguo y nuevo)
 export const getUsersWithRoles = async (req, res) => {
   try {
-    console.log('🔍 getUsersWithRoles - Iniciando...');
+    console.log('🔍 Iniciando getUsersWithRoles con JOINs corregidos...');
     
-    // Usar el mismo patrón que el controller de grupos que SÍ funciona
-    const [rows] = await pool.query(`
+    const [users] = await pool.query(`
       SELECT 
-        user_id as id,
-        username,
-        name,
-        email,
-        group_id,
-        role_id
-      FROM users 
-      ORDER BY username
+        u.user_id as id,
+        u.username,
+        u.name,
+        u.email,
+        g.name as group_name,
+        g.group_id,
+        r.id as role_id,
+        r.name as role_name,
+        r.description as role_description,
+        CASE 
+          WHEN u.role_id IS NOT NULL THEN 'rbac'
+          ELSE 'legacy'
+        END as system_type
+      FROM users u
+      LEFT JOIN groups g ON u.group_id = g.group_id
+      LEFT JOIN roles r ON u.role_id = r.id
+      ORDER BY u.username
     `);
-    
-    console.log('✅ Usuarios obtenidos:', rows.length);
-    
-    // Formatear igual que el patrón que funciona
-    const formattedUsers = rows.map(user => ({
-      id: user.id,
-      username: user.username || 'sin_username',
-      name: user.name || 'Sin nombre', 
-      email: user.email || '',
-      group_id: user.group_id,
-      role_id: user.role_id,
-      group_name: user.group_id ? `Grupo ${user.group_id}` : 'Sin grupo',
-      role_name: user.role_id ? `Rol ${user.role_id}` : 'Sin rol',
-      system_type: user.role_id ? 'rbac' : 'legacy'
-    }));
 
-    // Respuesta simple como el patrón que funciona
-    res.json(formattedUsers);
-    
+    console.log('✅ Usuarios con roles y grupos encontrados:', users.length);
+    res.json(users);
+
   } catch (error) {
-    console.error('❌ Error getUsersWithRoles:', error);
-    res.status(500).json({ error: error.message });
+    console.error('❌ Error fatal en getUsersWithRoles:', error);
+    res.status(500).json({ error: 'Error interno del servidor al obtener usuarios.', details: error.message });
   }
 };
 
