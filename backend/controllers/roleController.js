@@ -387,3 +387,65 @@ export const migrateUserToRBAC = async (req, res) => {
     connection.release();
   }
 };
+
+// Actualizar rol de un usuario
+export const updateUserRole = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { roleId } = req.body;
+    
+    console.log('🔄 Actualizando rol del usuario:', userId, 'al rol:', roleId);
+    
+    // Validar datos
+    if (!roleId) {
+      return res.status(400).json({
+        success: false,
+        message: 'roleId es requerido'
+      });
+    }
+
+    // Verificar que el usuario existe
+    const [userExists] = await pool.execute(`
+      SELECT user_id FROM users WHERE user_id = ?
+    `, [userId]);
+
+    if (userExists.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado'
+      });
+    }
+
+    // Verificar que el rol existe
+    const [roleExists] = await pool.execute(`
+      SELECT id FROM roles WHERE id = ?
+    `, [roleId]);
+
+    if (roleExists.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Rol no encontrado'
+      });
+    }
+
+    // Actualizar el rol del usuario
+    await pool.execute(`
+      UPDATE users 
+      SET role_id = ?, updated_at = CURRENT_TIMESTAMP 
+      WHERE user_id = ?
+    `, [roleId, userId]);
+
+    console.log('✅ Rol actualizado exitosamente');
+
+    res.json({
+      success: true,
+      message: 'Rol del usuario actualizado exitosamente'
+    });
+  } catch (error) {
+    console.error('❌ Error actualizando rol del usuario:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
+    });
+  }
+};
