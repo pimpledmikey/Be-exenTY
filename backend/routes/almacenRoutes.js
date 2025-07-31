@@ -1,8 +1,5 @@
 import { Router } from 'express';
 import * as almacenController from '../controllers/almacenController.js';
-import checkModuleAccess from '../middlewares/checkModuleAccess.js';
-import auth from '../middlewares/auth.js';
-import validarStock from '../middlewares/validarStock.js';
 import { verifyAuth, checkPermission } from '../middleware/authMiddleware.js';
 
 const router = Router();

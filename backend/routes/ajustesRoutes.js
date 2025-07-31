@@ -1,11 +1,10 @@
 import { Router } from 'express';
 import * as ajustesController from '../controllers/ajustesController.js';
-import checkModuleAccess from '../middlewares/checkModuleAccess.js';
-import auth from '../middlewares/auth.js';
+import { verifyAuth, checkPermission } from '../middleware/authMiddleware.js';
 
 const router = Router();
 
-router.get('/', auth, checkModuleAccess, ajustesController.getAjustes);
-router.post('/', auth, checkModuleAccess, ajustesController.createAjuste);
+router.get('/', verifyAuth, checkPermission('administracion', 'view'), ajustesController.getAjustes);
+router.post('/', verifyAuth, checkPermission('administracion', 'create'), ajustesController.createAjuste);
 
 export default router;

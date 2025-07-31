@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { checkPermisoModulo } from '../controllers/permisosController.js';
-import auth from '../middlewares/auth.js';
+import { verifyAuth } from '../middleware/authMiddleware.js';
 
 const router = Router();
 
-router.post('/', auth, checkPermisoModulo);
+router.post('/', verifyAuth, checkPermisoModulo);
 
 export default router;
