@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import ArticuloForm from './ArticuloForm';
+import { usePermissions } from '../../hooks/usePermissions';
+import { PermissionAlert, PermissionGuard } from '../../components/PermissionComponents';
+import { usePermissionError, fetchWithPermissions } from '../../utils/permissionUtils';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -28,6 +31,10 @@ export default function ArticulosList() {
   const [alerta, setAlerta] = useState<{ tipo: 'success' | 'danger'; mensaje: string } | null>(null);
   const [articuloAEliminar, setArticuloAEliminar] = useState<Articulo | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
+  
+  // Hook para verificar permisos del usuario
+  const { canPerform, loading: permissionsLoading } = usePermissions();
+  const { permissionError, showPermissionError, clearPermissionError } = usePermissionError();
   // Catálogos para mostrar nombres
   const [medidas, setMedidas] = useState<{ measure_code: string; measure_name: string }[]>([]);
   const [unidades, setUnidades] = useState<{ unit_code: string; unit_name: string }[]>([]);

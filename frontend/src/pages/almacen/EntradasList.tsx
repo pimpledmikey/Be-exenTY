@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import EntradaForm from './EntradaForm';
 import { usePermissions } from '../../hooks/usePermissions';
+import { PermissionAlert, PermissionGuard } from '../../components/PermissionComponents';
+import { usePermissionError, fetchWithPermissions } from '../../utils/permissionUtils';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -24,6 +26,7 @@ export default function EntradasList() {
   
   // Hook para verificar permisos del usuario
   const { canPerform, loading: permissionsLoading } = usePermissions();
+  const { permissionError, showPermissionError, clearPermissionError } = usePermissionError();
 
   // Paginación y filtrado
   const [pagina, setPagina] = useState(1);
@@ -39,12 +42,13 @@ export default function EntradasList() {
   const fetchEntradas = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/almacen/entradas`, {
+      const res = await fetchWithPermissions(`${API_URL}/almacen/entradas`, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
-      });
+      }, showPermissionError);
+      
       if (!res.ok) throw new Error('Error al cargar entradas');
       const data = await res.json();
       setEntradas(data.map((e: any) => ({ ...e, article_id: String(e.article_id) })));
@@ -85,11 +89,25 @@ export default function EntradasList() {
             value={filtro}
             onChange={e => { setFiltro(e.target.value); setPagina(1); }}
           />
-          {canPerform('entradas', 'entradas_create', 'create') && (
+          <PermissionGuard
+            module="entradas"
+            permission="entradas_create"
+            action="create"
+            canPerform={canPerform}
+          >
             <button className="btn btn-success" onClick={() => { setShowForm(true); }}>Crear entrada</button>
-          )}
+          </PermissionGuard>
         </div>
       </div>
+      {permissionError && (
+        <PermissionAlert 
+          show={true}
+          onClose={clearPermissionError}
+          action="acceder a esta información"
+          module="entradas"
+        />
+      )}
+      
       {alerta && (
         <div className="card-alert alert alert-success mb-0">
           {alerta.mensaje}
@@ -122,7 +140,12 @@ export default function EntradasList() {
                 <td>{e.supplier}</td>
                 <td>
                   <div className="d-flex gap-1">
-                    {canPerform('entradas', 'entradas_edit', 'edit') && (
+                    <PermissionGuard
+                      module="entradas"
+                      permission="entradas_edit"
+                      action="edit"
+                      canPerform={canPerform}
+                    >
                       <button 
                         className="btn btn-sm btn-outline-primary" 
                         title="Editar entrada"
@@ -130,8 +153,14 @@ export default function EntradasList() {
                       >
                         ✏️
                       </button>
-                    )}
-                    {canPerform('entradas', 'entradas_delete', 'delete') && (
+                    </PermissionGuard>
+                    
+                    <PermissionGuard
+                      module="entradas"
+                      permission="entradas_delete"
+                      action="delete"
+                      canPerform={canPerform}
+                    >
                       <button 
                         className="btn btn-sm btn-outline-danger" 
                         title="Eliminar entrada"
@@ -139,10 +168,11 @@ export default function EntradasList() {
                       >
                         🗑️
                       </button>
-                    )}
+                    </PermissionGuard>
+                    
                     {!canPerform('entradas', 'entradas_edit', 'edit') && 
                      !canPerform('entradas', 'entradas_delete', 'delete') && (
-                      <small className="text-muted">Sin permisos</small>
+                      <small className="text-muted">Solo lectura</small>
                     )}
                   </div>
                 </td>
