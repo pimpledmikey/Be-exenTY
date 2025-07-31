@@ -3,6 +3,8 @@ import pool from '../db.js';
 // Obtener todos los usuarios con sus roles (compatible con sistema antiguo y nuevo)
 export const getUsersWithRoles = async (req, res) => {
   try {
+    console.log('🔍 getUsersWithRoles - Iniciando consulta...');
+    
     const [users] = await pool.execute(`
       SELECT 
         u.user_id as id,
@@ -10,7 +12,7 @@ export const getUsersWithRoles = async (req, res) => {
         u.name,
         u.email,
         u.theme,
-        g.name as group_name,
+        COALESCE(g.name, g.group_name, 'Sin grupo') as group_name,
         g.group_id,
         r.id as role_id,
         r.name as role_name,
@@ -24,6 +26,9 @@ export const getUsersWithRoles = async (req, res) => {
       LEFT JOIN roles r ON u.role_id = r.id
       ORDER BY u.username
     `);
+
+    console.log('✅ getUsersWithRoles - Usuarios encontrados:', users.length);
+    console.log('🔍 Primer usuario:', users[0]);
 
     res.json({
       success: true,
