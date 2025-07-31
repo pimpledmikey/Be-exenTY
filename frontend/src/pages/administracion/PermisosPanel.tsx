@@ -91,10 +91,9 @@ const PermisosPanel: React.FC = () => {
       });
       const data = await response.json();
       
-      if (data.success) {
-        setRolePermissions(data.data);
-        setSelectedRole(roleId);
-      }
+      // La respuesta viene directamente como array, no con wrapper success/data
+      setRolePermissions(data);
+      setSelectedRole(roleId);
     } catch (error) {
       console.error('Error cargando permisos del rol:', error);
     }
@@ -133,7 +132,7 @@ const PermisosPanel: React.FC = () => {
 
       const data = await response.json();
       
-      if (data.success) {
+      if (response.ok && (data.success !== false)) {
         // Actualizar el estado local
         setRolePermissions(prev => {
           const filtered = prev.filter(
@@ -143,7 +142,7 @@ const PermisosPanel: React.FC = () => {
         });
         setMessage({ type: 'success', text: 'Permiso actualizado correctamente' });
       } else {
-        setMessage({ type: 'error', text: data.message || 'Error al actualizar permiso' });
+        setMessage({ type: 'error', text: data.message || data.error || 'Error al actualizar permiso' });
       }
     } catch (error) {
       console.error('Error actualizando permiso:', error);
