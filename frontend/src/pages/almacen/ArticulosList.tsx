@@ -65,13 +65,14 @@ export default function ArticulosList() {
   const fetchArticulos = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/almacen/articulos`, {
+      const res = await fetchWithPermissions(`${API_URL}/almacen/articulos`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
-      });
+      }, showPermissionError);
+      
       if (!res.ok) throw new Error('Error al cargar artículos');
       const data = await res.json();
       setArticulos(data.map((a: any) => ({ ...a, article_id: String(a.article_id) })));
@@ -97,13 +98,14 @@ export default function ArticulosList() {
   const eliminarArticulo = async () => {
     if (!articuloAEliminar) return;
     try {
-      const res = await fetch(`${API_URL}/almacen/articulos/${articuloAEliminar.article_id}`, {
+      const res = await fetchWithPermissions(`${API_URL}/almacen/articulos/${articuloAEliminar.article_id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
-      });
+      }, showPermissionError);
+      
       if (!res.ok) throw new Error('Error al eliminar artículo');
       setAlerta({ tipo: 'success', mensaje: 'Artículo eliminado correctamente' });
       fetchArticulos();
@@ -115,8 +117,18 @@ export default function ArticulosList() {
     }
   };
 
-  if (loading) return <div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando artículos...</span></div>;
+  if (loading || permissionsLoading) return <div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando artículos...</span></div>;
   if (error) return <div className="alert alert-danger">Error: {error}</div>;
+  
+  // Verificar si el usuario tiene permisos para ver artículos
+  if (!canPerform('almacen', 'almacen_view', 'view')) {
+    return (
+      <div className="alert alert-warning">
+        <h4>Sin permisos</h4>
+        <p>No tienes permisos para ver el catálogo de artículos. Contacta al administrador.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="card" data-bs-theme="dark">
@@ -131,11 +143,27 @@ export default function ArticulosList() {
             value={filtro}
             onChange={e => { setFiltro(e.target.value); setPagina(1); }}
           />
-          <button className="btn btn-success" onClick={() => { setEditArticulo(null); setShowForm(true); }}>
-            Crear Artículo
-          </button>
+          <PermissionGuard
+            module="almacen"
+            permission="almacen_create"
+            action="create"
+            canPerform={canPerform}
+          >
+            <button className="btn btn-success" onClick={() => { setEditArticulo(null); setShowForm(true); }}>
+              Crear Artículo
+            </button>
+          </PermissionGuard>
         </div>
       </div>
+      {permissionError && (
+        <PermissionAlert 
+          show={true}
+          onClose={clearPermissionError}
+          action="realizar esta acción"
+          module="artículos"
+        />
+      )}
+      
       {alerta && (
         <div className={`card-alert alert alert-${alerta.tipo} mb-0`}>
           {alerta.mensaje}
@@ -171,12 +199,34 @@ export default function ArticulosList() {
                 <td>{a.supplier_code || '-'}</td>
                 <td>{a.supplier_name || '-'}</td>
                 <td className="text-end">
-                  <button className="btn btn-primary btn-sm me-2" onClick={() => { setEditArticulo(a); setShowForm(true); }}>
-                    Editar
-                  </button>
-                  <button className="btn btn-danger btn-sm" onClick={() => { setArticuloAEliminar(a); setShowConfirm(true); }}>
-                    Eliminar
-                  </button>
+                  <div className="d-flex gap-1 justify-content-end">
+                    <PermissionGuard
+                      module="almacen"
+                      permission="almacen_edit"
+                      action="edit"
+                      canPerform={canPerform}
+                    >
+                      <button className="btn btn-primary btn-sm" onClick={() => { setEditArticulo(a); setShowForm(true); }}>
+                        Editar
+                      </button>
+                    </PermissionGuard>
+                    
+                    <PermissionGuard
+                      module="almacen"
+                      permission="almacen_delete"
+                      action="delete"
+                      canPerform={canPerform}
+                    >
+                      <button className="btn btn-danger btn-sm" onClick={() => { setArticuloAEliminar(a); setShowConfirm(true); }}>
+                        Eliminar
+                      </button>
+                    </PermissionGuard>
+                    
+                    {!canPerform('almacen', 'almacen_edit', 'edit') && 
+                     !canPerform('almacen', 'almacen_delete', 'delete') && (
+                      <small className="text-muted">Solo lectura</small>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}

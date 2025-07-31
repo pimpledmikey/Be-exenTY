@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import SalidaForm from './SalidaForm';
+import { usePermissions } from '../../hooks/usePermissions';
+import { PermissionAlert, PermissionGuard } from '../../components/PermissionComponents';
+import { usePermissionError, fetchWithPermissions } from '../../utils/permissionUtils';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -20,6 +23,11 @@ export default function SalidasList() {
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [alerta, setAlerta] = useState<{ tipo: 'success' | 'danger'; mensaje: string } | null>(null);
+  
+  // Hook para verificar permisos del usuario
+  const { canPerform, loading: permissionsLoading } = usePermissions();
+  const { permissionError, showPermissionError, clearPermissionError } = usePermissionError();
+  
   // Filtro
   const [filtro, setFiltro] = useState('');
 
