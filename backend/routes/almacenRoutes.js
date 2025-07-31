@@ -16,7 +16,7 @@ router.post('/entradas', verifyAuth, checkPermission('entradas', 'create'), alma
 
 // Rutas de salidas con permisos granulares
 router.get('/salidas', verifyAuth, checkPermission('salidas', 'view'), almacenController.getSalidas);
-router.post('/salidas', verifyAuth, checkPermission('salidas', 'create'), validarStock, almacenController.createSalida);
+router.post('/salidas', verifyAuth, checkPermission('salidas', 'create'), almacenController.createSalida);
 
 // Rutas de consulta (solo requieren permisos de vista)
 router.get('/stock', verifyAuth, checkPermission('almacen', 'view'), almacenController.getStock);
