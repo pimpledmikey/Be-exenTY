@@ -28,18 +28,20 @@ export const verifyAuth = async (req, res, next) => {
 export const checkPermission = (module, action) => {
   return async (req, res, next) => {
     try {
-      console.log('🔍 checkPermission - Usuario:', req.user);
+      console.log('🔍 checkPermission - req.user completo:', JSON.stringify(req.user, null, 2));
       console.log('🔍 checkPermission - Módulo:', module, 'Acción:', action);
       
-      const userId = req.user.user_id;
+      const userId = req.user.user?.user_id || req.user.user_id;
       
       if (!userId) {
-        console.error('❌ checkPermission - user_id no encontrado en req.user');
+        console.error('❌ checkPermission - user_id no encontrado. Estructura req.user:', req.user);
         return res.status(403).json({
           success: false,
           message: 'Usuario no válido'
         });
       }
+      
+      console.log('🔍 checkPermission - userId extraído:', userId);
       
       // Obtener permisos del usuario
       const [userPermissions] = await pool.execute(`
@@ -108,11 +110,11 @@ export const checkPermission = (module, action) => {
 // Middleware para verificar si es administrador
 export const checkAdmin = async (req, res, next) => {
   try {
-    console.log('🔍 checkAdmin - Usuario:', req.user);
-    const userId = req.user.user_id;
+    console.log('🔍 checkAdmin - req.user completo:', JSON.stringify(req.user, null, 2));
+    const userId = req.user.user?.user_id || req.user.user_id;
     
     if (!userId) {
-      console.error('❌ checkAdmin - user_id no encontrado en req.user');
+      console.error('❌ checkAdmin - user_id no encontrado. Estructura req.user:', req.user);
       return res.status(403).json({
         success: false,
         message: 'Usuario no válido'
