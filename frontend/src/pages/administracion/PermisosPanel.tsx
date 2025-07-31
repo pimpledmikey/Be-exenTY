@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Button, Form, Alert, Badge, Spinner } from 'react-bootstrap';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 interface User {
   id: number;
   username: string;
@@ -54,21 +56,21 @@ const PermisosPanel: React.FC = () => {
         'Content-Type': 'application/json'
       };
 
-      // Cargar usuarios con roles
-      const usersResponse = await fetch('/api/roles/users', { headers });
-      const usersData = await usersResponse.json();
-      
-      // Cargar roles
-      const rolesResponse = await fetch('/api/roles', { headers });
-      const rolesData = await rolesResponse.json();
-      
-      // Cargar permisos
-      const permissionsResponse = await fetch('/api/roles/permissions', { headers });
+            // Cargar usuarios con roles
+      const usersResponse = await fetch(`${API_URL}/roles/users`, { headers });
+      const users = await usersResponse.json();
+      setUsers(users);
+
+      const rolesResponse = await fetch(`${API_URL}/roles`, { headers });
+      const roles = await rolesResponse.json();
+      setRoles(roles);
+
+      const permissionsResponse = await fetch(`${API_URL}/roles/permissions`, { headers });
       const permissionsData = await permissionsResponse.json();
 
-      if (usersData.success) setUsers(usersData.data);
-      if (rolesData.success) setRoles(rolesData.data);
-      if (permissionsData.success) setPermissions(permissionsData.data);
+      setUsers(users);
+      setRoles(roles);
+      setPermissions(permissionsData);
 
     } catch (error) {
       console.error('Error cargando datos:', error);
@@ -81,7 +83,7 @@ const PermisosPanel: React.FC = () => {
   const loadRolePermissions = async (roleId: number) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/roles/${roleId}/permissions`, {
+      const response = await fetch(`${API_URL}/roles/${roleId}/permissions`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -120,7 +122,7 @@ const PermisosPanel: React.FC = () => {
         [action]: value
       };
 
-      const response = await fetch('/api/roles/permissions', {
+      const response = await fetch(`${API_URL}/roles/permissions`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
