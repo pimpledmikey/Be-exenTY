@@ -36,3 +36,46 @@ export const loginUser = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const getUserPermissions = async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+    
+    // Obtener el role_id del usuario
+    const [[user]] = await pool.query(
+      'SELECT role_id FROM users WHERE user_id = ?', 
+      [userId]
+    );
+    
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    
+    // Obtener todos los permisos del rol del usuario
+    const [permissions] = await pool.query(`
+      SELECT p.module, p.name, rp.can_view, rp.can_create, rp.can_edit, rp.can_delete
+      FROM role_permissions rp
+      JOIN permissions p ON rp.permission_id = p.id
+      WHERE rp.role_id = ?
+    `, [user.role_id]);
+    
+    // Organizar permisos por módulo
+    const userPermissions = {};
+    permissions.forEach(perm => {
+      if (!userPermissions[perm.module]) {
+        userPermissions[perm.module] = {};
+      }
+      userPermissions[perm.module][perm.name] = {
+        can_view: Boolean(perm.can_view),
+        can_create: Boolean(perm.can_create),
+        can_edit: Boolean(perm.can_edit),
+        can_delete: Boolean(perm.can_delete)
+      };
+    });
+    
+    res.json(userPermissions);
+  } catch (error) {
+    console.error('Error obteniendo permisos del usuario:', error);
+    res.status(500).json({ error: error.message });
+  }
+};

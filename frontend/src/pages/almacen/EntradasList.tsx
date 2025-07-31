@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import EntradaForm from './EntradaForm';
+import { usePermissions } from '../../hooks/usePermissions';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -20,6 +21,9 @@ export default function EntradasList() {
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [alerta, setAlerta] = useState<{ tipo: 'success' | 'danger'; mensaje: string } | null>(null);
+  
+  // Hook para verificar permisos del usuario
+  const { canPerform, loading: permissionsLoading } = usePermissions();
 
   // Paginación y filtrado
   const [pagina, setPagina] = useState(1);
@@ -55,8 +59,18 @@ export default function EntradasList() {
     fetchEntradas();
   }, []);
 
-  if (loading) return <div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando entradas...</span></div>;
+  if (loading || permissionsLoading) return <div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando entradas...</span></div>;
   if (error) return <div className="alert alert-danger">Error: {error}</div>;
+  
+  // Verificar si el usuario tiene permisos para ver entradas
+  if (!canPerform('entradas', 'entradas_view', 'view')) {
+    return (
+      <div className="alert alert-warning">
+        <h4>Sin permisos</h4>
+        <p>No tienes permisos para ver las entradas de inventario. Contacta al administrador.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="card" data-bs-theme="dark">
@@ -71,7 +85,9 @@ export default function EntradasList() {
             value={filtro}
             onChange={e => { setFiltro(e.target.value); setPagina(1); }}
           />
-          <button className="btn btn-success" onClick={() => { setShowForm(true); }}>Crear entrada</button>
+          {canPerform('entradas', 'entradas_create', 'create') && (
+            <button className="btn btn-success" onClick={() => { setShowForm(true); }}>Crear entrada</button>
+          )}
         </div>
       </div>
       {alerta && (
@@ -91,7 +107,6 @@ export default function EntradasList() {
               <th>Factura</th>
               <th>Fecha</th>
               <th>Proveedor</th>
-              {/* Acciones deshabilitadas por política */}
               <th>Acciones</th>
             </tr>
           </thead>
@@ -106,7 +121,30 @@ export default function EntradasList() {
                 <td>{e.date}</td>
                 <td>{e.supplier}</td>
                 <td>
-                  {/* <button className="btn btn-sm btn-outline-primary">Editar</button> */}
+                  <div className="d-flex gap-1">
+                    {canPerform('entradas', 'entradas_edit', 'edit') && (
+                      <button 
+                        className="btn btn-sm btn-outline-primary" 
+                        title="Editar entrada"
+                        onClick={() => console.log('Editar', e.entry_id)}
+                      >
+                        ✏️
+                      </button>
+                    )}
+                    {canPerform('entradas', 'entradas_delete', 'delete') && (
+                      <button 
+                        className="btn btn-sm btn-outline-danger" 
+                        title="Eliminar entrada"
+                        onClick={() => console.log('Eliminar', e.entry_id)}
+                      >
+                        🗑️
+                      </button>
+                    )}
+                    {!canPerform('entradas', 'entradas_edit', 'edit') && 
+                     !canPerform('entradas', 'entradas_delete', 'delete') && (
+                      <small className="text-muted">Sin permisos</small>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
