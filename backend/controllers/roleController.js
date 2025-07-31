@@ -5,34 +5,44 @@ export const getUsersWithRoles = async (req, res) => {
   try {
     console.log('🔍 getUsersWithRoles - Iniciando consulta...');
     
-    const [users] = await pool.execute(`
+    // Primero, una consulta muy simple para ver si hay usuarios
+    const [testUsers] = await pool.execute(`SELECT COUNT(*) as total FROM users`);
+    console.log('🔍 Total usuarios en DB:', testUsers[0].total);
+    
+    // Consulta simple sin JOINs para debugging
+    const [basicUsers] = await pool.execute(`
       SELECT 
         u.user_id as id,
         u.username,
         u.name,
         u.email,
-        u.theme,
-        g.name as group_name,
-        g.group_id,
-        r.id as role_id,
-        r.name as role_name,
-        r.description as role_description,
-        CASE 
-          WHEN r.id IS NOT NULL THEN 'rbac'
-          ELSE 'legacy'
-        END as system_type
+        u.group_id,
+        u.role_id
       FROM users u
-      LEFT JOIN groups g ON u.group_id = g.group_id
-      LEFT JOIN roles r ON u.role_id = r.id
       ORDER BY u.username
+      LIMIT 10
     `);
+    
+    console.log('✅ Usuarios básicos obtenidos:', basicUsers.length);
+    if (basicUsers.length > 0) {
+      console.log('🔍 Primer usuario básico:', basicUsers[0]);
+    }
 
-    console.log('✅ getUsersWithRoles - Usuarios encontrados:', users.length);
-    console.log('🔍 Primer usuario:', users[0]);
-
+    // Respuesta simple para debugging
     res.json({
       success: true,
-      data: users,
+      data: basicUsers.map(user => ({
+        id: user.id,
+        username: user.username,
+        name: user.name || 'Sin nombre',
+        email: user.email || 'Sin email',
+        group_name: `Grupo ${user.group_id}`,
+        group_id: user.group_id,
+        role_id: user.role_id,
+        role_name: user.role_id ? `Rol ${user.role_id}` : 'Sin rol',
+        role_description: 'Descripción pendiente',
+        system_type: user.role_id ? 'rbac' : 'legacy'
+      })),
       message: 'Usuarios obtenidos exitosamente'
     });
   } catch (error) {
