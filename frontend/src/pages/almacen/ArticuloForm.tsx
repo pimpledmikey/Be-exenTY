@@ -186,7 +186,7 @@ const ArticuloForm: React.FC<ArticuloFormProps> = ({ articulo, onClose }) => {
   };
 
   return (
-    <div>
+    <div data-bs-theme="dark">
       {!articulo?.article_id && (
         <div className="alert alert-info mb-3">
           <h6 className="alert-heading">📋 Nomenclatura de Códigos</h6>

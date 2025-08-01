@@ -9,6 +9,8 @@ import CambiarPassword from './pages/seguridad/CambiarPassword';
 import GoogleCalendarPage from './pages/GoogleCalendarPage';
 import CatalogosMenu from './pages/almacen/CatalogosMenu';
 import PermisosPanel from './pages/administracion/PermisosPanel';
+import ThemeToggle from './components/ThemeToggle';
+import { useTheme } from './hooks/useTheme';
 import logoBeExEn from './assets/logoBeExEn.png';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -177,6 +179,14 @@ function Dashboard({ user }: { user: any }) {
 	const [openAlmacenNavbar, setOpenAlmacenNavbar] = useState(false);
 	const [openAlmacenSidebar, setOpenAlmacenSidebar] = useState(false);
 	const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+	
+	// Inicializar tema
+	const { theme } = useTheme();
+	
+	// Aplicar tema al cargar
+	useEffect(() => {
+		document.documentElement.setAttribute('data-bs-theme', theme);
+	}, [theme]);
 
 	const sidebarItems = [
 		{
@@ -416,7 +426,7 @@ function Dashboard({ user }: { user: any }) {
 										objectFit: 'contain'
 									}} 
 								/>
-							</div>
+							</div>														 
 							<div>
 								<span style={{ 
 									fontWeight: 700, 
@@ -498,6 +508,10 @@ function Dashboard({ user }: { user: any }) {
 							<div style={{ fontSize: 14 }}>{user?.username || 'Usuario'}</div>
 							<div className="mt-1 small text-secondary">{user?.group || 'Rol'}</div>
 						</div>
+						
+						{/* Theme Toggle */}
+						<ThemeToggle className="ms-2" />
+						
 						<a
 							href="#"
 							className="btn btn-danger ms-2 ms-md-4 btn-sm d-md-none"

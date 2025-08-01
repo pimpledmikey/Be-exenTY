@@ -102,3 +102,27 @@ export const getCurrentUser = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const updateUserTheme = async (req, res) => {
+  try {
+    const userId = req.user.user.user_id;
+    const { theme } = req.body;
+    
+    // Validar tema
+    if (!['dark', 'light'].includes(theme)) {
+      return res.status(400).json({ error: 'Tema no válido' });
+    }
+    
+    // Actualizar tema en la base de datos
+    await pool.query(
+      'UPDATE users SET theme = ? WHERE user_id = ?',
+      [theme, userId]
+    );
+    
+    console.log(`[THEME] Usuario ${userId} cambió tema a: ${theme}`);
+    res.json({ message: 'Tema actualizado correctamente', theme });
+  } catch (error) {
+    console.error('Error actualizando tema del usuario:', error);
+    res.status(500).json({ error: error.message });
+  }
+};

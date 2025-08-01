@@ -266,9 +266,9 @@ export default function ArticulosList() {
       </ResponsiveLayout>
       
       {showForm && (
-        <div className="modal modal-blur fade show" style={{ display: 'block' }}>
+        <div className="modal modal-blur fade show" style={{ display: 'block' }} data-bs-theme="dark">
           <div className="modal-dialog modal-xl modal-dialog-centered">
-            <div className="modal-content">
+            <div className="modal-content bg-dark">
               <div className="modal-header">
                 <h5 className="modal-title">{editArticulo ? 'Editar Artículo' : 'Crear Artículo'}</h5>
                 <button type="button" className="btn-close" onClick={() => setShowForm(false)}></button>
@@ -282,9 +282,9 @@ export default function ArticulosList() {
       )}
       
       {showConfirm && (
-        <div className="modal modal-blur fade show" style={{ display: 'block' }}>
+        <div className="modal modal-blur fade show" style={{ display: 'block' }} data-bs-theme="dark">
           <div className="modal-dialog modal-sm modal-dialog-centered">
-            <div className="modal-content">
+            <div className="modal-content bg-dark">
               <div className="modal-body text-center py-4">
                 <h3>¿Estás seguro?</h3>
                 <p>¿Realmente quieres eliminar el artículo "{articuloAEliminar?.name}"?</p>
