@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Button, Form, Alert, Badge, Spinner } from 'react-bootstrap';
+import { useTheme } from '../../hooks/useTheme';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -41,6 +42,7 @@ interface RolePermission {
 }
 
 const PermisosPanel: React.FC = () => {
+  const { theme } = useTheme();
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
@@ -217,7 +219,7 @@ const PermisosPanel: React.FC = () => {
           <div className="row row-deck row-cards">
             {/* Lista de Roles */}
             <div className="col-md-4">
-              <Card>
+              <Card data-bs-theme={theme}>
                 <Card.Header>
                   <Card.Title>Gestión de Roles</Card.Title>
                   <div className="text-muted small">
@@ -236,7 +238,15 @@ const PermisosPanel: React.FC = () => {
                                 <h6 className="mb-1">{role.name}</h6>
                                 <small className="text-muted">{role.description}</small>
                               </div>
-                              <Badge bg="info" className="ms-2">
+                              <Badge 
+                                bg={theme === 'light' ? 'info' : 'info'} 
+                                className="ms-2"
+                                style={{ 
+                                  color: theme === 'light' ? '#000' : '#fff', 
+                                  fontWeight: 500,
+                                  backgroundColor: theme === 'light' ? '#d1ecf1' : '#0dcaf0'
+                                }}
+                              >
                                 {usersWithRole.length} {usersWithRole.length === 1 ? 'usuario' : 'usuarios'}
                               </Badge>
                             </div>
@@ -246,7 +256,17 @@ const PermisosPanel: React.FC = () => {
                                 <small className="text-muted">Usuarios:</small>
                                 <div className="mt-1">
                                   {usersWithRole.map(user => (
-                                    <Badge key={user.id} bg="light" text="dark" className="me-1 mb-1">
+                                    <Badge 
+                                      key={user.id} 
+                                      bg={theme === 'light' ? 'light' : 'secondary'} 
+                                      className="me-1 mb-1"
+                                      style={{ 
+                                        color: theme === 'light' ? '#000' : '#fff', 
+                                        fontWeight: 500, 
+                                        border: theme === 'light' ? '1px solid #dee2e6' : '1px solid #495057',
+                                        backgroundColor: theme === 'light' ? '#f8f9fa' : '#6c757d'
+                                      }}
+                                    >
                                       {user.username}
                                     </Badge>
                                   ))}
@@ -273,12 +293,20 @@ const PermisosPanel: React.FC = () => {
 
             {/* Panel de Permisos */}
             <div className="col-md-8">
-              <Card>
+              <Card data-bs-theme={theme}>
                 <Card.Header>
                   <Card.Title>
                     Configuración de Permisos
                     {selectedRole && (
-                      <Badge bg="primary" className="ms-2">
+                      <Badge 
+                        bg="primary" 
+                        className="ms-2"
+                        style={{ 
+                          color: '#fff', 
+                          fontWeight: 500,
+                          backgroundColor: theme === 'light' ? '#0d6efd' : '#0d6efd'
+                        }}
+                      >
                         {roles.find(r => r.id === selectedRole)?.name}
                       </Badge>
                     )}

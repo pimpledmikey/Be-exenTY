@@ -41,7 +41,7 @@ function DashboardHome() {
 					totalStock: dataFixed.reduce((acc: number, a: any) => acc + a.stock, 0)
 				});
 				// Entradas
-				const resEntradas = await fetch(`${API_URL}/almacen/entradas`, {
+				const resEntradas = await fetch(`${API_URL}/almacen/entradas`, {	         
 					headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
 				});
 				if (!resEntradas.ok) throw new Error('Error al cargar entradas');
@@ -435,7 +435,7 @@ function Dashboard({ user }: { user: any }) {
 									letterSpacing: '0.8px',
 									textShadow: '0 1px 2px rgba(0,0,0,0.1)'
 								}}>
-									Be-ExEn
+									Be-Exen
 								</span>
 							</div>
 						</div>
