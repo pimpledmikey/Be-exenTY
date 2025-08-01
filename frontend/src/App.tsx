@@ -9,6 +9,7 @@ import CambiarPassword from './pages/seguridad/CambiarPassword';
 import GoogleCalendarPage from './pages/GoogleCalendarPage';
 import CatalogosMenu from './pages/almacen/CatalogosMenu';
 import PermisosPanel from './pages/administracion/PermisosPanel';
+import logoBeExEn from './assets/logoBeExEn.png';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -380,8 +381,49 @@ function Dashboard({ user }: { user: any }) {
 					style={{ height: 64 }}
 				>
 					<div className="d-flex align-items-center">
-						{/* Cambiar logo por texto Be-exen */}
-						<span style={{ fontWeight: 700, fontSize: 24, color: '#fff', letterSpacing: 1, marginRight: 24 }}>Be-exen</span>
+						{/* Logo y nombre de Be-ExEn */}
+						<div className="d-flex align-items-center gap-3 me-4">
+							<div style={{
+								height: 40,
+								width: 40,
+								borderRadius: '8px',
+								background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)',
+								padding: '4px',
+								display: 'flex',
+								alignItems: 'center',
+								justifyContent: 'center',
+								boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+							}}>
+								<img 
+									src={logoBeExEn} 
+									alt="Be-ExEn Logo" 
+									style={{ 
+										height: '100%', 
+										width: '100%',
+										objectFit: 'contain'
+									}} 
+								/>
+							</div>
+							<div>
+								<span style={{ 
+									fontWeight: 700, 
+									fontSize: 22, 
+									color: '#fff', 
+									letterSpacing: '0.8px',
+									textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+								}}>
+									Be-ExEn
+								</span>
+								<div style={{
+									fontSize: 10,
+									color: 'rgba(255,255,255,0.7)',
+									fontWeight: 400,
+									marginTop: '-2px'
+								}}>
+									Sistema de Gestión
+								</div>
+							</div>
+						</div>
 						<ul className="navbar-nav flex-row d-none d-md-flex">
 							{sidebarItems.map(item => (
 								item.children ? (
