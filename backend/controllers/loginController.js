@@ -79,3 +79,26 @@ export const getUserPermissions = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const getCurrentUser = async (req, res) => {
+  try {
+    const userId = req.user.user.user_id;
+    
+    // Obtener información completa del usuario con su rol
+    const [[userInfo]] = await pool.query(`
+      SELECT u.user_id, u.username, u.role_id, r.name as role_name
+      FROM users u
+      JOIN roles r ON u.role_id = r.id
+      WHERE u.user_id = ?
+    `, [userId]);
+    
+    if (!userInfo) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    
+    res.json(userInfo);
+  } catch (error) {
+    console.error('Error obteniendo información del usuario:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
