@@ -3,6 +3,8 @@ import ArticuloForm from './ArticuloForm';
 import { usePermissions } from '../../hooks/usePermissions';
 import { PermissionAlert, PermissionGuard } from '../../components/PermissionComponents';
 import { usePermissionError, fetchWithPermissions } from '../../utils/permissionUtils';
+import ResponsiveTable from '../../components/ResponsiveTable';
+import ResponsiveLayout from '../../components/ResponsiveLayout';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -130,109 +132,139 @@ export default function ArticulosList() {
     );
   }
 
-  return (
-    <div className="card" data-bs-theme="dark">
-      <div className="card-header">
-        <h3 className="card-title">Catálogo de Artículos</h3>
-        <div className="card-actions d-flex">
-          <input
-            type="text"
-            className="form-control me-2"
-            style={{maxWidth: 300}}
-            placeholder="Buscar artículo..."
-            value={filtro}
-            onChange={e => { setFiltro(e.target.value); setPagina(1); }}
-          />
+  // Preparar columnas para la tabla responsive
+  const columns = [
+    { key: 'code', label: 'Código', hideOnMobile: false },
+    { key: 'name', label: 'Nombre', hideOnMobile: false },
+    { 
+      key: 'measure_code', 
+      label: 'Medida', 
+      hideOnMobile: true,
+      render: (value: string) => medidas.find(m => m.measure_code === value)?.measure_name || value
+    },
+    { 
+      key: 'unit_code', 
+      label: 'Unidad', 
+      hideOnMobile: true,
+      render: (value: string) => unidades.find(u => u.unit_code === value)?.unit_name || value
+    },
+    { key: 'min_stock', label: 'Stock Mín.', hideOnMobile: true },
+    { key: 'max_stock', label: 'Stock Máx.', hideOnMobile: true },
+    { 
+      key: 'status', 
+      label: 'Estado', 
+      hideOnMobile: false,
+      render: (value: string) => (
+        <span className={`badge ${value === 'Activo' ? 'bg-success' : 'bg-danger'} text-black`}>
+          {value}
+        </span>
+      )
+    },
+    { key: 'supplier_code', label: 'Cód. Proveedor', hideOnMobile: true },
+    { key: 'supplier_name', label: 'Proveedor', hideOnMobile: true },
+    { 
+      key: 'actions', 
+      label: 'Acciones', 
+      hideOnMobile: false,
+      className: 'w-1',
+      render: (_: any, row: Articulo) => (
+        <div className="d-flex gap-1 justify-content-end flex-wrap">
           <PermissionGuard
             module="almacen"
-            permission="almacen_create"
-            action="create"
+            permission="almacen_edit"
+            action="edit"
             canPerform={canPerform}
           >
-            <button className="btn btn-success" onClick={() => { setEditArticulo(null); setShowForm(true); }}>
-              Crear Artículo
+            <button 
+              className="btn btn-primary btn-sm" 
+              onClick={() => { setEditArticulo(row); setShowForm(true); }}
+            >
+              Editar
             </button>
           </PermissionGuard>
+          
+          <PermissionGuard
+            module="almacen"
+            permission="almacen_delete"
+            action="delete"
+            canPerform={canPerform}
+          >
+            <button 
+              className="btn btn-danger btn-sm" 
+              onClick={() => { setArticuloAEliminar(row); setShowConfirm(true); }}
+            >
+              Eliminar
+            </button>
+          </PermissionGuard>
+          
+          {!canPerform('almacen', 'almacen_edit', 'edit') && 
+           !canPerform('almacen', 'almacen_delete', 'delete') && (
+            <small className="text-muted">Solo lectura</small>
+          )}
         </div>
-      </div>
-      {permissionError && (
-        <PermissionAlert 
-          show={true}
-          onClose={clearPermissionError}
-          action="realizar esta acción"
-          module="artículos"
+      )
+    }
+  ];
+
+  return (
+    <>
+      <ResponsiveLayout
+        title="Catálogo de Artículos"
+        actions={
+          <div className="d-flex flex-wrap gap-2 w-100 w-md-auto">
+            <input
+              type="text"
+              className="form-control flex-grow-1"
+              style={{ minWidth: 200, maxWidth: 300 }}
+              placeholder="Buscar artículo..."
+              value={filtro}
+              onChange={e => { setFiltro(e.target.value); setPagina(1); }}
+            />
+            <PermissionGuard
+              module="almacen"
+              permission="almacen_create"
+              action="create"
+              canPerform={canPerform}
+            >
+              <button 
+                className="btn btn-success" 
+                onClick={() => { setEditArticulo(null); setShowForm(true); }}
+              >
+                Crear Artículo
+              </button>
+            </PermissionGuard>
+          </div>
+        }
+      >
+        {permissionError && (
+          <PermissionAlert 
+            show={true}
+            onClose={clearPermissionError}
+            action="realizar esta acción"
+            module="artículos"
+          />
+        )}
+        
+        {alerta && (
+          <div className={`alert alert-${alerta.tipo} mb-3`}>
+            {alerta.mensaje}
+            <button type="button" className="btn-close" onClick={() => setAlerta(null)}></button>
+          </div>
+        )}
+
+        <ResponsiveTable
+          columns={columns}
+          data={articulosPagina}
+          loading={loading || permissionsLoading}
+          emptyMessage="No se encontraron artículos"
+          pagination={{
+            currentPage: pagina,
+            totalPages: totalPaginas,
+            onPageChange: setPagina
+          }}
         />
-      )}
+      </ResponsiveLayout>
       
-      {alerta && (
-        <div className={`card-alert alert alert-${alerta.tipo} mb-0`}>
-          {alerta.mensaje}
-          <button type="button" className="btn-close" onClick={() => setAlerta(null)}></button>
-        </div>
-      )}
-      <div className="table-responsive">
-        <table className="table card-table table-vcenter text-nowrap datatable table-striped">
-          <thead>
-            <tr>
-              <th>Código</th>
-              <th>Nombre</th>
-              <th>Medida</th>
-              <th>Unidad</th>
-              <th>Stock Mín.</th>
-              <th>Stock Máx.</th>
-              <th>Estado</th>
-              <th>Cód. Proveedor</th>
-              <th>Proveedor</th>
-              <th className="w-1">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {articulosPagina.map(a => (
-              <tr key={a.article_id}>
-                <td>{a.code}</td>
-                <td>{a.name}</td>
-                <td>{medidas.find(m => m.measure_code === a.measure_code)?.measure_name || a.measure_code}</td>
-                <td>{unidades.find(u => u.unit_code === a.unit_code)?.unit_name || a.unit_code}</td>
-                <td>{a.min_stock}</td>
-                <td>{a.max_stock}</td>
-                <td><span className={`badge ${a.status === 'Activo' ? 'bg-success' : 'bg-danger'} text-black`}>{a.status}</span></td>
-                <td>{a.supplier_code || '-'}</td>
-                <td>{a.supplier_name || '-'}</td>
-                <td className="text-end">
-                  <div className="d-flex gap-1 justify-content-end">
-                    <PermissionGuard
-                      module="almacen"
-                      permission="almacen_edit"
-                      action="edit"
-                      canPerform={canPerform}
-                    >
-                      <button className="btn btn-primary btn-sm" onClick={() => { setEditArticulo(a); setShowForm(true); }}>
-                        Editar
-                      </button>
-                    </PermissionGuard>
-                    
-                    <PermissionGuard
-                      module="almacen"
-                      permission="almacen_delete"
-                      action="delete"
-                      canPerform={canPerform}
-                    >
-                      <button className="btn btn-danger btn-sm" onClick={() => { setArticuloAEliminar(a); setShowConfirm(true); }}>
-                        Eliminar
-                      </button>
-                    </PermissionGuard>
-                    
-                    {!canPerform('almacen', 'almacen_edit', 'edit') && 
-                     !canPerform('almacen', 'almacen_delete', 'delete') && (
-                      <small className="text-muted">Solo lectura</small>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
       {showForm && (
         <div className="modal modal-blur fade show" style={{ display: 'block' }}>
           <div className="modal-dialog modal-xl modal-dialog-centered">
@@ -248,6 +280,7 @@ export default function ArticulosList() {
           </div>
         </div>
       )}
+      
       {showConfirm && (
         <div className="modal modal-blur fade show" style={{ display: 'block' }}>
           <div className="modal-dialog modal-sm modal-dialog-centered">
@@ -264,23 +297,6 @@ export default function ArticulosList() {
           </div>
         </div>
       )}
-      {/* Paginación */}
-      <div className="card-footer d-flex align-items-center">
-        <p className="m-0 text-muted">Mostrando <span>{articulosPagina.length}</span> de <span>{articulosFiltrados.length}</span> artículos</p>
-        <ul className="pagination m-0 ms-auto">
-          <li className={`page-item ${pagina === 1 ? 'disabled' : ''}`}>
-            <a className="page-link" href="#" onClick={() => setPagina(p => p - 1)}>anterior</a>
-          </li>
-          {[...Array(totalPaginas)].map((_, i) => (
-            <li key={i} className={`page-item ${pagina === i + 1 ? 'active' : ''}`}>
-              <a className="page-link" href="#" onClick={() => setPagina(i + 1)}>{i + 1}</a>
-            </li>
-          ))}
-          <li className={`page-item ${pagina === totalPaginas ? 'disabled' : ''}`}>
-            <a className="page-link" href="#" onClick={() => setPagina(p => p + 1)}>siguiente</a>
-          </li>
-        </ul>
-      </div>
-    </div>
+    </>
   );
 }

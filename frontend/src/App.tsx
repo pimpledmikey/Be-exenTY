@@ -176,6 +176,7 @@ function Dashboard({ user }: { user: any }) {
 	const [current, setCurrent] = useState('dashboard');
 	const [openAlmacenNavbar, setOpenAlmacenNavbar] = useState(false);
 	const [openAlmacenSidebar, setOpenAlmacenSidebar] = useState(false);
+	const [showMobileSidebar, setShowMobileSidebar] = useState(false);
 
 	const sidebarItems = [
 		{
@@ -381,14 +382,26 @@ function Dashboard({ user }: { user: any }) {
 					style={{ height: 64 }}
 				>
 					<div className="d-flex align-items-center">
+						{/* Botón hamburguesa para móvil */}
+						<button 
+							className="btn btn-outline-light d-md-none me-3"
+							onClick={() => setShowMobileSidebar(!showMobileSidebar)}
+						>
+							<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+								<line x1="3" y1="6" x2="21" y2="6"></line>
+								<line x1="3" y1="12" x2="21" y2="12"></line>
+								<line x1="3" y1="18" x2="21" y2="18"></line>
+							</svg>
+						</button>
+						
 						{/* Logo y nombre de Be-ExEn */}
-						<div className="d-flex align-items-center gap-3 me-4">
+						<div className="d-flex align-items-center gap-2 gap-md-3 me-3">
 							<div style={{
-								height: 40,
-								width: 40,
-								borderRadius: '8px',
+								height: 32,
+								width: 32,
+								borderRadius: '6px',
 								background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)',
-								padding: '4px',
+								padding: '3px',
 								display: 'flex',
 								alignItems: 'center',
 								justifyContent: 'center',
@@ -407,21 +420,13 @@ function Dashboard({ user }: { user: any }) {
 							<div>
 								<span style={{ 
 									fontWeight: 700, 
-									fontSize: 22, 
+									fontSize: window.innerWidth < 768 ? 18 : 22, 
 									color: '#fff', 
 									letterSpacing: '0.8px',
 									textShadow: '0 1px 2px rgba(0,0,0,0.1)'
 								}}>
 									Be-ExEn
 								</span>
-								<div style={{
-									fontSize: 10,
-									color: 'rgba(255,255,255,0.7)',
-									fontWeight: 400,
-									marginTop: '-2px'
-								}}>
-									Sistema de Gestión
-								</div>
 							</div>
 						</div>
 						<ul className="navbar-nav flex-row d-none d-md-flex">
@@ -487,14 +492,29 @@ function Dashboard({ user }: { user: any }) {
 					</div>
 					<div className="d-flex align-items-center">
 						{/* Imagen dummy de usuario */}
-						<img src={'https://ui-avatars.com/api/?name=' + encodeURIComponent(user?.username || 'Usuario') + '&background=0D6EFD&color=fff&size=40'} alt="Usuario" width={32} height={32} style={{ borderRadius: '50%', objectFit: 'cover' }} />
-						<div className="d-none d-xl-block ps-2">
-							<div>{user?.username || 'Usuario'}</div>
+						<img src={'https://ui-avatars.com/api/?name=' + encodeURIComponent(user?.username || 'Usuario') + '&background=0D6EFD&color=fff&size=40'} alt="Usuario" width={28} height={28} style={{ borderRadius: '50%', objectFit: 'cover' }} className="d-block d-md-none" />
+						<img src={'https://ui-avatars.com/api/?name=' + encodeURIComponent(user?.username || 'Usuario') + '&background=0D6EFD&color=fff&size=40'} alt="Usuario" width={32} height={32} style={{ borderRadius: '50%', objectFit: 'cover' }} className="d-none d-md-block" />
+						<div className="d-none d-lg-block ps-2">
+							<div style={{ fontSize: 14 }}>{user?.username || 'Usuario'}</div>
 							<div className="mt-1 small text-secondary">{user?.group || 'Rol'}</div>
 						</div>
 						<a
 							href="#"
-							className="btn btn-danger ms-4"
+							className="btn btn-danger ms-2 ms-md-4 btn-sm d-md-none"
+							onClick={() => {
+								localStorage.removeItem('token');
+								window.location.reload();
+							}}
+						>
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+								<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+								<polyline points="16,17 21,12 16,7"></polyline>
+								<line x1="21" y1="12" x2="9" y2="12"></line>
+							</svg>
+						</a>
+						<a
+							href="#"
+							className="btn btn-danger ms-4 d-none d-md-block"
 							onClick={() => {
 								localStorage.removeItem('token');
 								window.location.reload();
@@ -507,7 +527,7 @@ function Dashboard({ user }: { user: any }) {
 			</header>
 			{/* Sidebar vertical tipo Tabler */}
 			<aside
-				className="navbar navbar-vertical navbar-expand-sm position-fixed h-100"
+				className={`navbar navbar-vertical navbar-expand-sm position-fixed h-100 d-none d-md-block ${showMobileSidebar ? 'd-block' : ''}`}
 				data-bs-theme="dark"
 				style={{
 					left: 0,
@@ -543,6 +563,7 @@ function Dashboard({ user }: { user: any }) {
 															onClick={e => {
 																e.preventDefault();
 																setCurrent(child.key);
+																setShowMobileSidebar(false);
 															}}
 														>
 															{child.label}
@@ -563,6 +584,7 @@ function Dashboard({ user }: { user: any }) {
 											onClick={e => {
 												e.preventDefault();
 												setCurrent(item.key);
+												setShowMobileSidebar(false);
 											}}
 										>
 											<span className="nav-link-icon">{item.icon}</span>
@@ -575,11 +597,96 @@ function Dashboard({ user }: { user: any }) {
 					</div>
 				</div>
 			</aside>
+			
+			{/* Mobile Sidebar Overlay */}
+			{showMobileSidebar && (
+				<>
+					<div 
+						className="position-fixed w-100 h-100 d-md-none"
+						style={{
+							top: 0,
+							left: 0,
+							backgroundColor: 'rgba(0,0,0,0.5)',
+							zIndex: 1039
+						}}
+						onClick={() => setShowMobileSidebar(false)}
+					></div>
+					<aside
+						className="navbar navbar-vertical navbar-expand-sm position-fixed h-100 d-md-none"
+						data-bs-theme="dark"
+						style={{
+							left: showMobileSidebar ? 0 : -250,
+							top: 64,
+							bottom: 0,
+							width: 250,
+							zIndex: 1040,
+							background: '#181a2a',
+							transition: 'left 0.3s ease'
+						}}
+					>
+						<div className="container-fluid flex-column h-100 pt-3">
+							<div className="collapse navbar-collapse flex-grow-1 show">
+								<ul className="navbar-nav pt-lg-3 flex-column">
+									{sidebarItems.map(item => (
+										item.children ? (
+											<li className="nav-item" key={item.key}>
+												<div className="nav-link" style={{ cursor: 'pointer', fontWeight: 600, color: '#0d6efd' }} onClick={() => setOpenAlmacenSidebar(open => !open)}>
+													<span className="nav-link-icon">{item.icon}</span>
+													<span className="nav-link-title"> {item.label} </span>
+													<span style={{ marginLeft: 4 }}>&#9660;</span>
+												</div>
+												{openAlmacenSidebar && (
+													<ul className="navbar-nav flex-column ms-3">
+														{item.children.map(child => (
+															<li className="nav-item" key={child.key}>
+																<a
+																	className={`nav-link${current === child.key ? ' active' : ''}`}
+																	href="#"
+																	style={{ color: current === child.key ? '#fff' : '#6c757d', background: current === child.key ? '#0d6efd' : 'transparent', borderRadius: 4, fontWeight: 500, margin: '2px 0' }}
+																	onClick={e => {
+																		e.preventDefault();
+																		setCurrent(child.key);
+																		setShowMobileSidebar(false);
+																	}}
+																>
+																	{child.label}
+																</a>
+															</li>
+														))}
+													</ul>
+												)}
+											</li>
+										) : (
+											<li
+												className={`nav-item px-2${current === item.key ? ' active' : ''}`}
+												key={item.key}
+											>
+												<a
+													className="nav-link"
+													href="#"
+													onClick={e => {
+														e.preventDefault();
+														setCurrent(item.key);
+														setShowMobileSidebar(false);
+													}}
+												>
+													<span className="nav-link-icon">{item.icon}</span>
+													<span className="nav-link-title"> {item.label} </span>
+												</a>
+											</li>
+										)
+									))}
+								</ul>
+							</div>
+						</div>
+					</aside>
+				</>
+			)}
 			{/* Contenido principal debajo del navbar y sidebar */}
 			<div
 				className="page-wrapper"
 				style={{
-					marginLeft: 250,
+					marginLeft: window.innerWidth >= 768 ? 250 : 0,
 					paddingTop: 64,
 					minHeight: 'calc(100vh - 64px)',
 					background: '#181a2a',
@@ -595,7 +702,7 @@ function Dashboard({ user }: { user: any }) {
 					className="page-body"
 					style={{ minHeight: 'calc(100vh - 64px)' }}
 				>
-					<div className="container-xl">{content}</div>
+					<div className="container-xl px-3 px-md-4">{content}</div>
 				</div>
 			</div>
 		</div>
