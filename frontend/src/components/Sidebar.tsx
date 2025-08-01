@@ -1,3 +1,5 @@
+import logoBeExEn from '../assets/logoBeExEn.png';
+
 interface SidebarProps {
   user: { username: string; group: string };
   current: string;
@@ -16,8 +18,49 @@ export default function Sidebar({ current, onChange }: SidebarProps) {
   return (
     <nav className="navbar navbar-dark bg-dark flex-column p-3" style={{ minHeight: '100vh', width: 220 }}>
       <div className="text-center mb-4">
-        {/* Solo texto, sin logo */}
-        <span style={{ fontWeight: 700, fontSize: 28, color: '#fff', letterSpacing: 1 }}>Be-exen</span>
+        {/* Logo y nombre de Be-ExEn */}
+        <div className="d-flex flex-column align-items-center gap-2">
+          <div style={{
+            height: 50,
+            width: 50,
+            borderRadius: '12px',
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)',
+            padding: '6px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+          }}>
+            <img 
+              src={logoBeExEn} 
+              alt="Be-ExEn Logo" 
+              style={{ 
+                height: '100%', 
+                width: '100%',
+                objectFit: 'contain'
+              }} 
+            />
+          </div>
+          <div className="text-center">
+            <div style={{ 
+              fontWeight: 700, 
+              fontSize: 24, 
+              color: '#fff', 
+              letterSpacing: '0.8px',
+              textShadow: '0 1px 2px rgba(0,0,0,0.2)'
+            }}>
+              Be-ExEn
+            </div>
+            <div style={{
+              fontSize: 11,
+              color: 'rgba(255,255,255,0.7)',
+              fontWeight: 400,
+              marginTop: '-2px'
+            }}>
+              Sistema de Gestión
+            </div>
+          </div>
+        </div>
       </div>
       <ul className="nav nav-pills flex-column mb-auto">
         {menu.map(item => (
