@@ -52,7 +52,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, onNavChange, current 
                 fontWeight: 400,
                 marginTop: '-2px'
               }}>
-                Sistema de Gestión
+                Sistema de Gestión Empresarial
               </div>
             </div>
           </div>
