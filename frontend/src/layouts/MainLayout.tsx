@@ -1,4 +1,5 @@
 import Sidebar from '../components/Sidebar';
+import StockAlertas from '../components/StockAlertas';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -28,6 +29,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, onNavChange, current 
       <main className="container-xl py-4" style={{ marginLeft: 220, marginTop: 60 }}>
         {children}
       </main>
+      {/* Alertas de stock bajo que aparecen al iniciar sesión */}
+      <StockAlertas />
     </div>
   </div>
 );
