@@ -227,6 +227,7 @@ export default function SalidasList() {
                   autoriza={solicitudData.autoriza}
                   tipo={solicitudData.tipo}
                   folio={solicitudData.folio}
+                  onClose={cerrarSolicitud}
                 />
               </div>
             </div>

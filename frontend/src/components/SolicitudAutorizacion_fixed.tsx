@@ -29,10 +29,7 @@ interface SolicitudAutorizacionProps {
   dirigido?: string;
   departamento?: string;
   usuario?: { nombre: string };
-  solicitante?: string;
-  autoriza?: string;
-  folio?: string;
-  onClose?: () => void;
+  onClose: () => void;
 }
 
 const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
@@ -51,10 +48,7 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
   dirigido,
   departamento,
   usuario,
-  solicitante,
-  autoriza,
-  folio,
-  onClose = () => {}
+  onClose
 }) => {
   // Crear filas completas con el item individual y los items de la lista
   const filasCompletas: SolicitudItem[] = [];
@@ -326,15 +320,6 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
             }}>
               Fecha: {fecha}
             </div>
-            {folio && (
-              <div style={{ 
-                fontSize: '14px', 
-                color: '#666',
-                marginTop: '5px'
-              }}>
-                Folio: {folio}
-              </div>
-            )}
           </div>
         </div>
 
@@ -494,7 +479,7 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
               fontSize: '12px'
             }}>
               <strong>Solicitado por:</strong><br/>
-              {solicitante || usuario?.nombre || '_______________________'}
+              {usuario?.nombre || '_______________________'}
             </div>
           </div>
           
@@ -506,7 +491,7 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
               fontSize: '12px'
             }}>
               <strong>Autorizado por:</strong><br/>
-              {autoriza || '_______________________'}
+              _______________________
             </div>
           </div>
           

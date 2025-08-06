@@ -238,6 +238,7 @@ export default function EntradasList() {
                   autoriza={solicitudData.autoriza}
                   tipo={solicitudData.tipo}
                   folio={solicitudData.folio}
+                  onClose={cerrarSolicitud}
                 />
               </div>
             </div>

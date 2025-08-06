@@ -89,13 +89,28 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
     const nuevosItems = [...items];
     nuevosItems[index] = {
       ...nuevosItems[index],
-      codigo: articulo.codigo,
+      codigo: articulo.codigo || articulo.id?.toString() || '', // Asegurar que el código se asigne
       descripcion: articulo.name,
       unidad: articulo.unit
     };
     setItems(nuevosItems);
     setItemSeleccionando(null);
     setBusquedaArticulo('');
+    
+    // Mostrar confirmación visual
+    const toast = document.createElement('div');
+    toast.innerHTML = `✅ Artículo "${articulo.name}" agregado`;
+    toast.style.cssText = `
+      position: fixed; top: 20px; right: 20px; z-index: 9999;
+      background: #28a745; color: white; padding: 10px 20px;
+      border-radius: 5px; font-family: Arial, sans-serif;
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+      if (document.body.contains(toast)) {
+        document.body.removeChild(toast);
+      }
+    }, 2000);
   };
 
   const abrirModalArticulos = (index: number) => {
@@ -151,7 +166,8 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
     solicitante,
     autoriza,
     tipo,
-    folio
+    folio,
+    onClose: () => setShowPreview(false)
   };
 
   if (showPreview) {
