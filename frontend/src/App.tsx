@@ -440,7 +440,7 @@ function Dashboard({ user }: { user: any }) {
 							</div>
 						</div>
 						<ul className="navbar-nav flex-row d-none d-md-flex">
-							{sidebarItems.map(item => (
+								{sidebarItems.map(item => (
 								item.children ? (
 									<li className="nav-item px-2 position-relative" key={item.key}>
 										<a

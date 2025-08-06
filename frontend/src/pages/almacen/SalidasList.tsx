@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import SalidaForm from './SalidaForm';
+import SolicitudAutorizacion from '../../components/SolicitudAutorizacion';
+import { useSolicitudAutorizacion } from '../../hooks/useSolicitudAutorizacion';
 import { usePermissions } from '../../hooks/usePermissions';
 import { PermissionAlert, PermissionGuard } from '../../components/PermissionComponents';
 import { usePermissionError, fetchWithPermissions } from '../../utils/permissionUtils';
@@ -27,6 +29,14 @@ export default function SalidasList() {
   // Hook para verificar permisos del usuario
   const { canPerform, loading: permissionsLoading } = usePermissions();
   const { permissionError, showPermissionError, clearPermissionError } = usePermissionError();
+  
+  // Hook para solicitud de autorización
+  const { 
+    solicitudData, 
+    showSolicitud, 
+    generarSolicitudSalida, 
+    cerrarSolicitud 
+  } = useSolicitudAutorizacion();
   
   // Filtro
   const [filtro, setFiltro] = useState('');
@@ -87,6 +97,22 @@ export default function SalidasList() {
             value={filtro}
             onChange={e => { setFiltro(e.target.value); }}
           />
+          {salidasFiltradas.length > 0 && (
+            <button 
+              className="btn btn-warning me-2" 
+              onClick={() => generarSolicitudSalida(salidasFiltradas)}
+              title="Generar Solicitud de Autorización de Salida"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="me-1">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14,2 14,8 20,8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10,9 9,9 8,9"></polyline>
+              </svg>
+              Solicitud
+            </button>
+          )}
           <PermissionGuard
             module="salidas"
             permission="salidas_create"
@@ -178,6 +204,30 @@ export default function SalidasList() {
               </div>
               <div className="modal-body">
                 <SalidaForm onClose={() => { setShowForm(false); fetchSalidas(); setAlerta({ tipo: 'success', mensaje: 'Salida creada con éxito' }); }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Modal de Solicitud de Autorización */}
+      {showSolicitud && solicitudData && (
+        <div className="modal fade show d-block" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.8)' }}>
+          <div className="modal-dialog modal-xl modal-dialog-centered">
+            <div className="modal-content" data-bs-theme="dark">
+              <div className="modal-header">
+                <h5 className="modal-title">Solicitud de Autorización de Salida</h5>
+                <button type="button" className="btn-close" onClick={cerrarSolicitud}></button>
+              </div>
+              <div className="modal-body p-0">
+                <SolicitudAutorizacion 
+                  fecha={solicitudData.fecha}
+                  items={solicitudData.items}
+                  solicitante={solicitudData.solicitante}
+                  autoriza={solicitudData.autoriza}
+                  tipo={solicitudData.tipo}
+                  folio={solicitudData.folio}
+                />
               </div>
             </div>
           </div>
