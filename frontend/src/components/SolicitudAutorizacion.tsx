@@ -151,50 +151,78 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
       <style>
         {`
           @media print {
-            /* Ocultar todo excepto el documento */
-            body * {
-              visibility: hidden;
+            /* Reiniciar todos los estilos para impresión */
+            * {
+              -webkit-print-color-adjust: exact !important;
+              color-adjust: exact !important;
             }
             
-            .solicitud-documento, .solicitud-documento * {
-              visibility: visible;
-            }
-            
-            .solicitud-documento {
-              position: absolute;
-              left: 0;
-              top: 0;
-              width: 100% !important;
-              height: 100% !important;
-              margin: 0 !important;
-              padding: 20px !important;
-              box-shadow: none !important;
-              background: white !important;
-              color: black !important;
-            }
-            
-            /* Ocultar elementos del sistema */
-            .navbar, .sidebar, .page-wrapper, .container-xl, .modal-backdrop, .btn, .d-print-none {
+            /* Ocultar elementos de navegación */
+            .navbar, .sidebar, .page-wrapper, .container-xl, 
+            .modal-backdrop, .d-print-none, .btn, .modal, .modal-dialog,
+            .modal-content, .modal-header, .modal-body {
               display: none !important;
               visibility: hidden !important;
             }
             
-            /* Optimizar tablas para impresión */
-            .tabla-items {
+            /* Mostrar solo el documento */
+            .solicitud-documento {
+              display: block !important;
+              visibility: visible !important;
+              position: relative !important;
+              left: 0 !important;
+              top: 0 !important;
+              width: 100% !important;
+              height: auto !important;
+              margin: 0 !important;
+              padding: 15mm !important;
+              box-shadow: none !important;
+              background: white !important;
+              color: black !important;
+              font-size: 12px !important;
+              font-family: Arial, sans-serif !important;
               page-break-inside: avoid;
             }
             
-            /* Ajustar fuentes para impresión */
-            .solicitud-documento {
-              font-size: 12px !important;
+            .solicitud-documento * {
+              visibility: visible !important;
+              color: black !important;
             }
             
+            /* Optimizar tablas para impresión */
+            .solicitud-documento table {
+              width: 100% !important;
+              border-collapse: collapse !important;
+              page-break-inside: avoid;
+            }
+            
+            .solicitud-documento td, 
+            .solicitud-documento th {
+              border: 1px solid #000 !important;
+              padding: 4px !important;
+              font-size: 10px !important;
+            }
+            
+            /* Ajustar títulos */
             .solicitud-documento h1 {
-              font-size: 18px !important;
+              font-size: 16px !important;
+              color: black !important;
             }
             
             .solicitud-documento h2 {
-              font-size: 16px !important;
+              font-size: 14px !important;
+              color: black !important;
+            }
+            
+            /* Evitar saltos de página en secciones importantes */
+            .header-section, .titulo-section, .firmas-section {
+              page-break-inside: avoid;
+            }
+            
+            /* Configuración de página */
+            @page {
+              size: A4;
+              margin: 15mm;
             }
           }
           
@@ -214,13 +242,6 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
           .solicitud-documento th {
             border: 1px solid #000 !important;
             padding: 8px !important;
-          }
-          
-          /* Evitar saltos de página en elementos importantes */
-          .solicitud-documento .header-section,
-          .solicitud-documento .titulo-section,
-          .solicitud-documento .firmas-section {
-            page-break-inside: avoid;
           }
         `}
       </style>

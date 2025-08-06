@@ -6,6 +6,7 @@ const router = Router();
 
 router.post('/theme', updateUserTheme);
 router.post('/create', verifyAuth, checkAdmin, createUser);
+router.post('/usuarios', verifyAuth, checkAdmin, createUser); // Agregar ruta alternativa
 router.post('/grupo', verifyAuth, checkAdmin, createGroup);
 router.post('/grupos', verifyAuth, checkAdmin, createGroup);
 router.put('/grupos/:id', verifyAuth, checkAdmin, updateGroup);

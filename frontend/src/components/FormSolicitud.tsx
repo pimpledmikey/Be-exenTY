@@ -156,25 +156,47 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
 
   if (showPreview) {
     return (
-      <div className="container-fluid" style={{ height: '100vh' }}>
-        <div className="d-flex justify-content-between align-items-center mb-3 p-3 bg-dark">
-          <h4 className="text-white m-0">Vista Previa - Solicitud de Autorización</h4>
-          <div>
-            <button 
-              className="btn btn-secondary me-2" 
-              onClick={() => setShowPreview(false)}
-            >
-              ← Editar
-            </button>
-            <button 
-              className="btn btn-outline-light" 
-              onClick={onClose}
-            >
-              ✕ Cerrar
-            </button>
+      <div className="modal show" style={{ 
+        display: 'block', 
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        zIndex: 1050
+      }}>
+        <div className="modal-dialog modal-xl" style={{ maxWidth: '95vw', height: '95vh' }}>
+          <div className="modal-content h-100" data-bs-theme={theme}>
+            <div className="modal-header bg-dark text-white">
+              <h4 className="modal-title m-0">Vista Previa - Solicitud de Autorización</h4>
+              <div>
+                <button 
+                  className="btn btn-secondary me-2" 
+                  onClick={() => setShowPreview(false)}
+                >
+                  ← Editar
+                </button>
+                <button 
+                  className="btn btn-outline-light" 
+                  onClick={onClose}
+                >
+                  ✕ Cerrar
+                </button>
+              </div>
+            </div>
+            <div className="modal-body p-0" style={{ 
+              height: 'calc(95vh - 120px)', 
+              overflowY: 'auto',
+              backgroundColor: '#f5f5f5'
+            }}>
+              <div className="d-flex justify-content-center py-4">
+                <div style={{ 
+                  maxWidth: '210mm', 
+                  width: '100%',
+                  margin: '0 auto'
+                }}>
+                  <SolicitudAutorizacion {...solicitudData} />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <SolicitudAutorizacion {...solicitudData} />
       </div>
     );
   }

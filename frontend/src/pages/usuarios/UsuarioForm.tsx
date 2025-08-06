@@ -76,7 +76,9 @@ export default function UsuarioForm({ usuario, onClose }: UsuarioFormProps) {
     setSuccess(false);
     try {
       const method = usuario && usuario.id ? 'PUT' : 'POST';
-      const url = usuario && usuario.id ? `${API_URL}/user/usuarios/${usuario.id}` : `${API_URL}/user/usuarios`;
+      const url = usuario && usuario.id 
+        ? `${API_URL}/user/usuarios/${usuario.id}` 
+        : `${API_URL}/user/create`; // Cambiado de /user/usuarios a /user/create
       const body: any = {
         name: form.name,
         email: form.email,
