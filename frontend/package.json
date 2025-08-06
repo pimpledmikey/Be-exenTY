@@ -16,6 +16,8 @@
     "@tabler/icons-react": "^3.34.0",
     "bootstrap": "^5.3.7",
     "date-fns": "^4.1.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.1",
     "react": "^19.1.0",
     "react-big-calendar": "^1.19.4",
     "react-bootstrap": "^2.10.10",

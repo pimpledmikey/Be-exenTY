@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SolicitudAutorizacion from './SolicitudAutorizacion';
 import { useTheme } from '../hooks/useTheme';
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface SolicitudItem {
   codigo?: string;
@@ -10,6 +12,14 @@ interface SolicitudItem {
   cantidad: number;
   precioU?: number;
   precioT?: number;
+}
+
+interface ArticuloStock {
+  id: number;
+  codigo: string;
+  name: string;
+  unit: string;
+  stock: number;
 }
 
 interface FormSolicitudProps {
@@ -24,6 +34,11 @@ interface FormSolicitudProps {
 const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) => {
   const { theme } = useTheme();
   const [showPreview, setShowPreview] = useState(false);
+  
+  // Estados para artículos del stock
+  const [articulosStock, setArticulosStock] = useState<ArticuloStock[]>([]);
+  const [busquedaArticulo, setBusquedaArticulo] = useState('');
+  const [itemSeleccionando, setItemSeleccionando] = useState<number | null>(null);
   
   // Datos del formulario
   const [tipo, setTipo] = useState<'entrada' | 'salida'>(initialData?.tipo || 'entrada');
@@ -40,6 +55,25 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
     ]
   );
 
+  // Cargar artículos del stock al montar el componente
+  useEffect(() => {
+    const cargarArticulosStock = async () => {
+      try {
+        const response = await fetch(`${API_URL}/almacen/stock`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setArticulosStock(data);
+        }
+      } catch (error) {
+        console.error('Error al cargar artículos del stock:', error);
+      }
+    };
+    
+    cargarArticulosStock();
+  }, []);
+
   const agregarItem = () => {
     setItems([...items, { 
       codigo: '', 
@@ -50,6 +84,29 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
       precioT: 0 
     }]);
   };
+
+  const seleccionarArticuloStock = (articulo: ArticuloStock, index: number) => {
+    const nuevosItems = [...items];
+    nuevosItems[index] = {
+      ...nuevosItems[index],
+      codigo: articulo.codigo,
+      descripcion: articulo.name,
+      unidad: articulo.unit
+    };
+    setItems(nuevosItems);
+    setItemSeleccionando(null);
+    setBusquedaArticulo('');
+  };
+
+  const abrirModalArticulos = (index: number) => {
+    setItemSeleccionando(index);
+    setBusquedaArticulo('');
+  };
+
+  const articulosFiltrados = articulosStock.filter(articulo =>
+    articulo.name.toLowerCase().includes(busquedaArticulo.toLowerCase()) ||
+    articulo.codigo.toLowerCase().includes(busquedaArticulo.toLowerCase())
+  );
 
   const eliminarItem = (index: number) => {
     if (items.length > 1) {
@@ -257,14 +314,24 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
                             />
                           </td>
                           <td>
-                            <input
-                              type="text"
-                              className="form-control form-control-sm"
-                              value={item.descripcion}
-                              onChange={(e) => actualizarItem(index, 'descripcion', e.target.value)}
-                              placeholder="Descripción del artículo *"
-                              required
-                            />
+                            <div className="input-group">
+                              <input
+                                type="text"
+                                className="form-control form-control-sm"
+                                value={item.descripcion}
+                                onChange={(e) => actualizarItem(index, 'descripcion', e.target.value)}
+                                placeholder="Descripción del artículo *"
+                                required
+                              />
+                              <button
+                                type="button"
+                                className="btn btn-outline-secondary btn-sm"
+                                onClick={() => abrirModalArticulos(index)}
+                                title="Buscar en stock"
+                              >
+                                🔍
+                              </button>
+                            </div>
                           </td>
                           <td>
                             <select
@@ -365,6 +432,98 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
           </div>
         </div>
       </div>
+
+      {/* Modal de Selección de Artículos del Stock */}
+      {itemSeleccionando !== null && (
+        <div className="modal show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content" data-bs-theme={theme}>
+              <div className="modal-header">
+                <h5 className="modal-title">Seleccionar Artículo del Stock</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setItemSeleccionando(null)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                {/* Búsqueda */}
+                <div className="mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Buscar por código o descripción..."
+                    value={busquedaArticulo}
+                    onChange={(e) => setBusquedaArticulo(e.target.value)}
+                    autoFocus
+                  />
+                </div>
+                
+                {/* Lista de artículos */}
+                <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                  <table className="table table-hover">
+                    <thead className="table-dark sticky-top">
+                      <tr>
+                        <th>Código</th>
+                        <th>Descripción</th>
+                        <th>Unidad</th>
+                        <th>Stock</th>
+                        <th>Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {articulosFiltrados.length > 0 ? (
+                        articulosFiltrados.map((articulo) => (
+                          <tr key={articulo.id}>
+                            <td><strong>{articulo.codigo}</strong></td>
+                            <td>{articulo.name}</td>
+                            <td>
+                              <span className="badge bg-secondary">{articulo.unit}</span>
+                            </td>
+                            <td>
+                              <span className={`badge ${articulo.stock > 5 ? 'bg-success' : articulo.stock > 0 ? 'bg-warning' : 'bg-danger'}`}>
+                                {articulo.stock}
+                              </span>
+                            </td>
+                            <td>
+                              <button
+                                type="button"
+                                className="btn btn-primary btn-sm"
+                                onClick={() => seleccionarArticuloStock(articulo, itemSeleccionando)}
+                              >
+                                Seleccionar
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={5} className="text-center text-muted py-3">
+                            {busquedaArticulo ? 'No se encontraron artículos con ese criterio' : 'Cargando artículos...'}
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+                
+                <div className="mt-3 text-muted small">
+                  <strong>Tip:</strong> También puedes escribir manualmente un artículo nuevo en el campo de descripción.
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setItemSeleccionando(null)}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

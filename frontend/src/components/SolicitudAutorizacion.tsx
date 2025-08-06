@@ -1,5 +1,8 @@
 import React from 'react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import logoBeExEn from '../assets/logoBeExEn.png';
+import { PDF_CONFIG, optimizeElementForPDF, cleanupAfterPDF } from '../utils/pdfUtils';
 
 interface SolicitudItem {
   codigo?: string;
@@ -57,9 +60,172 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
     window.print();
   };
 
+  const handleDownloadPDF = async () => {
+    const elemento = document.querySelector('.solicitud-documento') as HTMLElement;
+    if (!elemento) return;
+
+    try {
+      // Mostrar indicador de carga
+      const loadingToast = document.createElement('div');
+      loadingToast.innerHTML = '🔄 Generando PDF...';
+      loadingToast.style.cssText = `
+        position: fixed; top: 20px; right: 20px; z-index: 9999;
+        background: #007bff; color: white; padding: 10px 20px;
+        border-radius: 5px; font-family: Arial, sans-serif;
+      `;
+      document.body.appendChild(loadingToast);
+
+      // Optimizar elemento para PDF
+      optimizeElementForPDF(elemento);
+
+      // Configurar opciones mejoradas para html2canvas
+      const canvas = await html2canvas(elemento, {
+        ...PDF_CONFIG.html2canvasOptions,
+        width: elemento.offsetWidth,
+        height: elemento.offsetHeight
+      });
+
+      const imgData = canvas.toDataURL('image/png', 1.0); // Máxima calidad
+      
+      // Crear PDF en formato A4
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      // Calcular dimensiones con márgenes
+      const margins = PDF_CONFIG.pdfOptions.margins;
+      const imgWidth = pdfWidth - (margins.left + margins.right);
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      let heightLeft = imgHeight;
+      let position = margins.top;
+      
+      // Agregar imagen al PDF
+      pdf.addImage(imgData, 'PNG', margins.left, position, imgWidth, imgHeight, '', 'FAST');
+      heightLeft -= (pdfHeight - margins.top - margins.bottom);
+      
+      // Si el contenido es más alto que una página, agregar páginas adicionales
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight + margins.top;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', margins.left, position, imgWidth, imgHeight, '', 'FAST');
+        heightLeft -= (pdfHeight - margins.top - margins.bottom);
+      }
+      
+      // Generar nombre de archivo y descargar
+      const fileName = PDF_CONFIG.generateFileName(tipo, folio || '');
+      pdf.save(fileName);
+      
+      // Limpiar optimizaciones
+      cleanupAfterPDF(elemento);
+      
+      // Remover indicador de carga
+      document.body.removeChild(loadingToast);
+      
+      // Mostrar mensaje de éxito
+      const successToast = document.createElement('div');
+      successToast.innerHTML = '✅ PDF generado exitosamente';
+      successToast.style.cssText = loadingToast.style.cssText.replace('#007bff', '#28a745');
+      document.body.appendChild(successToast);
+      setTimeout(() => document.body.removeChild(successToast), 3000);
+      
+    } catch (error) {
+      console.error('Error al generar PDF:', error);
+      
+      // Mostrar mensaje de error
+      const errorToast = document.createElement('div');
+      errorToast.innerHTML = '❌ Error al generar PDF';
+      errorToast.style.cssText = `
+        position: fixed; top: 20px; right: 20px; z-index: 9999;
+        background: #dc3545; color: white; padding: 10px 20px;
+        border-radius: 5px; font-family: Arial, sans-serif;
+      `;
+      document.body.appendChild(errorToast);
+      setTimeout(() => document.body.removeChild(errorToast), 5000);
+    }
+  };
+
   return (
     <div className="solicitud-container">
-      {/* Botón de imprimir - solo visible en pantalla */}
+      {/* Estilos específicos para impresión y PDF */}
+      <style>
+        {`
+          @media print {
+            /* Ocultar todo excepto el documento */
+            body * {
+              visibility: hidden;
+            }
+            
+            .solicitud-documento, .solicitud-documento * {
+              visibility: visible;
+            }
+            
+            .solicitud-documento {
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 100% !important;
+              height: 100% !important;
+              margin: 0 !important;
+              padding: 20px !important;
+              box-shadow: none !important;
+              background: white !important;
+              color: black !important;
+            }
+            
+            /* Ocultar elementos del sistema */
+            .navbar, .sidebar, .page-wrapper, .container-xl, .modal-backdrop, .btn, .d-print-none {
+              display: none !important;
+              visibility: hidden !important;
+            }
+            
+            /* Optimizar tablas para impresión */
+            .tabla-items {
+              page-break-inside: avoid;
+            }
+            
+            /* Ajustar fuentes para impresión */
+            .solicitud-documento {
+              font-size: 12px !important;
+            }
+            
+            .solicitud-documento h1 {
+              font-size: 18px !important;
+            }
+            
+            .solicitud-documento h2 {
+              font-size: 16px !important;
+            }
+          }
+          
+          /* Estilos para PDF y pantalla */
+          .solicitud-documento {
+            /* Asegurar que se vea bien en alta resolución */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+          }
+          
+          .solicitud-documento table {
+            border-collapse: collapse !important;
+          }
+          
+          .solicitud-documento td, 
+          .solicitud-documento th {
+            border: 1px solid #000 !important;
+            padding: 8px !important;
+          }
+          
+          /* Evitar saltos de página en elementos importantes */
+          .solicitud-documento .header-section,
+          .solicitud-documento .titulo-section,
+          .solicitud-documento .firmas-section {
+            page-break-inside: avoid;
+          }
+        `}
+      </style>
+
+      {/* Botones de acción - solo visible en pantalla */}
       <div className="d-print-none mb-3">
         <button 
           className="btn btn-primary me-2" 
@@ -71,6 +237,17 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
             <rect x="6" y="14" width="12" height="8"></rect>
           </svg>
           Imprimir
+        </button>
+        <button 
+          className="btn btn-success me-2" 
+          onClick={handleDownloadPDF}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="me-1">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7,10 12,15 17,10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Descargar PDF
         </button>
       </div>
 
@@ -87,7 +264,7 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
       }}>
         
         {/* Header */}
-        <div style={{ 
+        <div className="header-section" style={{ 
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'space-between',
@@ -126,7 +303,7 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
         </div>
 
         {/* Título */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        <div className="titulo-section" style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <h2 style={{ 
             margin: 0, 
             fontSize: '1.8rem', 
@@ -161,7 +338,7 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
         )}
 
         {/* Tabla */}
-        <table style={{ 
+        <table className="tabla-items" style={{ 
           width: '100%', 
           borderCollapse: 'collapse',
           marginBottom: '3rem',
@@ -244,7 +421,7 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
         )}
 
         {/* Firmas */}
-        <div style={{ 
+        <div className="firmas-section" style={{ 
           display: 'flex', 
           justifyContent: 'space-between',
           marginTop: '4rem',
