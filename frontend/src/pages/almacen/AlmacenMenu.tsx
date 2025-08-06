@@ -4,6 +4,7 @@ import EntradasList from './EntradasList';
 import SalidasList from './SalidasList';
 import StockList from './StockList';
 import AjustesList from './AjustesList';
+import FormSolicitud from '../../components/FormSolicitud';
 
 const almacenMenus = [
   { key: 'articulos', label: 'Artículos' },
@@ -19,6 +20,7 @@ interface AlmacenMenuProps {
 
 const AlmacenMenu: React.FC<AlmacenMenuProps> = ({ initialTab }) => {
   const [submenu, setSubmenu] = useState(initialTab || 'articulos');
+  const [showFormSolicitud, setShowFormSolicitud] = useState(false);
 
   useEffect(() => {
     setSubmenu(initialTab);
@@ -61,12 +63,12 @@ const AlmacenMenu: React.FC<AlmacenMenuProps> = ({ initialTab }) => {
       <div style={{ height: isMobile ? 12 : 24 }}></div>
       
       <div className="container-xl px-0 mb-3">
-        <div className="d-flex flex-wrap align-items-center gap-2 justify-content-start" style={{ minHeight: 40 }}>
-          <div className="d-flex gap-1 gap-md-2 flex-wrap w-100">
+        <div className="d-flex flex-wrap align-items-center gap-2 justify-content-between" style={{ minHeight: 40 }}>
+          <div className="d-flex gap-1 gap-md-2 flex-wrap">
             {almacenMenus.map(m => (
               <button
                 key={m.key}
-                className={`btn ${submenu === m.key ? 'btn-primary' : 'btn-outline-primary'} btn-sm flex-grow-1 flex-md-grow-0`}
+                className={`btn ${submenu === m.key ? 'btn-primary' : 'btn-outline-primary'} btn-sm`}
                 style={{ 
                   minWidth: 'max-content',
                   fontSize: isMobile ? '12px' : '14px',
@@ -78,10 +80,45 @@ const AlmacenMenu: React.FC<AlmacenMenuProps> = ({ initialTab }) => {
               </button>
             ))}
           </div>
+          
+          {/* Botón para crear solicitud personalizada */}
+          <button
+            className="btn btn-success btn-sm"
+            onClick={() => setShowFormSolicitud(true)}
+            style={{ 
+              minWidth: 'max-content',
+              fontSize: isMobile ? '12px' : '14px',
+              padding: isMobile ? '6px 12px' : '8px 16px'
+            }}
+            title="Crear Solicitud Personalizada"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="me-1">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14,2 14,8 20,8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10,9 9,9 8,9"></polyline>
+            </svg>
+            {isMobile ? 'Nueva' : 'Nueva Solicitud'}
+          </button>
         </div>
       </div>
       
       <div>{content}</div>
+      
+      {/* Modal de Formulario de Solicitud */}
+      {showFormSolicitud && (
+        <div className="modal fade show d-block" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.8)', zIndex: 9999 }}>
+          <div className="modal-dialog modal-fullscreen">
+            <div className="modal-content" data-bs-theme="dark">
+              <FormSolicitud 
+                onClose={() => setShowFormSolicitud(false)}
+                initialData={{ tipo: 'entrada' }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

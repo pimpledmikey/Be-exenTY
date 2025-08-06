@@ -36,7 +36,7 @@ export const useSolicitudAutorizacion = () => {
 
     const solicitud: SolicitudData = {
       fecha: new Date().toLocaleDateString('es-ES'),
-      proveedor: proveedor || 'Por definir',
+      proveedor: proveedor || entradas[0]?.supplier || 'Por definir',
       items,
       tipo: 'entrada',
       folio: `ENT-${Date.now()}`
