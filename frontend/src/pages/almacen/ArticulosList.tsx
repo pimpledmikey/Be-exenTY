@@ -4,7 +4,6 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { PermissionAlert, PermissionGuard } from '../../components/PermissionComponents';
 import { usePermissionError, fetchWithPermissions } from '../../utils/permissionUtils';
 import ResponsiveTable from '../../components/ResponsiveTable';
-import ResponsiveLayout from '../../components/ResponsiveLayout';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -208,14 +207,23 @@ export default function ArticulosList() {
 
   return (
     <>
-      <ResponsiveLayout
-        title="Catálogo de Artículos"
-        actions={
-          <div className="d-flex flex-wrap gap-2 w-100 w-md-auto">
+      <div className="card" data-bs-theme="dark">
+        {permissionError && (
+          <PermissionAlert 
+            show={true}
+            onClose={clearPermissionError}
+            action="realizar esta acción"
+            module="artículos"
+          />
+        )}
+        
+        <div className="card-header">
+          <h3 className="card-title">Catálogo de Artículos</h3>
+          <div className="card-actions d-flex gap-2">
             <input
               type="text"
-              className="form-control flex-grow-1"
-              style={{ minWidth: 200, maxWidth: 300 }}
+              className="form-control"
+              style={{ maxWidth: 300 }}
               placeholder="Buscar artículo..."
               value={filtro}
               onChange={e => { setFiltro(e.target.value); setPagina(1); }}
@@ -234,36 +242,69 @@ export default function ArticulosList() {
               </button>
             </PermissionGuard>
           </div>
-        }
-      >
-        {permissionError && (
-          <PermissionAlert 
-            show={true}
-            onClose={clearPermissionError}
-            action="realizar esta acción"
-            module="artículos"
-          />
-        )}
-        
+        </div>
+
         {alerta && (
-          <div className={`alert alert-${alerta.tipo} mb-3`}>
+          <div className="card-alert alert alert-success mb-0">
             {alerta.mensaje}
             <button type="button" className="btn-close" onClick={() => setAlerta(null)}></button>
           </div>
         )}
 
-        <ResponsiveTable
-          columns={columns}
-          data={articulosPagina}
-          loading={loading || permissionsLoading}
-          emptyMessage="No se encontraron artículos"
-          pagination={{
-            currentPage: pagina,
-            totalPages: totalPaginas,
-            onPageChange: setPagina
-          }}
-        />
-      </ResponsiveLayout>
+        <div className="card-body p-0">
+          <div className="table-responsive" style={{ maxHeight: 'calc(100vh - 300px)', overflowY: 'auto' }}>
+            <style>
+              {`
+                .table thead th {
+                  background: linear-gradient(135deg, #28a745, #20c997) !important;
+                  color: white !important;
+                  border: none !important;
+                  font-weight: 600;
+                  letter-spacing: 0.5px;
+                  padding: 16px 12px;
+                  text-transform: uppercase;
+                  font-size: 0.85rem;
+                  position: sticky;
+                  top: 0;
+                  z-index: 10;
+                  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+                .table thead th:first-child {
+                  border-top-left-radius: 8px;
+                }
+                .table thead th:last-child {
+                  border-top-right-radius: 8px;
+                }
+                .table tbody tr {
+                  border-bottom: 1px solid rgba(255,255,255,0.1);
+                  transition: all 0.2s ease;
+                }
+                .table tbody tr:hover {
+                  background-color: rgba(40, 167, 69, 0.05) !important;
+                  transform: translateY(-1px);
+                  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+                }
+                .table tbody td {
+                  padding: 12px;
+                  vertical-align: middle;
+                  border: none;
+                }
+              `}
+            </style>
+            <ResponsiveTable
+              columns={columns}
+              data={articulosPagina}
+              loading={loading || permissionsLoading}
+              emptyMessage="No se encontraron artículos"
+              pagination={{
+                currentPage: pagina,
+                totalPages: totalPaginas,
+                onPageChange: setPagina
+              }}
+            />
+          </div>
+        </div>
+      </div>
       
       {showForm && (
         <div className="modal modal-blur fade show" style={{ display: 'block' }} data-bs-theme="dark">

@@ -318,34 +318,57 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
               </div>
 
               {/* Lista de Artículos */}
-              <div className="mb-4">
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <h5 className="m-0">Artículos / Materiales</h5>
-                  <button 
-                    className="btn btn-success btn-sm"
-                    onClick={agregarItem}
-                  >
-                    + Agregar Artículo
-                  </button>
+              <div className="card mb-4">
+                <div className="card-header">
+                  <h3 className="card-title">Artículos / Materiales</h3>
+                  <div className="card-actions d-flex">
+                    <button 
+                      className="btn btn-success btn-sm me-2"
+                      onClick={agregarItem}
+                      title="Agregar nuevo artículo"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="me-1">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                      </svg>
+                      Agregar Artículo
+                    </button>
+                    <button 
+                      className="btn btn-primary btn-sm"
+                      onClick={generarSolicitud}
+                      disabled={items.every(item => item.descripcion.trim() === '')}
+                      title="Vista previa y generar solicitud"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="me-1">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14,2 14,8 20,8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10,9 9,9 8,9"></polyline>
+                      </svg>
+                      Generar Solicitud
+                    </button>
+                  </div>
                 </div>
                 
-                <div className="table-responsive">
-                  <table className="table table-bordered">
-                    <thead>
-                      <tr>
-                        <th style={{ width: '10%' }}>Código</th>
-                        <th style={{ width: '30%' }}>Descripción *</th>
-                        <th style={{ width: '10%' }}>Unidad</th>
-                        <th style={{ width: '10%' }}>Cantidad *</th>
-                        {tipo === 'entrada' && (
-                          <>
-                            <th style={{ width: '15%' }}>Precio U.</th>
-                            <th style={{ width: '15%' }}>Precio T.</th>
-                          </>
-                        )}
-                        <th style={{ width: '10%' }}>Acciones</th>
-                      </tr>
-                    </thead>
+                <div className="card-body p-0">
+                  <div className="table-responsive" style={{ maxHeight: 'calc(100vh - 400px)', overflowY: 'auto' }}>
+                    <table className="table table-striped table-hover mb-0">
+                      <thead className="table-dark">
+                        <tr>
+                          <th style={{ width: '10%' }}>Código</th>
+                          <th style={{ width: '30%' }}>Descripción *</th>
+                          <th style={{ width: '10%' }}>Unidad</th>
+                          <th style={{ width: '10%' }}>Cantidad *</th>
+                          {tipo === 'entrada' && (
+                            <>
+                              <th style={{ width: '15%' }}>Precio U.</th>
+                              <th style={{ width: '15%' }}>Precio T.</th>
+                            </>
+                          )}
+                          <th style={{ width: '10%' }}>Acciones</th>
+                        </tr>
+                      </thead>
                     <tbody>
                       {items.map((item, index) => (
                         <tr key={index}>
@@ -463,23 +486,16 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
                   </table>
                 </div>
               </div>
+            </div>
 
-              {/* Botones de Acción */}
-              <div className="d-flex justify-content-end gap-2">
-                <button 
-                  className="btn btn-secondary" 
-                  onClick={onClose}
-                >
-                  Cancelar
-                </button>
-                <button 
-                  className="btn btn-primary" 
-                  onClick={generarSolicitud}
-                  disabled={items.every(item => item.descripcion.trim() === '')}
-                >
-                  🔍 Vista Previa y Generar
-                </button>
-              </div>
+            {/* Botones de Acción */}
+            <div className="d-flex justify-content-end gap-2 mt-3">
+              <button 
+                className="btn btn-secondary" 
+                onClick={onClose}
+              >
+                Cancelar
+              </button>
             </div>
           </div>
         </div>
@@ -576,6 +592,7 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 };
