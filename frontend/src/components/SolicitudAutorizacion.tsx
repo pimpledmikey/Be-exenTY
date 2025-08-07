@@ -125,23 +125,23 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
     <div className="solicitud-container">
       {/* Botones de acción - solo visible en pantalla */}
       <div className="d-print-none mb-4">
-        <div className="d-flex justify-content-center gap-3">
+        <div className="d-flex justify-content-center gap-4">
           <button 
-            className="btn btn-primary px-4 py-2" 
+            className="btn btn-primary px-4 py-2 mx-2" 
             onClick={handlePrint}
             style={{ minWidth: '140px' }}
           >
             🖨️ Imprimir
           </button>
           <button 
-            className="btn btn-success px-4 py-2" 
+            className="btn btn-success px-4 py-2 mx-2" 
             onClick={handleDownloadPDF}
             style={{ minWidth: '140px' }}
           >
             📄 Descargar PDF
           </button>
           <button 
-            className="btn btn-secondary px-4 py-2" 
+            className="btn btn-secondary px-4 py-2 mx-2" 
             onClick={onClose}
             style={{ minWidth: '140px' }}
           >
