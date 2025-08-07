@@ -19,66 +19,50 @@ interface SolicitudAutorizacionProps {
   items: SolicitudItem[];
   codigo?: string;
   descripcion?: string;
-  justificacion?: string;
   unidad?: string;
   cantidad?: number;
   precioU?: number;
   precioT?: number;
-  tipo?: 'salida' | 'entrada';
-  observaciones?: string;
-  dirigido?: string;
-  departamento?: string;
   usuario?: { nombre: string };
   solicitante?: string;
   autoriza?: string;
-  folio?: string;
   onClose?: () => void;
 }
 
 const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
-  fecha = new Date().toLocaleDateString('es-ES'),
+  fecha = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-'),
   proveedor,
   items = [],
   codigo,
   descripcion,
-  justificacion,
   unidad,
   cantidad,
   precioU,
   precioT,
-  tipo = 'salida',
-  observaciones,
-  dirigido,
-  departamento,
   usuario,
   solicitante,
   autoriza,
-  folio,
   onClose = () => {}
 }) => {
-  // Ref para el componente que se va a imprimir
   const componentRef = useRef<HTMLDivElement>(null);
   
-  // Hook para manejar la impresión/PDF
   const handlePrint = useReactToPrint({
     contentRef: componentRef,
-    documentTitle: `Solicitud_${tipo === 'entrada' ? 'Entrada' : 'Salida'}_${new Date().toLocaleDateString('es-ES').replace(/\//g, '-')}`,
+    documentTitle: `Solicitud_Autorizacion_Compra_${fecha}`,
     pageStyle: `
       @page {
         size: A4;
-        margin: 15mm;
+        margin: 10mm;
       }
       @media print {
         body { 
           -webkit-print-color-adjust: exact; 
           color-adjust: exact;
-          font-family: Arial, sans-serif;
         }
       }
     `,
   });
   
-  // Crear filas completas con el item individual y los items de la lista
   const filasCompletas: SolicitudItem[] = [];
   
   if (codigo && descripcion && unidad && cantidad) {
@@ -96,7 +80,6 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
     filasCompletas.push(item);
   });
 
-  // Asegurar que tengamos al menos 10 filas para el formato
   while (filasCompletas.length < 10) {
     filasCompletas.push({
       codigo: '',
@@ -109,18 +92,17 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
   }
 
   return (
-    <div className="solicitud-container">
-      {/* Botones de acción */}
-      <div className="botones-accion d-print-none">
+    <div className="solicitud-container-wrapper">
+      <div className="botones-accion-wrapper d-print-none">
         <button 
-          className="btn-accion btn-pdf" 
+          className="btn-accion-print btn-pdf-print" 
           onClick={handlePrint}
         >
-          🖨️ Imprimir / PDF
+          🖨️ Imprimir / Guardar PDF
         </button>
         {onClose && (
           <button 
-            className="btn-accion btn-volver" 
+            className="btn-accion-print btn-volver-print" 
             onClick={onClose}
           >
             ↩️ Volver
@@ -128,149 +110,74 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
         )}
       </div>
 
-      {/* Documento principal */}
-      <div ref={componentRef} className="solicitud-documento no-page-break">
-        {/* Encabezado */}
-        <div className="documento-header no-page-break">
-          <div className="logo-container">
-            <img 
-              src={logoBeExEn} 
-              alt="Logo BE-EX-EN" 
-              className="logo-beexen"
-            />
+      <div ref={componentRef} className="solicitud-documento-print">
+        <div className="header-print">
+          <div className="logo-container-print">
+            <img src={logoBeExEn} alt="Logo BE-EX-EN" className="logo-beexen-print"/>
           </div>
-          <div className="header-info">
-            <h1 className="titulo-principal">
-              SOLICITUD DE AUTORIZACIÓN
-            </h1>
-            <h2 className="info-documento">
-              {tipo === 'entrada' ? 'ENTRADA DE MATERIALES' : 'SALIDA DE MATERIALES'}
-            </h2>
-            <div className="info-documento">
-              Fecha: {fecha}
-            </div>
-            {folio && (
-              <div className="info-documento">
-                Folio: {folio}
-              </div>
-            )}
+          <div className="titulo-container-print">
+            <h1 className="titulo-principal-print">Solicitud Autorización de Compra</h1>
+          </div>
+          <div className="fecha-container-print">
+            <span className="fecha-label-print">Fecha:</span>
+            <span className="fecha-valor-print">{fecha}</span>
           </div>
         </div>
 
-        {/* Información adicional */}
-        <div className="info-general no-page-break">
-          {dirigido && (
-            <div className="campo-grupo">
-              <label className="campo-label">Dirigido a:</label>
-              <div className="campo-valor">{dirigido}</div>
-            </div>
-          )}
-
-          {departamento && (
-            <div className="campo-grupo">
-              <label className="campo-label">Departamento:</label>
-              <div className="campo-valor">{departamento}</div>
-            </div>
-          )}
-
-          {proveedor && (
-            <div className="campo-grupo">
-              <label className="campo-label">Proveedor:</label>
-              <div className="campo-valor">{proveedor}</div>
-            </div>
-          )}
+        <div className="subtitulo-print">
+          Requerimiento para compra de herramienta, materia prima o cualquier insumo.
         </div>
 
-        {/* Tabla */}
-        <div className="tabla-container no-page-break">
-          <table className="tabla-articulos">
-            <thead>
-              <tr>
-                <th>No.</th>
-                <th>Código</th>
-                <th>Descripción</th>
-                <th>Unidad</th>
-                <th>Medida</th>
-                <th>Cantidad</th>
-                {tipo === 'entrada' && (
-                  <>
-                    <th>Precio U</th>
-                    <th>Precio T</th>
-                  </>
-                )}
+        <div className="proveedor-print">
+          <span>Proveedor: {proveedor}</span>
+        </div>
+
+        <table className="tabla-articulos-print">
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Código</th>
+              <th>Descripción</th>
+              <th>Unidad</th>
+              <th>Medida</th>
+              <th>Cantidad</th>
+              <th>Precio U</th>
+              <th>Precio T</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filasCompletas.map((item, index) => (
+              <tr key={index}>
+                <td>{index + 1}</td>
+                <td>{item.codigo}</td>
+                <td>{item.descripcion}</td>
+                <td>{item.unidad}</td>
+                <td>{item.medida || ''}</td>
+                <td>{item.cantidad || ''}</td>
+                <td>{item.precioU ? `$${item.precioU.toFixed(2)}` : ''}</td>
+                <td>{item.precioT ? `$${item.precioT.toFixed(2)}` : ''}</td>
               </tr>
-            </thead>
-            <tbody>
-              {filasCompletas.map((item, index) => (
-                <tr key={index}>
-                  <td>
-                    {item.descripcion || item.codigo ? index + 1 : ''}
-                  </td>
-                  <td>
-                    <strong>{item.codigo}</strong>
-                  </td>
-                  <td>
-                    {item.descripcion}
-                  </td>
-                  <td>
-                    {item.unidad}
-                  </td>
-                  <td>
-                    {item.medida || ''}
-                  </td>
-                  <td>
-                    <strong>{item.cantidad || ''}</strong>
-                  </td>
-                  {tipo === 'entrada' && (
-                    <>
-                      <td>
-                        {item.precioU ? `$${item.precioU.toFixed(2)}` : ''}
-                      </td>
-                      <td>
-                        <strong>{item.precioT ? `$${item.precioT.toFixed(2)}` : ''}</strong>
-                      </td>
-                    </>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
 
-        {/* Justificación */}
-        {justificacion && (
-          <div className="observaciones-section no-page-break">
-            <label className="observaciones-label">Justificación:</label>
-            <div className="observaciones-texto">
-              {justificacion}
+        <div className="firmas-section-print">
+          <div className="firma-campo-print">
+            <div className="firma-label-print">
+              <strong>Solicitante</strong>
             </div>
-          </div>
-        )}
-
-        {/* Observaciones */}
-        {observaciones && (
-          <div className="observaciones-section no-page-break">
-            <label className="observaciones-label">Observaciones:</label>
-            <div className="observaciones-texto">
-              {observaciones}
-            </div>
-          </div>
-        )}
-
-        {/* Firmas */}
-        <div className="firmas-section no-page-break">
-          <div className="firma-campo">
-            <div className="linea-firma"></div>
-            <div className="firma-label">
-              <strong>Solicitante</strong><br/>
+            <div className="linea-firma-print"></div>
+            <div className="nombre-firma-print">
               {solicitante || usuario?.nombre || 'Juan Jesús Ortega Simbrón'}
             </div>
           </div>
           
-          <div className="firma-campo">
-            <div className="linea-firma"></div>
-            <div className="firma-label">
-              <strong>Autoriza</strong><br/>
+          <div className="firma-campo-print">
+            <div className="firma-label-print">
+              <strong>Autoriza</strong>
+            </div>
+            <div className="linea-firma-print"></div>
+            <div className="nombre-firma-print">
               {autoriza || 'Lic. Elisa Avila Requena'}
             </div>
           </div>

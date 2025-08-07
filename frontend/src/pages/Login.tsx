@@ -45,7 +45,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
     <div className={`${styles['login-container']} fade-in`}>
       <div className={styles['image-box']}>
         <div className={styles['logo-glass-container']}>
-          <img src={logoBeExEn} alt="Logo BE ExEn" className={styles['logo-glass']} />
+          <img src={logoBeExEn} alt="Logo BE Excellent Energy" className={styles['logo-glass']} />
         </div>
         <h1>Tu inventario seguro</h1>
         <p>Controla tu almacén y usuarios con seguridad y facilidad.</p>
