@@ -304,7 +304,7 @@
     break-inside: avoid;
   }
   
-  /* Header que se repite - enfoque simple y compatible */
+  /* Header normal para impresión - sin elementos fijos */
   .header-print {
     position: static !important;
     flex-shrink: initial !important;
@@ -316,45 +316,5 @@
     margin-bottom: 20px !important;
     padding-bottom: 15px !important;
     border-bottom: 1px solid #e8e8e8 !important;
-  }
-  
-  /* Crear elementos para header repetible */
-  .solicitud-documento-print::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 100px;
-    background: white;
-    z-index: 999;
-    display: none; /* Solo visible en impresión */
-  }
-  
-  /* Mostrar header fijo solo en impresión */
-  body {
-    counter-reset: page;
-  }
-  
-  .solicitud-documento-print {
-    counter-increment: page;
-  }
-  
-  /* Header personalizado que se repite */
-  .solicitud-documento-print::after {
-    content: "BE-EX-EN | SOLICITUD DE AUTORIZACIÓN | Página " counter(page);
-    position: fixed;
-    top: 10mm;
-    left: 15mm;
-    right: 15mm;
-    height: 60px;
-    background: white;
-    border-bottom: 1px solid #e8e8e8;
-    padding: 10px;
-    font-weight: bold;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 1000;
   }
 }
