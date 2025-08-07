@@ -14,6 +14,7 @@ interface SolicitudItem {
 }
 
 interface SolicitudAutorizacionProps {
+  tipo?: 'ENTRADA' | 'SALIDA'; // Nuevo campo para tipo
   fecha?: string;
   proveedor?: string;
   items: SolicitudItem[];
@@ -30,7 +31,8 @@ interface SolicitudAutorizacionProps {
 }
 
 const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
-  fecha = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-'),
+  tipo = 'ENTRADA', // Por defecto ENTRADA
+  fecha = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }),
   items = [],
   codigo,
   descripcion,
@@ -47,7 +49,7 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
   
   const handlePrint = useReactToPrint({
     contentRef: componentRef,
-    documentTitle: `Solicitud_Autorizacion_Compra_${fecha}`,
+    documentTitle: `Solicitud_Autorizacion_${tipo}_${fecha}`,
     pageStyle: `
       @page {
         size: A4;
@@ -111,17 +113,29 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
 
       <div ref={componentRef} className="solicitud-documento-print">
         <div className="header-print">
-          <div className="fecha-container-print">
-            <div className="fecha-label-print">Fecha:</div>
-            <div className="fecha-valor-print">{fecha}</div>
-            <div className="folio-print">Folio: ENTRADA-{new Date().getTime().toString().slice(-9)}</div>
+          <div className="logo-container-print">
+            <img src={logoBeExEn} alt="Logo BE-EX-EN" className="logo-beexen-print"/>
           </div>
           <div className="titulo-container-print">
             <h1 className="titulo-principal-print">SOLICITUD DE AUTORIZACIÓN</h1>
-            <h2 className="subtitulo-verde-print">ENTRADA DE MATERIALES</h2>
-          </div>
-          <div className="logo-container-print">
-            <img src={logoBeExEn} alt="Logo BE-EX-EN" className="logo-beexen-print"/>
+            <h2 className="subtitulo-verde-print">{tipo} DE MATERIALES</h2>
+            <div className="fecha-container-print">
+              <div className="fecha-label-print">Fecha:</div>
+              <div className="fecha-valor-print">{fecha}</div>
+              <div className="folio-print">Folio: {tipo}-{new Date().getTime().toString().slice(-9)}</div>
+              {solicitante && (
+                <div className="solicitante-print">
+                  <span className="solicitante-label-print">Solicitante: </span>
+                  <span className="solicitante-valor-print">{solicitante}</span>
+                </div>
+              )}
+              {autoriza && (
+                <div className="autoriza-print">
+                  <span className="autoriza-label-print">Autoriza: </span>
+                  <span className="autoriza-valor-print">{autoriza}</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -132,10 +146,13 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
               <th>Código</th>
               <th>Descripción</th>
               <th>Unidad</th>
-              <th>Medida</th>
               <th>Cantidad</th>
-              <th>Precio U</th>
-              <th>Precio T</th>
+              {tipo === 'ENTRADA' && (
+                <>
+                  <th>Precio U</th>
+                  <th>Precio T</th>
+                </>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -145,10 +162,13 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
                 <td>{item.codigo}</td>
                 <td>{item.descripcion}</td>
                 <td>{item.unidad}</td>
-                <td>{item.medida || ''}</td>
                 <td>{item.cantidad || ''}</td>
-                <td>{item.precioU ? `$${item.precioU.toFixed(2)}` : ''}</td>
-                <td>{item.precioT ? `$${item.precioT.toFixed(2)}` : ''}</td>
+                {tipo === 'ENTRADA' && (
+                  <>
+                    <td>{item.precioU ? `$${item.precioU.toFixed(2)}` : ''}</td>
+                    <td>{item.precioT ? `$${item.precioT.toFixed(2)}` : ''}</td>
+                  </>
+                )}
               </tr>
             ))}
           </tbody>

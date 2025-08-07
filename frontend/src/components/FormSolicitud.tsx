@@ -75,6 +75,11 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
     cargarArticulosStock();
   }, []);
 
+  // Actualizar folio cuando cambie el tipo
+  useEffect(() => {
+    setFolio(`${tipo.toUpperCase()}-${Date.now()}`);
+  }, [tipo]);
+
   const agregarItem = () => {
     setItems([...items, { 
       codigo: '', 
@@ -167,12 +172,12 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
   };
 
   const solicitudData = {
+    tipo: tipo.toUpperCase() as 'ENTRADA' | 'SALIDA', // Convertir a mayúsculas
     fecha: new Date(fecha).toLocaleDateString('es-ES'),
     proveedor,
     items,
     solicitante,
     autoriza,
-    tipo,
     folio,
     onClose: () => setShowPreview(false)
   };
