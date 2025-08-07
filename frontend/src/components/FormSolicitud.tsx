@@ -16,7 +16,8 @@ interface SolicitudItem {
 
 interface ArticuloStock {
   id: number;
-  codigo: string;
+  article_id: number;
+  code: string;  // Cambié de 'codigo' a 'code' que es el real
   name: string;
   unit: string;
   stock: number;
@@ -88,7 +89,7 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
   const seleccionarArticuloStock = (articulo: ArticuloStock, index: number) => {
     console.log('Artículo seleccionado:', articulo); // Debug
     const nuevosItems = [...items];
-    const codigoFinal = articulo.codigo || articulo.id?.toString() || `ART-${articulo.id}`;
+    const codigoFinal = articulo.code || `ART-${articulo.article_id || articulo.id}`;
     console.log('Código final asignado:', codigoFinal); // Debug
     
     nuevosItems[index] = {
@@ -126,7 +127,7 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
 
   const articulosFiltrados = articulosStock.filter(articulo =>
     articulo.name.toLowerCase().includes(busquedaArticulo.toLowerCase()) ||
-    articulo.codigo.toLowerCase().includes(busquedaArticulo.toLowerCase())
+    (articulo.code && articulo.code.toLowerCase().includes(busquedaArticulo.toLowerCase()))
   );
 
   const eliminarItem = (index: number) => {
@@ -526,7 +527,7 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
                       {articulosFiltrados.length > 0 ? (
                         articulosFiltrados.map((articulo) => (
                           <tr key={articulo.id}>
-                            <td><strong>{articulo.codigo}</strong></td>
+                            <td><strong>{articulo.code}</strong></td>
                             <td>{articulo.name}</td>
                             <td>
                               <span className="badge bg-secondary">{articulo.unit}</span>

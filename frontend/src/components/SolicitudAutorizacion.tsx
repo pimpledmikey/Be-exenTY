@@ -1,7 +1,6 @@
 import React from 'react';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import logoBeExEn from '../assets/logoBeExEn.png';
+import '../styles/SolicitudAutorizacion.css';
 
 interface SolicitudItem {
   codigo?: string;
@@ -202,88 +201,25 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
     }, 100);
   };
 
-  // Función para descargar PDF
+  // Función para descargar PDF - usando print nativo del navegador
   const handleDownloadPDF = async () => {
     try {
-      const elemento = document.querySelector('.solicitud-documento') as HTMLElement;
+      console.log('Iniciando generación de PDF...');
       
-      if (!elemento) {
-        alert('Error: No se encontró el documento para generar el PDF');
-        return;
-      }
-
-      console.log('Generando PDF...');
+      // Trigger print dialog which allows saving as PDF
+      window.print();
       
-      // Crear un clon del elemento para procesar sin afectar el original
-      const clone = elemento.cloneNode(true) as HTMLElement;
+      console.log('PDF iniciado exitosamente');
       
-      // Limpiar estilos que pueden causar problemas con html2canvas
-      const elementsWithProblematicStyles = clone.querySelectorAll('*');
-      elementsWithProblematicStyles.forEach((el: any) => {
-        // Convertir oklch y otros colores modernos a hex/rgb
-        const computedStyle = window.getComputedStyle(el);
-        if (el.style) {
-          // Forzar colores básicos para compatibilidad
-          if (computedStyle.backgroundColor && computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)') {
-            el.style.backgroundColor = '#ffffff';
-          }
-          if (computedStyle.color) {
-            el.style.color = '#000000';
-          }
-          if (computedStyle.borderColor) {
-            el.style.borderColor = '#000000';
-          }
-        }
-      });
-      
-      // Crear un contenedor temporal
-      const tempContainer = document.createElement('div');
-      tempContainer.style.position = 'absolute';
-      tempContainer.style.left = '-9999px';
-      tempContainer.style.top = '0';
-      tempContainer.style.width = '794px'; // A4 width en px (210mm)
-      tempContainer.style.backgroundColor = '#ffffff';
-      tempContainer.appendChild(clone);
-      document.body.appendChild(tempContainer);
-      
-      // Configurar opciones para html2canvas con configuración más conservadora
-      const canvas = await html2canvas(clone, {
-        scale: 1.5, // Calidad reducida para evitar errores
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: '#ffffff',
-        width: clone.scrollWidth,
-        height: clone.scrollHeight,
-        scrollX: 0,
-        scrollY: 0,
-        ignoreElements: (element) => {
-          // Ignorar elementos problemáticos
-          return element.tagName === 'BUTTON' || 
-                 element.classList.contains('d-print-none') ||
-                 element.classList.contains('btn');
-        }
-      });
-
-      // Limpiar contenedor temporal
-      document.body.removeChild(tempContainer);
-
-      // Crear PDF con jsPDF
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210; // Ancho A4 en mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
-      
-      // Descargar
-      const nombreArchivo = `solicitud_autorizacion_${fecha.replace(/\//g, '-')}.pdf`;
-      pdf.save(nombreArchivo);
-      
-      console.log('PDF generado exitosamente');
+      // Mostrar mensaje informativo
+      setTimeout(() => {
+        alert('💡 Para guardar como PDF:\n\n1. En la ventana de impresión, cambia el destino a "Guardar como PDF"\n2. Haz clic en "Guardar"\n3. Elige la ubicación donde guardar el archivo');
+      }, 500);
 
     } catch (error) {
-      console.error('Error al generar PDF:', error);
+      console.error('Error al iniciar PDF:', error);
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-      alert('Error al generar el PDF. Detalles: ' + errorMessage);
+      alert('Error al iniciar el PDF. Detalles: ' + errorMessage);
     }
   };
 
