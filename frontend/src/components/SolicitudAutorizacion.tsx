@@ -31,7 +31,6 @@ interface SolicitudAutorizacionProps {
 
 const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
   fecha = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-'),
-  proveedor,
   items = [],
   codigo,
   descripcion,
@@ -116,20 +115,14 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
             <img src={logoBeExEn} alt="Logo BE-EX-EN" className="logo-beexen-print"/>
           </div>
           <div className="titulo-container-print">
-            <h1 className="titulo-principal-print">Solicitud Autorización de Compra</h1>
+            <h1 className="titulo-principal-print">SOLICITUD DE AUTORIZACIÓN</h1>
+            <h2 className="subtitulo-verde-print">ENTRADA DE MATERIALES</h2>
           </div>
           <div className="fecha-container-print">
-            <span className="fecha-label-print">Fecha:</span>
-            <span className="fecha-valor-print">{fecha}</span>
+            <div className="fecha-label-print">Fecha:</div>
+            <div className="fecha-valor-print">{fecha}</div>
+            <div className="folio-print">Folio: ENTRADA-{new Date().getTime().toString().slice(-9)}</div>
           </div>
-        </div>
-
-        <div className="subtitulo-print">
-          Requerimiento para compra de herramienta, materia prima o cualquier insumo.
-        </div>
-
-        <div className="proveedor-print">
-          <span>Proveedor: {proveedor}</span>
         </div>
 
         <table className="tabla-articulos-print">
@@ -164,21 +157,31 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
         <div className="firmas-section-print">
           <div className="firma-campo-print">
             <div className="firma-label-print">
-              <strong>Solicitante</strong>
+              <strong>SOLICITADO POR:</strong>
             </div>
             <div className="linea-firma-print"></div>
             <div className="nombre-firma-print">
-              {solicitante || usuario?.nombre || 'Juan Jesús Ortega Simbrón'}
+              {solicitante || usuario?.nombre || 'JUAN JESÚS ORTEGA SIMBRÓN'}
             </div>
           </div>
           
           <div className="firma-campo-print">
             <div className="firma-label-print">
-              <strong>Autoriza</strong>
+              <strong>AUTORIZADO POR:</strong>
             </div>
             <div className="linea-firma-print"></div>
             <div className="nombre-firma-print">
-              {autoriza || 'Lic. Elisa Avila Requena'}
+              {autoriza || 'LIC. ELISA AVILA REQUENA'}
+            </div>
+          </div>
+
+          <div className="firma-campo-print">
+            <div className="firma-label-print">
+              <strong>RECIBIDO POR:</strong>
+            </div>
+            <div className="linea-firma-print"></div>
+            <div className="nombre-firma-print">
+              ___________________
             </div>
           </div>
         </div>
