@@ -90,67 +90,67 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
     });
   }
 
-  // Función para imprimir - SIMPLIFICADA
+  // Función para imprimir - SIMPLE Y NATURAL
   const handlePrint = () => {
-    const printContainer = document.querySelector('.solicitud-container');
-    if (printContainer) {
-      // Añadimos una clase al contenedor que queremos imprimir
-      printContainer.classList.add('solicitud-container-print');
-      window.print();
-      // Eliminamos la clase después de imprimir
-      printContainer.classList.remove('solicitud-container-print');
-    }
+    window.print();
   };
 
-  // Función para generar PDF con jsPDF y html2canvas - SIMPLIFICADA
+  // Función para generar PDF - SIMPLE Y DIRECTO
   const handleDownloadPDF = async () => {
-    const documentElement = document.querySelector('.solicitud-documento') as HTMLElement;
-    if (!documentElement) {
-      console.error("Elemento .solicitud-documento no encontrado");
+    const elemento = document.querySelector('.solicitud-documento') as HTMLElement;
+    if (!elemento) {
+      alert("Error: No se pudo encontrar el documento");
       return;
     }
 
     setGenerandoPDF(true);
 
     try {
-      const canvas = await html2canvas(documentElement, {
-        scale: 2,
+      // Capturar el elemento como imagen
+      const canvas = await html2canvas(elemento, {
+        scale: 1.5,
         useCORS: true,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
+        width: elemento.scrollWidth,
+        height: elemento.scrollHeight
       });
 
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
-
-      const imgWidth = 190;
-      const pageHeight = 295;
-      const imgHeight = canvas.height * imgWidth / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 10, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 10, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
+      // Crear el PDF
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvas.toDataURL('image/jpeg', 0.85);
       
-      const ahora = new Date();
-      const fechaArchivo = ahora.toLocaleDateString('es-ES').replace(/\//g, '-');
-      const horaArchivo = ahora.toLocaleTimeString('es-ES', { hour12: false }).replace(/:/g, '-');
-      const tipoDoc = tipo === 'entrada' ? 'ENTRADA' : 'SALIDA';
-      const nombreArchivo = `Solicitud_${tipoDoc}_${fechaArchivo}_${horaArchivo}.pdf`;
+      // Calcular dimensiones para ajustar al A4
+      const pdfWidth = 210; // A4 width in mm
+      const pdfHeight = 297; // A4 height in mm
+      const imgWidth = pdfWidth - 20; // Margen de 10mm a cada lado
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      let heightLeft = imgHeight;
+      let position = 10; // Margen superior
 
+      // Agregar la imagen al PDF
+      pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
+      heightLeft -= (pdfHeight - 20);
+
+      // Si el contenido es más alto que una página, agregar páginas adicionales
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight + 10;
+        pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
+        heightLeft -= (pdfHeight - 20);
+      }
+
+      // Generar nombre de archivo
+      const fecha = new Date().toLocaleDateString('es-ES').replace(/\//g, '-');
+      const tipoDoc = tipo === 'entrada' ? 'Entrada' : 'Salida';
+      const nombreArchivo = `Solicitud_${tipoDoc}_${fecha}.pdf`;
+
+      // Descargar
       pdf.save(nombreArchivo);
 
     } catch (error) {
       console.error("Error al generar PDF:", error);
+      alert("Error al generar el PDF. Por favor, intenta nuevamente.");
     } finally {
       setGenerandoPDF(false);
     }
