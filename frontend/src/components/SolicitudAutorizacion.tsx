@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import html2pdf from 'html2pdf.js';
+import React, { useRef } from 'react';
+import { useReactToPrint } from 'react-to-print';
 import logoBeExEn from '../assets/logoBeExEn.png';
 import '../styles/SolicitudAutorizacion.css';
 
@@ -56,8 +56,27 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
   folio,
   onClose = () => {}
 }) => {
-  // Estado para manejar la carga del PDF
-  const [generandoPDF, setGenerandoPDF] = useState(false);
+  // Ref para el componente que se va a imprimir
+  const componentRef = useRef<HTMLDivElement>(null);
+  
+  // Hook para manejar la impresión/PDF
+  const handlePrint = useReactToPrint({
+    contentRef: componentRef,
+    documentTitle: `Solicitud_${tipo === 'entrada' ? 'Entrada' : 'Salida'}_${new Date().toLocaleDateString('es-ES').replace(/\//g, '-')}`,
+    pageStyle: `
+      @page {
+        size: A4;
+        margin: 15mm;
+      }
+      @media print {
+        body { 
+          -webkit-print-color-adjust: exact; 
+          color-adjust: exact;
+          font-family: Arial, sans-serif;
+        }
+      }
+    `,
+  });
   
   // Crear filas completas con el item individual y los items de la lista
   const filasCompletas: SolicitudItem[] = [];
@@ -89,81 +108,20 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
     });
   }
 
-  // Función para imprimir - ROBUSTA Y CONFIABLE
-  const handlePrint = () => {
-    window.print();
-  };
-
-  // Función para generar PDF - SIMPLIFICADA Y ROBUSTA
-  const handleDownloadPDF = async () => {
-    const elemento = document.querySelector('.solicitud-documento') as HTMLElement;
-    if (!elemento) {
-      alert("Error: No se pudo encontrar el documento");
-      return;
-    }
-
-    setGenerandoPDF(true);
-
-    try {
-      // Configuración simple y robusta
-      const opciones = {
-        margin: 10,
-        filename: `Solicitud_${tipo === 'entrada' ? 'Entrada' : 'Salida'}_${new Date().toLocaleDateString('es-ES').replace(/\//g, '-')}.pdf`,
-        image: { type: 'jpeg', quality: 0.8 },
-        html2canvas: { 
-          scale: 1,
-          useCORS: false,
-          allowTaint: true,
-          backgroundColor: '#ffffff'
-        },
-        jsPDF: { 
-          unit: 'mm', 
-          format: 'a4', 
-          orientation: 'portrait'
-        }
-      };
-
-      // Generar PDF directamente
-      await html2pdf().from(elemento).set(opciones).save();
-
-    } catch (error) {
-      console.error("Error al generar PDF:", error);
-      // Si falla el PDF, sugerir usar la función de imprimir
-      const usarImprimir = confirm(
-        "Hubo un problema al generar el PDF. ¿Deseas imprimir el documento en su lugar? " + 
-        "(Puedes usar 'Guardar como PDF' en las opciones de impresión)"
-      );
-      if (usarImprimir) {
-        window.print();
-      }
-    } finally {
-      setGenerandoPDF(false);
-    }
-  };
-
   return (
     <div className="solicitud-container">
       {/* Botones de acción */}
       <div className="botones-accion d-print-none">
         <button 
-          className="btn-accion btn-imprimir" 
+          className="btn-accion btn-pdf" 
           onClick={handlePrint}
-          disabled={generandoPDF}
         >
-          🖨️ Imprimir
-        </button>
-        <button 
-          className={`btn-accion btn-pdf ${generandoPDF ? 'loading' : ''}`} 
-          onClick={handleDownloadPDF}
-          disabled={generandoPDF}
-        >
-          {generandoPDF ? '⏳ Generando...' : '📄 Descargar PDF'}
+          🖨️ Imprimir / PDF
         </button>
         {onClose && (
           <button 
             className="btn-accion btn-volver" 
             onClick={onClose}
-            disabled={generandoPDF}
           >
             ↩️ Volver
           </button>
@@ -171,7 +129,7 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
       </div>
 
       {/* Documento principal */}
-      <div className="solicitud-documento no-page-break">
+      <div ref={componentRef} className="solicitud-documento no-page-break">
         {/* Encabezado */}
         <div className="documento-header no-page-break">
           <div className="logo-container">

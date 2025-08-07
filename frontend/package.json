@@ -16,11 +16,11 @@
     "@tabler/icons-react": "^3.34.0",
     "bootstrap": "^5.3.7",
     "date-fns": "^4.1.0",
-    "html2pdf.js": "^0.10.3",
     "react": "^19.1.0",
     "react-big-calendar": "^1.19.4",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.1.0",
+    "react-to-print": "^3.1.1",
     "recharts": "^3.0.2",
     "sweetalert2": "^11.22.0"
   },

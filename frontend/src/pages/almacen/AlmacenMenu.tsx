@@ -5,6 +5,7 @@ import SalidasList from './SalidasList';
 import StockList from './StockList';
 import AjustesList from './AjustesList';
 import FormSolicitud from '../../components/FormSolicitud';
+import PruebaSolicitud from '../../components/PruebaSolicitud';
 
 const almacenMenus = [
   { key: 'articulos', label: 'Artículos' },
@@ -21,6 +22,7 @@ interface AlmacenMenuProps {
 const AlmacenMenu: React.FC<AlmacenMenuProps> = ({ initialTab }) => {
   const [submenu, setSubmenu] = useState(initialTab || 'articulos');
   const [showFormSolicitud, setShowFormSolicitud] = useState(false);
+  const [showPruebaSolicitud, setShowPruebaSolicitud] = useState(false);
 
   useEffect(() => {
     setSubmenu(initialTab);
@@ -101,6 +103,24 @@ const AlmacenMenu: React.FC<AlmacenMenuProps> = ({ initialTab }) => {
             </svg>
             {isMobile ? 'Nueva' : 'Nueva Solicitud'}
           </button>
+          
+          {/* Botón para probar el nuevo sistema */}
+          <button
+            className="btn btn-warning btn-sm"
+            onClick={() => setShowPruebaSolicitud(true)}
+            style={{ 
+              minWidth: 'max-content',
+              fontSize: isMobile ? '12px' : '14px',
+              padding: isMobile ? '6px 12px' : '8px 16px'
+            }}
+            title="Probar Nuevo Sistema de Solicitudes"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="me-1">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polygon points="10,8 16,12 10,16 10,8"></polygon>
+            </svg>
+            ✨ Probar Nuevo Sistema
+          </button>
         </div>
       </div>
       
@@ -115,6 +135,29 @@ const AlmacenMenu: React.FC<AlmacenMenuProps> = ({ initialTab }) => {
                 onClose={() => setShowFormSolicitud(false)}
                 initialData={{ tipo: 'entrada' }}
               />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Prueba del Nuevo Sistema */}
+      {showPruebaSolicitud && (
+        <div className="modal fade show d-block" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.9)', zIndex: 9999 }}>
+          <div className="modal-dialog modal-fullscreen">
+            <div className="modal-content" data-bs-theme="light" style={{ background: '#f5f5f5' }}>
+              <div className="modal-header bg-warning text-dark">
+                <h5 className="modal-title">
+                  🎉 ¡Nuevo Sistema de Solicitudes con react-to-print!
+                </h5>
+                <button 
+                  type="button" 
+                  className="btn-close" 
+                  onClick={() => setShowPruebaSolicitud(false)}
+                ></button>
+              </div>
+              <div className="modal-body p-0" style={{ background: '#f5f5f5' }}>
+                <PruebaSolicitud />
+              </div>
             </div>
           </div>
         </div>
