@@ -186,7 +186,7 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
       }}>
         <div className="modal-dialog modal-xl" style={{ maxWidth: '95vw', height: '95vh' }}>
           <div className="modal-content h-100" data-bs-theme={theme}>
-            <div className="modal-header bg-dark text-white">
+            <div className="modal-header bg-dark text-white d-print-none">
               <h4 className="modal-title m-0">Vista Previa - Solicitud de Autorización</h4>
               <div>
                 <button 
@@ -204,19 +204,11 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
               </div>
             </div>
             <div className="modal-body p-0" style={{ 
-              height: 'calc(95vh - 120px)', 
+              height: 'calc(100% - 56px)', // Ajustado para el header
               overflowY: 'auto',
               backgroundColor: '#f5f5f5'
             }}>
-              <div className="d-flex justify-content-center py-4">
-                <div style={{ 
-                  maxWidth: '210mm', 
-                  width: '100%',
-                  margin: '0 auto'
-                }}>
-                  <SolicitudAutorizacion {...solicitudData} />
-                </div>
-              </div>
+              <SolicitudAutorizacion {...solicitudData} />
             </div>
           </div>
         </div>

@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import logoBeExEn from '../assets/logoBeExEn.png';
 import '../styles/SolicitudAutorizacion.css';
 
@@ -55,6 +57,9 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
   folio,
   onClose = () => {}
 }) => {
+  // Estado para manejar la carga del PDF
+  const [generandoPDF, setGenerandoPDF] = useState(false);
+  
   // Crear filas completas con el item individual y los items de la lista
   const filasCompletas: SolicitudItem[] = [];
   
@@ -85,69 +90,99 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
     });
   }
 
-  // Función para imprimir
+  // Función para imprimir - SIMPLIFICADA
   const handlePrint = () => {
-    // Agregar clase especial al body para impresión
-    document.body.classList.add('printing');
-    
-    // Trigger print
-    window.print();
-    
-    // Remover clase después de imprimir
-    setTimeout(() => {
-      document.body.classList.remove('printing');
-    }, 100);
+    const printContainer = document.querySelector('.solicitud-container');
+    if (printContainer) {
+      // Añadimos una clase al contenedor que queremos imprimir
+      printContainer.classList.add('solicitud-container-print');
+      window.print();
+      // Eliminamos la clase después de imprimir
+      printContainer.classList.remove('solicitud-container-print');
+    }
   };
 
-  // Función para descargar PDF - usando print nativo del navegador
+  // Función para generar PDF con jsPDF y html2canvas - SIMPLIFICADA
   const handleDownloadPDF = async () => {
+    const documentElement = document.querySelector('.solicitud-documento') as HTMLElement;
+    if (!documentElement) {
+      console.error("Elemento .solicitud-documento no encontrado");
+      return;
+    }
+
+    setGenerandoPDF(true);
+
     try {
-      console.log('Iniciando generación de PDF...');
+      const canvas = await html2canvas(documentElement, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff'
+      });
+
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const imgWidth = 190;
+      const pageHeight = 295;
+      const imgHeight = canvas.height * imgWidth / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 10, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 10, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
       
-      // Trigger print dialog which allows saving as PDF
-      window.print();
-      
-      console.log('PDF iniciado exitosamente');
-      
-      // Mostrar mensaje informativo
-      setTimeout(() => {
-        alert('💡 Para guardar como PDF:\n\n1. En la ventana de impresión, cambia el destino a "Guardar como PDF"\n2. Haz clic en "Guardar"\n3. Elige la ubicación donde guardar el archivo');
-      }, 500);
+      const ahora = new Date();
+      const fechaArchivo = ahora.toLocaleDateString('es-ES').replace(/\//g, '-');
+      const horaArchivo = ahora.toLocaleTimeString('es-ES', { hour12: false }).replace(/:/g, '-');
+      const tipoDoc = tipo === 'entrada' ? 'ENTRADA' : 'SALIDA';
+      const nombreArchivo = `Solicitud_${tipoDoc}_${fechaArchivo}_${horaArchivo}.pdf`;
+
+      pdf.save(nombreArchivo);
 
     } catch (error) {
-      console.error('Error al iniciar PDF:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-      alert('Error al iniciar el PDF. Detalles: ' + errorMessage);
+      console.error("Error al generar PDF:", error);
+    } finally {
+      setGenerandoPDF(false);
     }
   };
 
   return (
     <div className="solicitud-container">
-      {/* Botones de acción - solo visible en pantalla */}
-      <div className="d-print-none mb-4">
-        <div className="d-flex justify-content-center gap-4">
+      {/* Botones de acción */}
+      <div className="botones-accion d-print-none">
+        <button 
+          className="btn-accion btn-imprimir" 
+          onClick={handlePrint}
+          disabled={generandoPDF}
+        >
+          🖨️ Imprimir
+        </button>
+        <button 
+          className={`btn-accion btn-pdf ${generandoPDF ? 'loading' : ''}`} 
+          onClick={handleDownloadPDF}
+          disabled={generandoPDF}
+        >
+          {generandoPDF ? '⏳ Generando...' : '📄 Descargar PDF'}
+        </button>
+        {onClose && (
           <button 
-            className="btn btn-primary px-4 py-2 mx-2" 
-            onClick={handlePrint}
-            style={{ minWidth: '140px' }}
-          >
-            🖨️ Imprimir
-          </button>
-          <button 
-            className="btn btn-success px-4 py-2 mx-2" 
-            onClick={handleDownloadPDF}
-            style={{ minWidth: '140px' }}
-          >
-            📄 Descargar PDF
-          </button>
-          <button 
-            className="btn btn-secondary px-4 py-2 mx-2" 
+            className="btn-accion btn-volver" 
             onClick={onClose}
-            style={{ minWidth: '140px' }}
+            disabled={generandoPDF}
           >
-            ❌ Cerrar
+            ↩️ Volver
           </button>
-        </div>
+        )}
       </div>
 
       {/* Documento principal */}
