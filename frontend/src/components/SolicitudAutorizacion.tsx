@@ -248,68 +248,28 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
       </div>
 
       {/* Documento principal */}
-      <div className="solicitud-documento" style={{
-        backgroundColor: 'white',
-        padding: '2rem',
-        border: '1px solid #ddd',
-        borderRadius: '8px',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-        fontFamily: 'Arial, sans-serif',
-        fontSize: '14px',
-        lineHeight: '1.4',
-        color: 'black'
-      }}>
+      <div className="solicitud-documento">
         {/* Encabezado */}
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          marginBottom: '2rem',
-          borderBottom: '2px solid #0d6efd',
-          paddingBottom: '1rem'
-        }}>
-          <div>
+        <div className="documento-header">
+          <div className="logo-container">
             <img 
               src={logoBeExEn} 
               alt="Logo BE-EX-EN" 
-              style={{ 
-                height: '60px',
-                objectFit: 'contain'
-              }}
+              className="logo-beexen"
             />
           </div>
-          <div style={{ textAlign: 'center', flex: 1 }}>
-            <h1 style={{ 
-              fontSize: '24px', 
-              fontWeight: 'bold', 
-              color: '#0d6efd',
-              margin: '0 0 10px 0'
-            }}>
+          <div className="header-info">
+            <h1 className="titulo-principal">
               SOLICITUD DE AUTORIZACIÓN
             </h1>
-            <h2 style={{ 
-              fontSize: '18px',
-              color: '#666',
-              margin: 0,
-              textTransform: 'uppercase'
-            }}>
+            <h2 className="info-documento">
               {tipo === 'entrada' ? 'ENTRADA DE MATERIALES' : 'SALIDA DE MATERIALES'}
             </h2>
-          </div>
-          <div style={{ textAlign: 'right', minWidth: '150px' }}>
-            <div style={{ 
-              fontSize: '16px', 
-              fontWeight: 'bold',
-              color: '#0d6efd'
-            }}>
+            <div className="info-documento">
               Fecha: {fecha}
             </div>
             {folio && (
-              <div style={{ 
-                fontSize: '14px', 
-                color: '#666',
-                marginTop: '5px'
-              }}>
+              <div className="info-documento">
                 Folio: {folio}
               </div>
             )}
@@ -317,125 +277,86 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
         </div>
 
         {/* Información adicional */}
-        {dirigido && (
-          <div style={{ marginBottom: '1rem', fontSize: '14px' }}>
-            <strong>Dirigido a:</strong> 
-            <span style={{ 
-              marginLeft: '10px',
-              borderBottom: '1px solid #666',
-              minWidth: '300px',
-              display: 'inline-block',
-              paddingBottom: '2px'
-            }}>
-              {dirigido}
-            </span>
-          </div>
-        )}
+        <div className="info-general">
+          {dirigido && (
+            <div className="campo-grupo">
+              <label className="campo-label">Dirigido a:</label>
+              <div className="campo-valor">{dirigido}</div>
+            </div>
+          )}
 
-        {departamento && (
-          <div style={{ marginBottom: '1rem', fontSize: '14px' }}>
-            <strong>Departamento:</strong> 
-            <span style={{ 
-              marginLeft: '10px',
-              borderBottom: '1px solid #666',
-              minWidth: '300px',
-              display: 'inline-block',
-              paddingBottom: '2px'
-            }}>
-              {departamento}
-            </span>
-          </div>
-        )}
+          {departamento && (
+            <div className="campo-grupo">
+              <label className="campo-label">Departamento:</label>
+              <div className="campo-valor">{departamento}</div>
+            </div>
+          )}
 
-        {proveedor && (
-          <div style={{ marginBottom: '1rem', fontSize: '14px' }}>
-            <strong>Proveedor:</strong> 
-            <span style={{ 
-              marginLeft: '10px',
-              borderBottom: '1px solid #666',
-              minWidth: '300px',
-              display: 'inline-block',
-              paddingBottom: '2px'
-            }}>
-              {proveedor}
-            </span>
-          </div>
-        )}
+          {proveedor && (
+            <div className="campo-grupo">
+              <label className="campo-label">Proveedor:</label>
+              <div className="campo-valor">{proveedor}</div>
+            </div>
+          )}
+        </div>
 
         {/* Tabla */}
-        <table style={{ 
-          width: '100%', 
-          borderCollapse: 'collapse',
-          marginBottom: '3rem',
-          fontSize: '12px'
-        }}>
-          <thead>
-            <tr style={{ backgroundColor: '#0d6efd', color: 'white' }}>
-              <th style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center', width: '5%' }}>No.</th>
-              <th style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center', width: '12%' }}>Código</th>
-              <th style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center', width: '35%' }}>Descripción</th>
-              <th style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center', width: '12%' }}>Unidad</th>
-              <th style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center', width: '12%' }}>Cantidad</th>
-              {tipo === 'entrada' && (
-                <>
-                  <th style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center', width: '12%' }}>Precio U</th>
-                  <th style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center', width: '12%' }}>Precio T</th>
-                </>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {filasCompletas.map((item, index) => (
-              <tr key={index} style={{ 
-                backgroundColor: index % 2 === 0 ? '#f8f9fa' : 'white',
-                minHeight: '40px'
-              }}>
-                <td style={{ 
-                  border: '1px solid #ddd', 
-                  padding: '8px', 
-                  textAlign: 'center',
-                  fontWeight: 'bold'
-                }}>
-                  {item.descripcion || item.codigo ? index + 1 : ''}
-                </td>
-                <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center', fontWeight: 'bold', color: '#0d6efd' }}>
-                  {item.codigo}
-                </td>
-                <td style={{ border: '1px solid #ddd', padding: '8px' }}>
-                  {item.descripcion}
-                </td>
-                <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center' }}>
-                  {item.unidad}
-                </td>
-                <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center', fontWeight: 'bold' }}>
-                  {item.cantidad || ''}
-                </td>
+        <div className="tabla-container">
+          <table className="tabla-articulos">
+            <thead>
+              <tr>
+                <th>No.</th>
+                <th>Código</th>
+                <th>Descripción</th>
+                <th>Unidad</th>
+                <th>Cantidad</th>
                 {tipo === 'entrada' && (
                   <>
-                    <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center' }}>
-                      {item.precioU ? `$${item.precioU.toFixed(2)}` : ''}
-                    </td>
-                    <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center', fontWeight: 'bold' }}>
-                      {item.precioT ? `$${item.precioT.toFixed(2)}` : ''}
-                    </td>
+                    <th>Precio U</th>
+                    <th>Precio T</th>
                   </>
                 )}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filasCompletas.map((item, index) => (
+                <tr key={index}>
+                  <td>
+                    {item.descripcion || item.codigo ? index + 1 : ''}
+                  </td>
+                  <td>
+                    <strong>{item.codigo}</strong>
+                  </td>
+                  <td>
+                    {item.descripcion}
+                  </td>
+                  <td>
+                    {item.unidad}
+                  </td>
+                  <td>
+                    <strong>{item.cantidad || ''}</strong>
+                  </td>
+                  {tipo === 'entrada' && (
+                    <>
+                      <td>
+                        {item.precioU ? `$${item.precioU.toFixed(2)}` : ''}
+                      </td>
+                      <td>
+                        <strong>{item.precioT ? `$${item.precioT.toFixed(2)}` : ''}</strong>
+                      </td>
+                    </>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
         {/* Justificación */}
         {justificacion && (
-          <div style={{ marginBottom: '2rem' }}>
-            <h3 style={{ fontSize: '16px', marginBottom: '10px', color: '#0d6efd' }}>Justificación:</h3>
-            <div style={{ 
-              border: '1px solid #ddd',
-              padding: '15px',
-              backgroundColor: '#f8f9fa',
-              borderRadius: '4px',
-              minHeight: '80px'
-            }}>
+          <div className="observaciones-section">
+            <label className="observaciones-label">Justificación:</label>
+            <div className="observaciones-texto">
               {justificacion}
             </div>
           </div>
@@ -443,114 +364,41 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
 
         {/* Observaciones */}
         {observaciones && (
-          <div style={{ marginBottom: '2rem' }}>
-            <h3 style={{ fontSize: '16px', marginBottom: '10px', color: '#0d6efd' }}>Observaciones:</h3>
-            <div style={{ 
-              border: '1px solid #ddd',
-              padding: '15px',
-              backgroundColor: '#f8f9fa',
-              borderRadius: '4px',
-              minHeight: '60px'
-            }}>
+          <div className="observaciones-section">
+            <label className="observaciones-label">Observaciones:</label>
+            <div className="observaciones-texto">
               {observaciones}
             </div>
           </div>
         )}
 
         {/* Firmas */}
-        <div style={{ 
-          marginTop: '4rem',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-end'
-        }}>
-          <div style={{ textAlign: 'center', width: '200px' }}>
-            <div style={{ 
-              borderTop: '1px solid black',
-              marginTop: '50px',
-              paddingTop: '8px',
-              fontSize: '12px'
-            }}>
+        <div className="firmas-section">
+          <div className="firma-campo">
+            <div className="linea-firma"></div>
+            <div className="firma-label">
               <strong>Solicitado por:</strong><br/>
               {solicitante || usuario?.nombre || '_______________________'}
             </div>
           </div>
           
-          <div style={{ textAlign: 'center', width: '200px' }}>
-            <div style={{ 
-              borderTop: '1px solid black',
-              marginTop: '50px',
-              paddingTop: '8px',
-              fontSize: '12px'
-            }}>
+          <div className="firma-campo">
+            <div className="linea-firma"></div>
+            <div className="firma-label">
               <strong>Autorizado por:</strong><br/>
               {autoriza || '_______________________'}
             </div>
           </div>
           
-          <div style={{ textAlign: 'center', width: '200px' }}>
-            <div style={{ 
-              borderTop: '1px solid black',
-              marginTop: '50px',
-              paddingTop: '8px',
-              fontSize: '12px'
-            }}>
+          <div className="firma-campo">
+            <div className="linea-firma"></div>
+            <div className="firma-label">
               <strong>Recibido por:</strong><br/>
               _______________________
             </div>
           </div>
         </div>
       </div>
-
-      {/* Estilos para impresión - simplificados */}
-      <style>{`
-        @media print {
-          body {
-            font-family: Arial, sans-serif !important;
-            font-size: 12px !important;
-            line-height: 1.4 !important;
-            color: black !important;
-            background: white !important;
-            margin: 0 !important;
-            padding: 0 !important;
-          }
-          
-          .solicitud-container {
-            margin: 0 !important;
-            padding: 0 !important;
-          }
-          
-          .solicitud-documento {
-            box-shadow: none !important;
-            border: none !important;
-            margin: 0 !important;
-            padding: 1cm !important;
-            width: 100% !important;
-            background: white !important;
-          }
-          
-          .d-print-none {
-            display: none !important;
-          }
-          
-          table, th, td {
-            border: 1px solid black !important;
-            border-collapse: collapse !important;
-            color: black !important;
-            background: white !important;
-          }
-          
-          th {
-            background-color: #f0f0f0 !important;
-            color: black !important;
-          }
-          
-          @page {
-            size: A4;
-            margin: 1cm;
-          }
-        }
-      `}</style>
     </div>
   );
 };
