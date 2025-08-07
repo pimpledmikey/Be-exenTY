@@ -253,44 +253,6 @@ export default function ArticulosList() {
 
         <div className="card-body p-0">
           <div className="table-responsive" style={{ maxHeight: 'calc(100vh - 300px)', overflowY: 'auto' }}>
-            <style>
-              {`
-                .table thead th {
-                  background: linear-gradient(135deg, #28a745, #20c997) !important;
-                  color: white !important;
-                  border: none !important;
-                  font-weight: 600;
-                  letter-spacing: 0.5px;
-                  padding: 16px 12px;
-                  text-transform: uppercase;
-                  font-size: 0.85rem;
-                  position: sticky;
-                  top: 0;
-                  z-index: 10;
-                  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                }
-                .table thead th:first-child {
-                  border-top-left-radius: 8px;
-                }
-                .table thead th:last-child {
-                  border-top-right-radius: 8px;
-                }
-                .table tbody tr {
-                  border-bottom: 1px solid rgba(255,255,255,0.1);
-                  transition: all 0.2s ease;
-                }
-                .table tbody tr:hover {
-                  background-color: rgba(40, 167, 69, 0.05) !important;
-                  transform: translateY(-1px);
-                  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-                }
-                .table tbody td {
-                  padding: 12px;
-                  vertical-align: middle;
-                  border: none;
-                }
-              `}
-            </style>
             <ResponsiveTable
               columns={columns}
               data={articulosPagina}
