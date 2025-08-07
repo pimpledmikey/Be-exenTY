@@ -94,8 +94,9 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
     window.print();
   };
 
-  // Función para generar PDF con html2pdf.js - OPTIMIZADO PARA UNA PÁGINA
+  // Función para generar PDF con html2pdf.js - ANTI-DUPLICACIÓN TOTAL
   const handleDownloadPDF = async () => {
+    // Buscar SOLO el elemento del documento específico
     const elemento = document.querySelector('.solicitud-documento') as HTMLElement;
     if (!elemento) {
       alert("Error: No se pudo encontrar el documento");
@@ -105,35 +106,75 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
     setGenerandoPDF(true);
 
     try {
-      // Configuración optimizada para html2pdf.js
+      // Ocultar TODOS los elementos que pueden causar duplicación
+      const elementsToHide = [
+        '.botones-accion',
+        '.modal',
+        '.modal-dialog',
+        '.modal-content',
+        '.modal-header',
+        '.d-print-none',
+        '[data-bs-theme]'
+      ];
+      
+      const hiddenElements: HTMLElement[] = [];
+      
+      elementsToHide.forEach(selector => {
+        const els = document.querySelectorAll(selector) as NodeListOf<HTMLElement>;
+        els.forEach(el => {
+          hiddenElements.push(el);
+          el.style.display = 'none';
+        });
+      });
+
+      // Crear un elemento temporal limpio solo con el documento
+      const tempContainer = document.createElement('div');
+      tempContainer.style.cssText = `
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+        width: 794px;
+        background: white;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+      `;
+      
+      // Clonar solo el contenido del documento
+      const clonedElement = elemento.cloneNode(true) as HTMLElement;
+      tempContainer.appendChild(clonedElement);
+      document.body.appendChild(tempContainer);
+
+      // Configuración ultra-específica
       const opciones = {
-        margin: [8, 8, 8, 8], // Márgenes mínimos para una página
+        margin: [5, 5, 5, 5],
         filename: `Solicitud_${tipo === 'entrada' ? 'Entrada' : 'Salida'}_${new Date().toLocaleDateString('es-ES').replace(/\//g, '-')}.pdf`,
-        image: { type: 'jpeg', quality: 0.9 },
+        image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { 
-          scale: 1.2, 
+          scale: 1.0,
           useCORS: true,
           backgroundColor: '#ffffff',
+          width: 794,
+          height: tempContainer.scrollHeight,
           scrollX: 0,
-          scrollY: 0,
-          windowWidth: 800,
-          windowHeight: 1200
+          scrollY: 0
         },
         jsPDF: { 
           unit: 'mm', 
           format: 'a4', 
           orientation: 'portrait'
-        },
-        pagebreak: { 
-          mode: ['avoid-all', 'css', 'legacy'],
-          before: '.page-break-before',
-          after: '.page-break-after',
-          avoid: '.no-page-break'
         }
       };
 
-      // Generar PDF directamente desde el HTML
-      await html2pdf().set(opciones).from(elemento).save();
+      // Generar PDF del elemento temporal
+      await html2pdf().set(opciones).from(tempContainer).save();
+
+      // Limpiar elemento temporal
+      document.body.removeChild(tempContainer);
+      
+      // Restaurar elementos ocultos
+      hiddenElements.forEach(el => {
+        el.style.display = '';
+      });
 
     } catch (error) {
       console.error("Error al generar PDF:", error);
