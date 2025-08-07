@@ -95,13 +95,14 @@
   font-weight: 500;
 }
 
-/* Tabla con bordes negros como el ejemplo */
+/* Tabla con estilo minimalista y headers verdes */
 .tabla-container {
   margin: 30px 0;
-  border: 2px solid #000000;
-  border-radius: 0;
+  border: 2px solid #28a745;
+  border-radius: 6px;
   overflow: hidden;
   background: #ffffff;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.1);
 }
 
 .tabla-articulos {
@@ -112,37 +113,37 @@
 }
 
 .tabla-articulos th {
-  background: #ffffff;
-  color: #000000;
-  font-weight: bold;
-  padding: 12px 8px;
+  background: #28a745;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 16px 12px;
   text-align: center;
-  border: 1px solid #000000;
+  border: 1px solid #28a745;
   font-size: 13px;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .tabla-articulos td {
-  padding: 12px 8px;
-  border: 1px solid #000000;
+  padding: 14px 12px;
+  border: 1px solid #dee2e6;
   text-align: center;
   background: #ffffff;
-  color: #000000;
+  color: #333333;
   font-size: 14px;
   min-height: 40px;
 }
 
-.tabla-articulos tbody tr td {
-  background-color: #ffffff;
-  border: 1px solid #000000;
+.tabla-articulos tbody tr:nth-child(even) td {
+  background-color: #f8f9fa;
 }
 
 .tabla-articulos tbody tr:hover {
-  background-color: #ffffff !important;
+  background-color: rgba(40, 167, 69, 0.05) !important;
 }
 
 .tabla-articulos tbody tr:hover td {
-  background-color: #ffffff !important;
+  background-color: rgba(40, 167, 69, 0.05) !important;
 }
 
 /* Observaciones */
@@ -391,11 +392,11 @@
     border-radius: 0 !important;
   }
   
-  /* Tabla con bordes negros para impresión */
+  /* Tabla minimalista con headers verdes para impresión */
   .tabla-container {
     margin: 20px 0 !important;
-    border: 2px solid #000000 !important;
-    border-radius: 0 !important;
+    border: 2px solid #28a745 !important;
+    border-radius: 4px !important;
     overflow: hidden !important;
   }
   
@@ -407,19 +408,20 @@
   }
   
   .tabla-articulos th {
-    background: #ffffff !important;
-    color: #000000 !important;
+    background: #28a745 !important;
+    color: #ffffff !important;
     font-weight: bold !important;
     padding: 12px 6px !important;
     text-align: center !important;
-    border: 1px solid #000000 !important;
+    border: 1px solid #28a745 !important;
     font-size: 10px !important;
     text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
   }
   
   .tabla-articulos td {
     padding: 12px 6px !important;
-    border: 1px solid #000000 !important;
+    border: 1px solid #dee2e6 !important;
     text-align: center !important;
     background: #ffffff !important;
     color: #000000 !important;
@@ -427,10 +429,9 @@
     min-height: 35px !important;
   }
   
-  .tabla-articulos tbody tr td {
-    background: #ffffff !important;
+  .tabla-articulos tbody tr:nth-child(even) td {
+    background: #f8f9fa !important;
     color: #000000 !important;
-    border: 1px solid #000000 !important;
   }
   
   .tabla-articulos td strong {
