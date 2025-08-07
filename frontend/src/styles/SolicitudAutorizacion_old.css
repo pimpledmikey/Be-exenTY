@@ -1,11 +1,11 @@
-/* Estilos para SolicitudAutorizacion - Estilo Bootstrap limpio */
+/* Estilos para SolicitudAutorizacion - Tabla con bordes negros como el ejemplo */
 
 .solicitud-container {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
   background-color: #ffffff;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: Arial, sans-serif;
   max-height: calc(100vh - 120px);
   overflow-y: auto;
 }
@@ -13,11 +13,11 @@
 .solicitud-documento {
   background-color: #ffffff;
   padding: 30px;
-  border: 1px solid #dee2e6;
+  border: 1px solid #ddd;
   border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   min-height: 600px;
-  color: #212529;
+  color: #000000;
 }
 
 /* Encabezado del documento */
@@ -26,9 +26,11 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 30px;
-  padding: 20px 0;
-  border-bottom: 2px solid #dee2e6;
+  padding: 25px;
+  border-bottom: 2px solid #e0e0e0;
   background: transparent;
+  border-radius: 0;
+  color: #333333;
 }
 
 .logo-container {
@@ -74,8 +76,8 @@
 }
 
 .campo-label {
-  font-weight: 600;
-  color: #495057;
+  font-weight: bold;
+  color: #333333;
   font-size: 14px;
   margin-bottom: 8px;
   display: block;
@@ -84,21 +86,23 @@
 
 .campo-valor {
   padding: 12px 15px;
-  border: 1px solid #ced4da;
+  border: 2px solid #dee2e6;
   background: #f8f9fa;
-  color: #495057;
+  color: #333333;
   font-size: 16px;
   border-radius: 4px;
   min-height: 45px;
   font-weight: 500;
 }
 
-/* Tabla estilo Bootstrap */
+/* Tabla con estilo minimalista y headers verdes */
 .tabla-container {
   margin: 30px 0;
-  border-radius: 8px;
+  border: 2px solid #28a745;
+  border-radius: 6px;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.1);
 }
 
 .tabla-articulos {
@@ -106,7 +110,6 @@
   border-collapse: collapse;
   background: #ffffff;
   font-size: 14px;
-  margin-bottom: 0;
 }
 
 .tabla-articulos th {
@@ -119,7 +122,6 @@
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  vertical-align: middle;
 }
 
 .tabla-articulos td {
@@ -127,13 +129,9 @@
   border: 1px solid #dee2e6;
   text-align: center;
   background: #ffffff;
-  color: #495057;
+  color: #333333;
   font-size: 14px;
-  vertical-align: middle;
-}
-
-.tabla-articulos tbody tr:nth-child(even) {
-  background-color: #f8f9fa;
+  min-height: 40px;
 }
 
 .tabla-articulos tbody tr:nth-child(even) td {
@@ -141,11 +139,11 @@
 }
 
 .tabla-articulos tbody tr:hover {
-  background-color: rgba(40, 167, 69, 0.1);
+  background-color: rgba(40, 167, 69, 0.05) !important;
 }
 
 .tabla-articulos tbody tr:hover td {
-  background-color: rgba(40, 167, 69, 0.1);
+  background-color: rgba(40, 167, 69, 0.05) !important;
 }
 
 /* Observaciones */
@@ -154,24 +152,23 @@
 }
 
 .observaciones-label {
-  font-weight: 600;
-  color: #495057;
+  font-weight: bold;
+  color: #000000;
   margin-bottom: 10px;
   display: block;
   font-size: 14px;
-  text-transform: uppercase;
 }
 
 .observaciones-texto {
   width: 100%;
   min-height: 80px;
   padding: 12px;
-  border: 1px solid #ced4da;
+  border: 1px solid #000000;
   border-radius: 4px;
   background-color: #ffffff;
-  color: #495057;
+  color: #000000;
   font-size: 14px;
-  font-family: inherit;
+  font-family: Arial, sans-serif;
   resize: vertical;
 }
 
@@ -179,7 +176,7 @@
 .firmas-section {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 80px;
+  gap: 100px;
   margin-top: 50px;
   padding-top: 30px;
 }
@@ -191,15 +188,15 @@
 .linea-firma {
   width: 200px;
   height: 2px;
-  background: #495057;
+  background: #000000;
   margin: 50px auto 15px auto;
   border: none;
 }
 
 .firma-label {
-  color: #495057;
+  color: #000000;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: bold;
   text-align: center;
   line-height: 1.4;
 }
@@ -230,61 +227,64 @@
 }
 
 .btn-imprimir {
-  background: #007bff;
+  background: linear-gradient(135deg, #007bff, #0056b3);
   color: #ffffff;
 }
 
 .btn-imprimir:hover {
-  background: #0056b3;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+  background: linear-gradient(135deg, #0056b3, #004085);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
 }
 
 .btn-pdf {
-  background: #28a745;
+  background: linear-gradient(135deg, #28a745, #1e7e34);
   color: #ffffff;
 }
 
 .btn-pdf:hover {
-  background: #1e7e34;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+  background: linear-gradient(135deg, #1e7e34, #155724);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
 }
 
 .btn-volver {
-  background: #6c757d;
+  background: linear-gradient(135deg, #6c757d, #495057);
   color: #ffffff;
 }
 
 .btn-volver:hover {
-  background: #5a6268;
+  background-color: #5a6268;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
 }
 
-/* ESTILOS DE IMPRESIÓN ÚNICOS */
+/* ESTILOS DE IMPRESIÓN - Con tabla de bordes negros */
 @media print {
+  /* Configuración de página */
   @page {
     margin: 1.5cm;
     size: A4;
   }
   
+  /* Resetear elementos básicos */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    box-sizing: border-box !important;
   }
   
   body {
     margin: 0 !important;
     padding: 0 !important;
-    background: white !important;
-    color: black !important;
-    font-family: 'Arial', sans-serif !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-family: 'Arial', 'Helvetica', sans-serif !important;
     font-size: 12px !important;
     line-height: 1.4 !important;
   }
   
-  /* Ocultar todo excepto el documento */
+  /* Ocultar todo excepto el documento cuando se imprime */
   body.printing * {
     visibility: hidden !important;
   }
@@ -299,44 +299,55 @@
     left: 0 !important;
     top: 0 !important;
     width: 100% !important;
-    background: white !important;
+    height: auto !important;
+    background: #ffffff !important;
     margin: 0 !important;
-    padding: 20px !important;
-    border: none !important;
-    box-shadow: none !important;
+    padding: 15px !important;
   }
   
   .solicitud-container {
     max-width: none !important;
     margin: 0 !important;
     padding: 0 !important;
-    background: white !important;
+    background: #ffffff !important;
+    width: 100% !important;
     overflow: visible !important;
     max-height: none !important;
   }
   
   .solicitud-documento {
-    background: white !important;
-    padding: 20px !important;
+    background: #ffffff !important;
+    padding: 15px !important;
     margin: 0 !important;
     border: none !important;
+    border-radius: 0 !important;
     box-shadow: none !important;
-    color: black !important;
+    min-height: auto !important;
+    width: 100% !important;
+    color: #000000 !important;
   }
   
   /* Ocultar botones */
-  .d-print-none {
+  .d-print-none,
+  .botones-accion,
+  .btn-accion {
     display: none !important;
   }
   
-  /* Header para impresión */
+  /* Encabezado con layout exacto como vista previa */
   .documento-header {
     display: flex !important;
     align-items: flex-start !important;
     justify-content: space-between !important;
     margin-bottom: 25px !important;
     padding: 20px 0 !important;
-    border-bottom: 2px solid #dee2e6 !important;
+    border-bottom: 2px solid #e0e0e0 !important;
+    background: transparent !important;
+  }
+  
+  .logo-container {
+    flex-shrink: 0 !important;
+    margin-right: 20px !important;
   }
   
   .logo-beexen {
@@ -346,6 +357,8 @@
   
   .header-info {
     text-align: right !important;
+    flex-grow: 1 !important;
+    margin-left: 0 !important;
   }
   
   .titulo-principal {
@@ -353,6 +366,8 @@
     font-size: 24px !important;
     font-weight: bold !important;
     margin: 0 0 8px 0 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
   }
   
   .info-documento {
@@ -360,90 +375,135 @@
     font-size: 16px !important;
     font-weight: 600 !important;
     margin: 4px 0 !important;
+    text-transform: uppercase !important;
   }
   
   /* Información general */
+  .info-general {
+    margin-bottom: 20px !important;
+  }
+  
+  .campo-grupo {
+    margin-bottom: 12px !important;
+  }
+  
   .campo-label {
     font-weight: bold !important;
-    color: black !important;
+    color: #000000 !important;
     font-size: 11px !important;
+    margin-bottom: 3px !important;
+    text-transform: uppercase !important;
   }
   
   .campo-valor {
-    border: 1px solid black !important;
-    background: white !important;
-    color: black !important;
+    padding: 6px 10px !important;
+    border: 1px solid #000000 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
     font-size: 12px !important;
-    padding: 8px !important;
+    min-height: 20px !important;
+    font-weight: 500 !important;
+    border-radius: 0 !important;
   }
   
-  /* Tabla Bootstrap para impresión */
+  /* Tabla minimalista con headers verdes para impresión */
   .tabla-container {
-    margin: 25px 0 !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
+    margin: 20px 0 !important;
     border: 2px solid #28a745 !important;
+    border-radius: 4px !important;
+    overflow: hidden !important;
   }
   
   .tabla-articulos {
+    width: 100% !important;
     border-collapse: collapse !important;
-    background: white !important;
+    background: #ffffff !important;
     font-size: 11px !important;
   }
   
   .tabla-articulos th {
     background: #28a745 !important;
-    color: white !important;
+    color: #ffffff !important;
     font-weight: bold !important;
-    padding: 12px 8px !important;
+    padding: 12px 6px !important;
+    text-align: center !important;
     border: 1px solid #28a745 !important;
     font-size: 10px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
   }
   
   .tabla-articulos td {
-    padding: 10px 8px !important;
+    padding: 12px 6px !important;
     border: 1px solid #dee2e6 !important;
-    background: white !important;
-    color: black !important;
+    text-align: center !important;
+    background: #ffffff !important;
+    color: #000000 !important;
     font-size: 11px !important;
+    min-height: 35px !important;
   }
   
   .tabla-articulos tbody tr:nth-child(even) td {
     background: #f8f9fa !important;
+    color: #000000 !important;
   }
   
-  /* Observaciones */
+  .tabla-articulos td strong {
+    font-weight: bold !important;
+    color: #000000 !important;
+  }
+  
+  /* Observaciones y justificación */
+  .observaciones-section {
+    margin-top: 20px !important;
+  }
+  
   .observaciones-label {
     font-weight: bold !important;
-    color: black !important;
+    color: #000000 !important;
     font-size: 11px !important;
+    margin-bottom: 6px !important;
+    text-transform: uppercase !important;
   }
   
   .observaciones-texto {
-    border: 1px solid black !important;
-    background: white !important;
-    color: black !important;
-    font-size: 11px !important;
     padding: 10px !important;
+    border: 1px solid #000000 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 11px !important;
+    min-height: 50px !important;
+    border-radius: 0 !important;
   }
   
-  /* Firmas */
+  /* Firmas - Solo 2 columnas como el ejemplo */
   .firmas-section {
+    display: grid !important;
     grid-template-columns: 1fr 1fr !important;
-    gap: 60px !important;
-    margin-top: 40px !important;
+    gap: 80px !important;
+    margin-top: 35px !important;
+  }
+  
+  .firma-campo {
+    text-align: center !important;
   }
   
   .linea-firma {
-    background: black !important;
+    width: 200px !important;
     height: 1px !important;
-    margin: 40px auto 10px auto !important;
+    background: #000000 !important;
+    margin: 35px auto 8px auto !important;
+    border: none !important;
+    border-top: 1px solid #000000 !important;
   }
   
   .firma-label {
-    color: black !important;
+    color: #000000 !important;
     font-size: 10px !important;
     font-weight: bold !important;
+    text-align: center !important;
+    margin-top: 5px !important;
+    line-height: 1.2 !important;
   }
 }
 
@@ -452,6 +512,10 @@
   .solicitud-container {
     padding: 15px;
     max-height: none;
+  }
+  
+  .solicitud-documento {
+    padding: 20px;
   }
   
   .documento-header {
@@ -477,5 +541,10 @@
   .firmas-section {
     grid-template-columns: 1fr;
     gap: 30px;
+  }
+  
+  .botones-accion {
+    flex-direction: column;
+    align-items: center;
   }
 }
