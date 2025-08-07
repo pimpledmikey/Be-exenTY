@@ -87,7 +87,16 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
 
   // Función para imprimir
   const handlePrint = () => {
+    // Agregar clase especial al body para impresión
+    document.body.classList.add('printing');
+    
+    // Trigger print
     window.print();
+    
+    // Remover clase después de imprimir
+    setTimeout(() => {
+      document.body.classList.remove('printing');
+    }, 100);
   };
 
   // Función para descargar PDF - usando print nativo del navegador

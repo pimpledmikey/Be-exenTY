@@ -568,19 +568,17 @@
     align-items: center;
   }
 }
-
-/* Estilos específicos para impresión */
 @media print {
   .solicitud-container {
     margin: 0;
     padding: 0;
-    background: white;
+    background: white !important;
     max-height: none;
     overflow: visible;
   }
 
   .solicitud-documento {
-    background: white;
+    background: white !important;
     border: none;
     box-shadow: none;
     padding: 20px;
@@ -588,49 +586,69 @@
     color: black;
   }
 
-  /* Header para impresión - sin colores */
+  /* Header para impresión - MANTENER colores originales */
   .documento-header {
-    background: white !important;
-    color: black !important;
-    border-bottom: 2px solid black;
-    padding: 20px 0;
+    background: transparent !important;
+    color: #333333 !important;
+    border-bottom: 2px solid #e0e0e0;
+    padding: 25px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   .titulo-principal {
-    color: black !important;
-    font-size: 20px !important;
-    font-weight: bold;
+    color: #28a745 !important;
+    font-size: 24px !important;
+    font-weight: 700;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   .info-documento {
-    color: black !important;
-    font-size: 14px !important;
+    color: #28a745 !important;
+    font-size: 16px !important;
+    font-weight: 600;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
-  /* Tabla para impresión */
+  /* Tabla para impresión - MANTENER colores verdes */
   .tabla-container {
-    border: 2px solid black;
+    border: 1px solid #28a745 !important;
     max-height: none;
     overflow: visible;
+    border-radius: 4px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   .tabla-articulos th {
-    background: #f0f0f0 !important;
-    color: black !important;
-    border: 1px solid black !important;
-    font-weight: bold;
+    background: #28a745 !important;
+    color: white !important;
+    border: 1px solid #28a745 !important;
+    font-weight: 600;
+    padding: 14px 10px;
+    text-align: center;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
   .tabla-articulos td {
-    border: 1px solid black !important;
+    border: 1px solid #e0e0e0 !important;
     background: white !important;
     color: black !important;
+    padding: 12px 10px;
+    text-align: center;
+    font-size: 12px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   .tabla-articulos tbody tr:nth-child(even) td {
-    background: #f9f9f9 !important;
+    background: #f8f9fa !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
@@ -643,7 +661,10 @@
 
   .campo-valor {
     color: black !important;
-    border-bottom: 1px solid black;
+    border: 1px solid #000000;
+    background: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   .observaciones-label {
@@ -653,7 +674,10 @@
 
   .observaciones-texto {
     color: black !important;
-    border: 1px solid black;
+    border: 1px solid #000000;
+    background: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   /* Firmas para impresión */
@@ -662,7 +686,7 @@
   }
 
   .linea-firma {
-    border-top: 1px solid black !important;
+    border-top: 2px solid #000000 !important;
   }
 
   /* Ocultar elementos no necesarios en impresión */
@@ -679,5 +703,35 @@
   body {
     font-size: 12px;
     line-height: 1.3;
+    background: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Asegurar que solo se imprima el contenido del documento */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Ocultar todo el fondo de la aplicación */
+  body.printing * {
+    visibility: hidden;
+  }
+
+  body.printing .solicitud-documento,
+  body.printing .solicitud-documento * {
+    visibility: visible;
+  }
+
+  body.printing .solicitud-documento {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    height: auto !important;
+    background: white !important;
+    margin: 0;
+    padding: 20px;
   }
 }
