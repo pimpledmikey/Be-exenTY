@@ -109,13 +109,13 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
     setItemSeleccionando(null);
     setBusquedaArticulo('');
     
-    // Mostrar confirmación visual con código
+    // Mostrar confirmación visual con código y unidad
     const toast = document.createElement('div');
-    toast.innerHTML = `✅ Artículo "${articulo.name}" (${codigoFinal}) agregado`;
+    toast.innerHTML = `✅ Artículo "${articulo.name}" (${codigoFinal}) - ${articulo.unit} agregado`;
     toast.style.cssText = `
       position: fixed; top: 20px; right: 20px; z-index: 9999;
       background: #28a745; color: white; padding: 10px 20px;
-      border-radius: 5px; font-family: Arial, sans-serif;
+      border-radius: 5px; font-family: Arial, sans-serif; font-weight: bold;
     `;
     document.body.appendChild(toast);
     setTimeout(() => {
@@ -451,7 +451,7 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
                                   className="form-control"
                                   value={item.precioT || 0}
                                   readOnly
-                                  style={{ backgroundColor: '#f8f9fa', minHeight: '40px', fontSize: '14px' }}
+                                  style={{ backgroundColor: '#e9ecef', color: '#000', fontWeight: 'bold', minHeight: '40px', fontSize: '14px' }}
                                 />
                               </td>
                             </>
