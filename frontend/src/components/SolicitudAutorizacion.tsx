@@ -139,40 +139,44 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
           </div>
         </div>
 
-        <table className="tabla-articulos-print">
-          <thead>
-            <tr>
-              <th>No.</th>
-              <th>Código</th>
-              <th>Descripción</th>
-              <th>Unidad</th>
-              <th>Cantidad</th>
-              {tipo === 'ENTRADA' && (
-                <>
-                  <th>Precio U</th>
-                  <th>Precio T</th>
-                </>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {filasCompletas.map((item, index) => (
-              <tr key={index}>
-                <td>{index + 1}</td>
-                <td>{item.codigo}</td>
-                <td>{item.descripcion}</td>
-                <td>{item.unidad}</td>
-                <td>{item.cantidad || ''}</td>
-                {tipo === 'ENTRADA' && (
-                  <>
-                    <td>{item.precioU ? `$${item.precioU.toFixed(2)}` : ''}</td>
-                    <td>{item.precioT ? `$${item.precioT.toFixed(2)}` : ''}</td>
-                  </>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="contenido-scroll-print">
+          <div className="tabla-container-print">
+            <table className="tabla-articulos-print">
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th>Código</th>
+                  <th>Descripción</th>
+                  <th>Unidad</th>
+                  <th>Cantidad</th>
+                  {tipo === 'ENTRADA' && (
+                    <>
+                      <th>Precio U</th>
+                      <th>Precio T</th>
+                    </>
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                {filasCompletas.map((item, index) => (
+                  <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>{item.codigo}</td>
+                    <td>{item.descripcion}</td>
+                    <td>{item.unidad}</td>
+                    <td>{item.cantidad || ''}</td>
+                    {tipo === 'ENTRADA' && (
+                      <>
+                        <td>{item.precioU ? `$${item.precioU.toFixed(2)}` : ''}</td>
+                        <td>{item.precioT ? `$${item.precioT.toFixed(2)}` : ''}</td>
+                      </>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
         <div className="firmas-section-print">
           <div className="firma-campo-print">

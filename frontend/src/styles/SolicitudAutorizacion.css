@@ -59,6 +59,8 @@
   box-sizing: border-box;
   border-radius: 8px;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .header-print {
@@ -68,6 +70,11 @@
   margin-bottom: 20px;
   padding-bottom: 15px;
   border-bottom: 1px solid #e8e8e8;
+  flex-shrink: 0; /* El header nunca se reducirá */
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 10;
 }
 
 .logo-container-print {
@@ -157,6 +164,16 @@
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
+.contenido-scroll-print {
+  flex: 1;
+  overflow-y: auto;
+  max-height: calc(100vh - 200px); /* Usar viewport height en lugar de mm para pantalla */
+}
+
+.tabla-container-print {
+  margin-bottom: 20px;
+}
+
 .tabla-articulos-print th {
   background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
   color: white;
@@ -167,6 +184,14 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.8px;
+}
+
+/* Asegurar que el header de la tabla sea visible en impresión */
+@media print {
+  .tabla-articulos-print th {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 }
 
 .tabla-articulos-print td {
@@ -194,7 +219,10 @@
 .firmas-section-print {
   display: flex;
   justify-content: space-around;
-  margin-top: 60px;
+  margin-top: 30px;
+  flex-shrink: 0; /* Las firmas siempre visibles */
+  background: white;
+  padding-top: 20px;
 }
 
 .firma-campo-print {
@@ -241,5 +269,58 @@
     width: 100%;
     min-height: auto;
     padding: 0;
+    display: block !important; /* Volver al layout normal para impresión */
+    flex-direction: initial !important;
+  }
+  .header-print {
+    position: static !important; /* No sticky en impresión */
+    flex-shrink: initial !important;
+    break-inside: avoid; /* Evitar que se divida entre páginas */
+    page-break-inside: avoid;
+  }
+  .contenido-scroll-print {
+    overflow: visible !important; /* No scroll en impresión */
+    max-height: none !important; /* Sin límite de altura en impresión */
+    flex: initial !important;
+  }
+  .tabla-articulos-print {
+    margin-bottom: 30px !important;
+    page-break-inside: auto; /* Permitir división de tabla entre páginas */
+  }
+  .tabla-articulos-print thead {
+    display: table-header-group; /* Repetir header de tabla en cada página */
+  }
+  .tabla-articulos-print tbody {
+    display: table-row-group;
+  }
+  .tabla-articulos-print tr {
+    page-break-inside: avoid; /* Evitar dividir filas */
+  }
+  .firmas-section-print {
+    flex-shrink: initial !important;
+    margin-top: 60px !important; /* Más espacio en impresión */
+    padding-top: 0 !important;
+    page-break-inside: avoid; /* Mantener firmas juntas */
+    break-inside: avoid;
+  }
+  
+  /* Crear un header que se repita en cada página */
+  @page {
+    margin: 20mm;
+    @top-left {
+      content: "BE-EX-EN";
+      font-weight: bold;
+      font-size: 12pt;
+    }
+    @top-center {
+      content: "SOLICITUD DE AUTORIZACIÓN";
+      font-weight: bold;
+      font-size: 14pt;
+      color: #4CAF50;
+    }
+    @top-right {
+      content: "Página " counter(page);
+      font-size: 10pt;
+    }
   }
 }
