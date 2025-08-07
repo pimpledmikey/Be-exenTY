@@ -94,7 +94,7 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
     window.print();
   };
 
-  // Función para generar PDF con html2pdf.js - MUCHO MÁS SIMPLE
+  // Función para generar PDF con html2pdf.js - OPTIMIZADO PARA UNA PÁGINA
   const handleDownloadPDF = async () => {
     const elemento = document.querySelector('.solicitud-documento') as HTMLElement;
     if (!elemento) {
@@ -105,22 +105,31 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
     setGenerandoPDF(true);
 
     try {
-      // Configuración para html2pdf.js
+      // Configuración optimizada para html2pdf.js
       const opciones = {
-        margin: [10, 10, 10, 10], // top, left, bottom, right
+        margin: [8, 8, 8, 8], // Márgenes mínimos para una página
         filename: `Solicitud_${tipo === 'entrada' ? 'Entrada' : 'Salida'}_${new Date().toLocaleDateString('es-ES').replace(/\//g, '-')}.pdf`,
-        image: { type: 'jpeg', quality: 0.85 },
+        image: { type: 'jpeg', quality: 0.9 },
         html2canvas: { 
-          scale: 1.5, 
+          scale: 1.2, 
           useCORS: true,
-          backgroundColor: '#ffffff'
+          backgroundColor: '#ffffff',
+          scrollX: 0,
+          scrollY: 0,
+          windowWidth: 800,
+          windowHeight: 1200
         },
         jsPDF: { 
           unit: 'mm', 
           format: 'a4', 
           orientation: 'portrait'
         },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        pagebreak: { 
+          mode: ['avoid-all', 'css', 'legacy'],
+          before: '.page-break-before',
+          after: '.page-break-after',
+          avoid: '.no-page-break'
+        }
       };
 
       // Generar PDF directamente desde el HTML
@@ -164,9 +173,9 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
       </div>
 
       {/* Documento principal */}
-      <div className="solicitud-documento">
+      <div className="solicitud-documento no-page-break">
         {/* Encabezado */}
-        <div className="documento-header">
+        <div className="documento-header no-page-break">
           <div className="logo-container">
             <img 
               src={logoBeExEn} 
@@ -193,7 +202,7 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
         </div>
 
         {/* Información adicional */}
-        <div className="info-general">
+        <div className="info-general no-page-break">
           {dirigido && (
             <div className="campo-grupo">
               <label className="campo-label">Dirigido a:</label>
@@ -217,7 +226,7 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
         </div>
 
         {/* Tabla */}
-        <div className="tabla-container">
+        <div className="tabla-container no-page-break">
           <table className="tabla-articulos">
             <thead>
               <tr>
@@ -274,7 +283,7 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
 
         {/* Justificación */}
         {justificacion && (
-          <div className="observaciones-section">
+          <div className="observaciones-section no-page-break">
             <label className="observaciones-label">Justificación:</label>
             <div className="observaciones-texto">
               {justificacion}
@@ -284,7 +293,7 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
 
         {/* Observaciones */}
         {observaciones && (
-          <div className="observaciones-section">
+          <div className="observaciones-section no-page-break">
             <label className="observaciones-label">Observaciones:</label>
             <div className="observaciones-texto">
               {observaciones}
@@ -293,7 +302,7 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
         )}
 
         {/* Firmas */}
-        <div className="firmas-section">
+        <div className="firmas-section no-page-break">
           <div className="firma-campo">
             <div className="linea-firma"></div>
             <div className="firma-label">
