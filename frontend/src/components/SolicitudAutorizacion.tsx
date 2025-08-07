@@ -111,17 +111,17 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
 
       <div ref={componentRef} className="solicitud-documento-print">
         <div className="header-print">
-          <div className="logo-container-print">
-            <img src={logoBeExEn} alt="Logo BE-EX-EN" className="logo-beexen-print"/>
+          <div className="fecha-container-print">
+            <div className="fecha-label-print">Fecha:</div>
+            <div className="fecha-valor-print">{fecha}</div>
+            <div className="folio-print">Folio: ENTRADA-{new Date().getTime().toString().slice(-9)}</div>
           </div>
           <div className="titulo-container-print">
             <h1 className="titulo-principal-print">SOLICITUD DE AUTORIZACIÓN</h1>
             <h2 className="subtitulo-verde-print">ENTRADA DE MATERIALES</h2>
           </div>
-          <div className="fecha-container-print">
-            <div className="fecha-label-print">Fecha:</div>
-            <div className="fecha-valor-print">{fecha}</div>
-            <div className="folio-print">Folio: ENTRADA-{new Date().getTime().toString().slice(-9)}</div>
+          <div className="logo-container-print">
+            <img src={logoBeExEn} alt="Logo BE-EX-EN" className="logo-beexen-print"/>
           </div>
         </div>
 
