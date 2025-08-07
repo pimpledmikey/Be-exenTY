@@ -87,7 +87,7 @@ export default function AjustesList() {
           </PermissionGuard>
         </div>
       </div>
-      <div className="table-responsive">
+      <div className="table-responsive" style={{ maxHeight: 'calc(100vh - 300px)', overflowY: 'auto' }}>
         <table className="table card-table table-vcenter text-nowrap datatable table-striped">
           <thead>
             <tr>

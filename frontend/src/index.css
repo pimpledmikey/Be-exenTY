@@ -129,3 +129,60 @@ body .table.dataTable thead th {
     background-color: #f9f9f9;
   }
 }
+
+/* Estilos globales para tablas con scroll y cabeceras fijas */
+.table-responsive {
+  position: relative;
+}
+
+.table-responsive table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--tblr-gray-50, #f8f9fa) !important;
+  border-bottom: 2px solid var(--tblr-border-color, #dee2e6) !important;
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+.table-responsive[data-bs-theme="dark"] table thead th {
+  background-color: var(--tblr-dark, #1e293b) !important;
+  color: var(--tblr-gray-300, #e2e8f0) !important;
+  border-color: var(--tblr-border-color-dark, #374151) !important;
+}
+
+/* Mejoras para tablas largas */
+.table-responsive::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: var(--tblr-primary, #0f8158);
+  border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: var(--tblr-success, #19b97f);
+}
+
+/* Responsive para pantallas pequeñas */
+@media (max-width: 768px) {
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+  
+  .table-responsive table thead th {
+    padding: 0.5rem 0.25rem !important;
+    font-size: 0.75rem !important;
+  }
+  
+  .table-responsive table tbody td {
+    padding: 0.5rem 0.25rem !important;
+    font-size: 0.75rem !important;
+  }
+}

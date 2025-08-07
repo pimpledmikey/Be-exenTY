@@ -6,6 +6,8 @@
   padding: 20px;
   background-color: #ffffff;
   font-family: Arial, sans-serif;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
 }
 
 .solicitud-documento {
@@ -24,8 +26,12 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 30px;
-  padding-bottom: 20px;
+  padding: 25px;
   border-bottom: 2px solid #000000;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  border-radius: 8px 8px 0 0;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
 }
 
 .logo-container {
@@ -47,16 +53,18 @@
 .titulo-principal {
   font-size: 24px;
   font-weight: bold;
-  color: #000000;
+  color: #ffffff;
   margin: 0 0 10px 0;
   text-transform: uppercase;
   letter-spacing: 1px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .info-documento {
   font-size: 14px;
-  color: #333333;
+  color: #ffffff;
   margin: 5px 0;
+  font-weight: 600;
 }
 
 /* Información general */
@@ -95,12 +103,23 @@
   border: 2px solid #000000;
   border-radius: 4px;
   overflow: hidden;
+  max-height: 400px;
+  overflow-y: auto;
+  position: relative;
 }
 
 .tabla-articulos {
   width: 100%;
   border-collapse: collapse;
   background-color: #ffffff;
+  position: relative;
+}
+
+.tabla-articulos thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #f8f9fa;
 }
 
 .tabla-articulos th {
@@ -291,9 +310,12 @@
     align-items: center !important;
     justify-content: space-between !important;
     margin-bottom: 25px !important;
-    padding-bottom: 15px !important;
+    padding: 20px !important;
     border-bottom: 3px solid #000000 !important;
+    background: #f8f9fa !important;
     page-break-after: avoid !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
   }
   
   .logo-beexen {
@@ -309,6 +331,7 @@
     text-align: center !important;
     margin: 0 !important;
     letter-spacing: 2px !important;
+    text-shadow: none !important;
   }
   
   .info-documento {
@@ -499,15 +522,17 @@
 @media (max-width: 768px) {
   .solicitud-container {
     padding: 10px;
+    max-height: calc(100vh - 100px);
   }
   
   .solicitud-documento {
-    padding: 20px;
+    padding: 15px;
   }
   
   .documento-header {
     flex-direction: column;
     text-align: center;
+    padding: 20px 15px;
   }
   
   .header-info {
@@ -517,6 +542,11 @@
   
   .info-general {
     grid-template-columns: 1fr;
+  }
+  
+  .tabla-container {
+    max-height: 300px;
+    font-size: 12px;
   }
   
   .firmas-section {
