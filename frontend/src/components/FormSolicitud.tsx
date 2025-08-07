@@ -86,20 +86,26 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
   };
 
   const seleccionarArticuloStock = (articulo: ArticuloStock, index: number) => {
+    console.log('Artículo seleccionado:', articulo); // Debug
     const nuevosItems = [...items];
+    const codigoFinal = articulo.codigo || articulo.id?.toString() || `ART-${articulo.id}`;
+    console.log('Código final asignado:', codigoFinal); // Debug
+    
     nuevosItems[index] = {
       ...nuevosItems[index],
-      codigo: articulo.codigo || articulo.id?.toString() || '', // Asegurar que el código se asigne
+      codigo: codigoFinal,
       descripcion: articulo.name,
       unidad: articulo.unit
     };
+    
+    console.log('Nuevo item creado:', nuevosItems[index]); // Debug
     setItems(nuevosItems);
     setItemSeleccionando(null);
     setBusquedaArticulo('');
     
-    // Mostrar confirmación visual
+    // Mostrar confirmación visual con código
     const toast = document.createElement('div');
-    toast.innerHTML = `✅ Artículo "${articulo.name}" agregado`;
+    toast.innerHTML = `✅ Artículo "${articulo.name}" (${codigoFinal}) agregado`;
     toast.style.cssText = `
       position: fixed; top: 20px; right: 20px; z-index: 9999;
       background: #28a745; color: white; padding: 10px 20px;
@@ -345,27 +351,30 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
                           <td>
                             <input
                               type="text"
-                              className="form-control form-control-sm"
+                              className="form-control"
                               value={item.codigo || ''}
                               onChange={(e) => actualizarItem(index, 'codigo', e.target.value)}
                               placeholder="Código"
+                              style={{ minHeight: '40px', fontSize: '14px' }}
                             />
                           </td>
                           <td>
                             <div className="input-group">
                               <input
                                 type="text"
-                                className="form-control form-control-sm"
+                                className="form-control"
                                 value={item.descripcion}
                                 onChange={(e) => actualizarItem(index, 'descripcion', e.target.value)}
                                 placeholder="Descripción del artículo *"
                                 required
+                                style={{ minHeight: '40px', fontSize: '14px' }}
                               />
                               <button
                                 type="button"
-                                className="btn btn-outline-secondary btn-sm"
+                                className="btn btn-outline-secondary"
                                 onClick={() => abrirModalArticulos(index)}
                                 title="Buscar en stock"
+                                style={{ minHeight: '40px' }}
                               >
                                 🔍
                               </button>
@@ -373,9 +382,10 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
                           </td>
                           <td>
                             <select
-                              className="form-select form-select-sm"
+                              className="form-select"
                               value={item.unidad}
                               onChange={(e) => actualizarItem(index, 'unidad', e.target.value)}
+                              style={{ minHeight: '40px', fontSize: '14px' }}
                             >
                               <option value="PZA">PZA</option>
                               <option value="KG">KG</option>
@@ -392,11 +402,12 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
                           <td>
                             <input
                               type="number"
-                              className="form-control form-control-sm"
+                              className="form-control"
                               value={item.cantidad}
                               onChange={(e) => actualizarItem(index, 'cantidad', parseFloat(e.target.value) || 0)}
                               min="0"
                               step="0.01"
+                              style={{ minHeight: '40px', fontSize: '14px' }}
                             />
                           </td>
                           {tipo === 'entrada' && (
@@ -404,21 +415,22 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
                               <td>
                                 <input
                                   type="number"
-                                  className="form-control form-control-sm"
+                                  className="form-control"
                                   value={item.precioU || 0}
                                   onChange={(e) => actualizarItem(index, 'precioU', parseFloat(e.target.value) || 0)}
                                   min="0"
                                   step="0.01"
                                   placeholder="0.00"
+                                  style={{ minHeight: '40px', fontSize: '14px' }}
                                 />
                               </td>
                               <td>
                                 <input
                                   type="number"
-                                  className="form-control form-control-sm"
+                                  className="form-control"
                                   value={item.precioT || 0}
                                   readOnly
-                                  style={{ backgroundColor: '#f8f9fa' }}
+                                  style={{ backgroundColor: '#f8f9fa', minHeight: '40px', fontSize: '14px' }}
                                 />
                               </td>
                             </>
@@ -426,10 +438,11 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
                           <td>
                             <button
                               type="button"
-                              className="btn btn-outline-danger btn-sm"
+                              className="btn btn-outline-danger"
                               onClick={() => eliminarItem(index)}
                               disabled={items.length === 1}
                               title="Eliminar artículo"
+                              style={{ minHeight: '40px' }}
                             >
                               🗑️
                             </button>

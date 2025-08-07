@@ -198,7 +198,7 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
     setTimeout(() => {
       window.print();
       document.body.innerHTML = originalContents;
-      window.location.reload(); // Recargar para restaurar todos los event listeners
+      // No recargar la página, solo restaurar event listeners necesarios
     }, 100);
   };
 
@@ -214,17 +214,58 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
 
       console.log('Generando PDF...');
       
-      // Configurar opciones para html2canvas
-      const canvas = await html2canvas(elemento, {
-        scale: 2, // Mejor calidad
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        width: elemento.scrollWidth,
-        height: elemento.scrollHeight,
-        scrollX: 0,
-        scrollY: 0
+      // Crear un clon del elemento para procesar sin afectar el original
+      const clone = elemento.cloneNode(true) as HTMLElement;
+      
+      // Limpiar estilos que pueden causar problemas con html2canvas
+      const elementsWithProblematicStyles = clone.querySelectorAll('*');
+      elementsWithProblematicStyles.forEach((el: any) => {
+        // Convertir oklch y otros colores modernos a hex/rgb
+        const computedStyle = window.getComputedStyle(el);
+        if (el.style) {
+          // Forzar colores básicos para compatibilidad
+          if (computedStyle.backgroundColor && computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+            el.style.backgroundColor = '#ffffff';
+          }
+          if (computedStyle.color) {
+            el.style.color = '#000000';
+          }
+          if (computedStyle.borderColor) {
+            el.style.borderColor = '#000000';
+          }
+        }
       });
+      
+      // Crear un contenedor temporal
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-9999px';
+      tempContainer.style.top = '0';
+      tempContainer.style.width = '794px'; // A4 width en px (210mm)
+      tempContainer.style.backgroundColor = '#ffffff';
+      tempContainer.appendChild(clone);
+      document.body.appendChild(tempContainer);
+      
+      // Configurar opciones para html2canvas con configuración más conservadora
+      const canvas = await html2canvas(clone, {
+        scale: 1.5, // Calidad reducida para evitar errores
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: '#ffffff',
+        width: clone.scrollWidth,
+        height: clone.scrollHeight,
+        scrollX: 0,
+        scrollY: 0,
+        ignoreElements: (element) => {
+          // Ignorar elementos problemáticos
+          return element.tagName === 'BUTTON' || 
+                 element.classList.contains('d-print-none') ||
+                 element.classList.contains('btn');
+        }
+      });
+
+      // Limpiar contenedor temporal
+      document.body.removeChild(tempContainer);
 
       // Crear PDF con jsPDF
       const pdf = new jsPDF('p', 'mm', 'a4');
@@ -241,7 +282,8 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
 
     } catch (error) {
       console.error('Error al generar PDF:', error);
-      alert('Error al generar el PDF. Por favor, inténtalo de nuevo.');
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      alert('Error al generar el PDF. Detalles: ' + errorMessage);
     }
   };
 
