@@ -366,31 +366,10 @@ function Dashboard({ user }: { user: any }) {
 		content = <DashboardHome />;
 	}
 	return (
-		<div
-			className="page"
-			style={{
-				minHeight: '100vh',
-				width: '100vw',
-				background: '#181a2a',
-			}}
-		>
+		<div className="page">
 			{/* Navbar superior tipo Tabler */}
-			<header
-				className="navbar navbar-expand-md navbar-dark sticky-top"
-				style={{
-					background: '#181a2a',
-					minHeight: 64,
-					zIndex: 1050,
-					width: '100vw',
-					left: 0,
-					right: 0,
-					top: 0,
-				}}
-			>
-				<div
-					className="container-xl d-flex align-items-center justify-content-between"
-					style={{ height: 64 }}
-				>
+			<header className="navbar navbar-expand-md navbar-dark sticky-top">
+				<div className="container-xl d-flex align-items-center justify-content-between">
 					<div className="d-flex align-items-center">
 						{/* Botón hamburguesa para móvil */}
 						<button 
@@ -541,16 +520,8 @@ function Dashboard({ user }: { user: any }) {
 			</header>
 			{/* Sidebar vertical tipo Tabler */}
 			<aside
-				className={`navbar navbar-vertical navbar-expand-sm position-fixed h-100 d-none d-md-block ${showMobileSidebar ? 'd-block' : ''}`}
+				className="navbar-vertical d-none d-md-block"
 				data-bs-theme="dark"
-				style={{
-					left: 0,
-					top: 64,
-					bottom: 0,
-					width: 250,
-					zIndex: 1040,
-					background: '#181a2a',
-				}}
 			>
 				<div className="container-fluid flex-column h-100 pt-3">
 					<div
@@ -626,17 +597,8 @@ function Dashboard({ user }: { user: any }) {
 						onClick={() => setShowMobileSidebar(false)}
 					></div>
 					<aside
-						className="navbar navbar-vertical navbar-expand-sm position-fixed h-100 d-md-none"
+						className={`navbar-vertical ${showMobileSidebar ? 'show' : ''} d-md-none`}
 						data-bs-theme="dark"
-						style={{
-							left: showMobileSidebar ? 0 : -250,
-							top: 64,
-							bottom: 0,
-							width: 250,
-							zIndex: 1040,
-							background: '#181a2a',
-							transition: 'left 0.3s ease'
-						}}
 					>
 						<div className="container-fluid flex-column h-100 pt-3">
 							<div className="collapse navbar-collapse flex-grow-1 show">
@@ -697,26 +659,12 @@ function Dashboard({ user }: { user: any }) {
 				</>
 			)}
 			{/* Contenido principal debajo del navbar y sidebar */}
-			<div
-				className="page-wrapper"
-				style={{
-					marginLeft: window.innerWidth >= 768 ? 250 : 0,
-					paddingTop: 64,
-					minHeight: 'calc(100vh - 64px)',
-					background: '#181a2a',
-				}}
-			>
-				<div
-					className="page-header d-print-none"
-					style={{ display: 'none' }}
-				>
+			<div className="page-wrapper">
+				<div className="page-header d-print-none" style={{ display: 'none' }}>
 					{/* Eliminado el header duplicado */}
 				</div>
-				<div
-					className="page-body"
-					style={{ minHeight: 'calc(100vh - 64px)' }}
-				>
-					<div className="container-xl px-3 px-md-4">{content}</div>
+				<div className="page-body">
+					<div className="container-xl">{content}</div>
 				</div>
 			</div>
 		</div>
