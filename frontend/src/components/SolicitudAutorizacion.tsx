@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import html2pdf from 'html2pdf.js';
 import logoBeExEn from '../assets/logoBeExEn.png';
 import '../styles/SolicitudAutorizacion.css';
 
@@ -95,7 +94,7 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
     window.print();
   };
 
-  // Función para generar PDF - SIMPLE Y DIRECTO
+  // Función para generar PDF con html2pdf.js - MUCHO MÁS SIMPLE
   const handleDownloadPDF = async () => {
     const elemento = document.querySelector('.solicitud-documento') as HTMLElement;
     if (!elemento) {
@@ -106,47 +105,26 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
     setGenerandoPDF(true);
 
     try {
-      // Capturar el elemento como imagen
-      const canvas = await html2canvas(elemento, {
-        scale: 1.5,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        width: elemento.scrollWidth,
-        height: elemento.scrollHeight
-      });
+      // Configuración para html2pdf.js
+      const opciones = {
+        margin: [10, 10, 10, 10], // top, left, bottom, right
+        filename: `Solicitud_${tipo === 'entrada' ? 'Entrada' : 'Salida'}_${new Date().toLocaleDateString('es-ES').replace(/\//g, '-')}.pdf`,
+        image: { type: 'jpeg', quality: 0.85 },
+        html2canvas: { 
+          scale: 1.5, 
+          useCORS: true,
+          backgroundColor: '#ffffff'
+        },
+        jsPDF: { 
+          unit: 'mm', 
+          format: 'a4', 
+          orientation: 'portrait'
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+      };
 
-      // Crear el PDF
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgData = canvas.toDataURL('image/jpeg', 0.85);
-      
-      // Calcular dimensiones para ajustar al A4
-      const pdfWidth = 210; // A4 width in mm
-      const pdfHeight = 297; // A4 height in mm
-      const imgWidth = pdfWidth - 20; // Margen de 10mm a cada lado
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
-      let heightLeft = imgHeight;
-      let position = 10; // Margen superior
-
-      // Agregar la imagen al PDF
-      pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
-      heightLeft -= (pdfHeight - 20);
-
-      // Si el contenido es más alto que una página, agregar páginas adicionales
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight + 10;
-        pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
-        heightLeft -= (pdfHeight - 20);
-      }
-
-      // Generar nombre de archivo
-      const fecha = new Date().toLocaleDateString('es-ES').replace(/\//g, '-');
-      const tipoDoc = tipo === 'entrada' ? 'Entrada' : 'Salida';
-      const nombreArchivo = `Solicitud_${tipoDoc}_${fecha}.pdf`;
-
-      // Descargar
-      pdf.save(nombreArchivo);
+      // Generar PDF directamente desde el HTML
+      await html2pdf().set(opciones).from(elemento).save();
 
     } catch (error) {
       console.error("Error al generar PDF:", error);
