@@ -202,13 +202,20 @@
   line-height: 1.4;
 }
 
-/* Botones */
+/* Botones - Asegurar visibilidad en pantalla */
 .botones-accion {
-  display: flex;
+  display: flex !important;
   justify-content: center;
   gap: 15px;
   margin-bottom: 30px;
   flex-wrap: wrap;
+  visibility: visible !important;
+}
+
+/* Sobreescribir Bootstrap d-print-none en pantalla normal */
+.botones-accion.d-print-none {
+  display: flex !important;
+  visibility: visible !important;
 }
 
 .btn-accion {
@@ -220,11 +227,12 @@
   cursor: pointer;
   transition: all 0.3s ease;
   min-width: 150px;
-  display: inline-flex;
+  display: inline-flex !important;
   align-items: center;
   justify-content: center;
   gap: 8px;
   text-decoration: none;
+  visibility: visible !important;
 }
 
 .btn-imprimir {
@@ -496,4 +504,27 @@
 @keyframes spin {
   0% { transform: translateY(-50%) rotate(0deg); }
   100% { transform: translateY(-50%) rotate(360deg); }
+}
+
+/* Reglas específicas para diferentes medios */
+@media screen {
+  .botones-accion,
+  .botones-accion.d-print-none {
+    display: flex !important;
+    visibility: visible !important;
+  }
+  
+  .btn-accion {
+    display: inline-flex !important;
+    visibility: visible !important;
+  }
+}
+
+/* Reglas específicas para impresión */
+@media print {
+  .botones-accion,
+  .d-print-none {
+    display: none !important;
+    visibility: hidden !important;
+  }
 }
