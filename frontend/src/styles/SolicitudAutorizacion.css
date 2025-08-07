@@ -1,18 +1,22 @@
 /* styles/SolicitudAutorizacion.css */
 
 .solicitud-container-wrapper {
-  padding: 20px;
+  padding: 0; /* Quitar padding para mejor control del layout */
   background-color: #f0f2f5;
   font-family: Arial, sans-serif;
-  max-height: calc(100vh - 100px);
-  overflow-y: auto;
+  height: 100vh; /* Usar toda la altura de la ventana */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Evitar scroll en el contenedor principal */
 }
 
 .botones-accion-wrapper {
   display: flex;
   justify-content: center;
   gap: 15px;
-  margin-bottom: 20px;
+  padding: 20px;
+  background-color: #f0f2f5;
+  flex-shrink: 0; /* No se reduce */
 }
 
 .btn-accion-print {
@@ -52,15 +56,16 @@
   background: white;
   width: 210mm;
   min-height: 297mm;
-  margin: 0 auto;
+  margin: 20px auto 0; /* Solo margin top */
   padding: 15mm;
   border: none;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   box-sizing: border-box;
   border-radius: 8px;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
+  flex: 1; /* Ocupa el espacio restante */
+  overflow: hidden; /* Controlar scroll interno */
 }
 
 .header-print {
@@ -70,11 +75,12 @@
   margin-bottom: 20px;
   padding-bottom: 15px;
   border-bottom: 1px solid #e8e8e8;
-  flex-shrink: 0; /* El header nunca se reducirá */
-  position: sticky;
-  top: 0;
+  flex-shrink: 0; /* El header nunca se reduce */
   background: white;
   z-index: 10;
+  position: sticky;
+  top: 0;
+  /* Header fijo tanto en pantalla como en impresión */
 }
 
 .logo-container-print {
@@ -165,9 +171,9 @@
 }
 
 .contenido-scroll-print {
-  flex: 1;
-  overflow-y: auto;
-  max-height: calc(100vh - 200px); /* Usar viewport height en lugar de mm para pantalla */
+  flex: 1; /* Ocupa todo el espacio restante */
+  overflow-y: auto; /* Solo scroll vertical */
+  padding-right: 5px; /* Espacio para scrollbar */
 }
 
 .tabla-container-print {
@@ -222,7 +228,26 @@
   margin-top: 30px;
   flex-shrink: 0; /* Las firmas siempre visibles */
   background: white;
-  padding-top: 20px;
+  padding: 20px 0;
+}
+
+/* Estilos para el scroll personalizado */
+.contenido-scroll-print::-webkit-scrollbar {
+  width: 8px;
+}
+
+.contenido-scroll-print::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.contenido-scroll-print::-webkit-scrollbar-thumb {
+  background: #4CAF50;
+  border-radius: 4px;
+}
+
+.contenido-scroll-print::-webkit-scrollbar-thumb:hover {
+  background: #45a049;
 }
 
 .firma-campo-print {
@@ -256,8 +281,10 @@
   .solicitud-container-wrapper {
     padding: 0;
     background-color: white;
-    overflow: visible;
-    max-height: none;
+    overflow: hidden; /* Mantener overflow hidden en impresión */
+    height: 100vh; /* Altura completa en impresión */
+    display: flex;
+    flex-direction: column;
   }
   .d-print-none {
     display: none !important;
@@ -269,8 +296,9 @@
     width: 100%;
     min-height: auto;
     padding: 0;
-    display: block !important; /* Volver al layout normal para impresión */
-    flex-direction: initial !important;
+    display: flex !important; /* Mantener flexbox para impresión */
+    flex-direction: column !important;
+    height: 100vh; /* Altura completa para impresión */
   }
   .header-print {
     position: static !important; /* No sticky en impresión */
@@ -279,9 +307,9 @@
     page-break-inside: avoid;
   }
   .contenido-scroll-print {
-    overflow: visible !important; /* No scroll en impresión */
-    max-height: none !important; /* Sin límite de altura en impresión */
-    flex: initial !important;
+    overflow-y: auto !important; /* Mantener scroll en impresión para tablas largas */
+    max-height: calc(100vh - 200px) !important; /* Altura máxima considerando header y firmas */
+    flex: 1 !important; /* Mantener flexbox */
   }
   .tabla-articulos-print {
     margin-bottom: 30px !important;
@@ -304,10 +332,11 @@
     break-inside: avoid;
   }
   
-  /* Header normal para impresión - sin elementos fijos */
+  /* Header fijo para impresión - mantener posición sticky */
   .header-print {
-    position: static !important;
-    flex-shrink: initial !important;
+    position: sticky !important; /* Mantener sticky en impresión */
+    top: 0 !important;
+    flex-shrink: 0 !important;
     break-inside: avoid;
     page-break-inside: avoid;
     display: flex !important;
@@ -316,5 +345,7 @@
     margin-bottom: 20px !important;
     padding-bottom: 15px !important;
     border-bottom: 1px solid #e8e8e8 !important;
+    background: white !important;
+    z-index: 1000 !important;
   }
 }
