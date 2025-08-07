@@ -212,6 +212,7 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
                 <th>Código</th>
                 <th>Descripción</th>
                 <th>Unidad</th>
+                <th>Medida</th>
                 <th>Cantidad</th>
                 {tipo === 'entrada' && (
                   <>
@@ -235,6 +236,9 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
                   </td>
                   <td>
                     {item.unidad}
+                  </td>
+                  <td>
+                    {item.medida || ''}
                   </td>
                   <td>
                     <strong>{item.cantidad || ''}</strong>
@@ -280,24 +284,16 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
           <div className="firma-campo">
             <div className="linea-firma"></div>
             <div className="firma-label">
-              <strong>Solicitado por:</strong><br/>
-              {solicitante || usuario?.nombre || '_______________________'}
+              <strong>Solicitante</strong><br/>
+              {solicitante || usuario?.nombre || 'Juan Jesús Ortega Simbrón'}
             </div>
           </div>
           
           <div className="firma-campo">
             <div className="linea-firma"></div>
             <div className="firma-label">
-              <strong>Autorizado por:</strong><br/>
-              {autoriza || '_______________________'}
-            </div>
-          </div>
-          
-          <div className="firma-campo">
-            <div className="linea-firma"></div>
-            <div className="firma-label">
-              <strong>Recibido por:</strong><br/>
-              _______________________
+              <strong>Autoriza</strong><br/>
+              {autoriza || 'Lic. Elisa Avila Requena'}
             </div>
           </div>
         </div>
