@@ -87,118 +87,7 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
 
   // Función para imprimir
   const handlePrint = () => {
-    const printContents = document.querySelector('.solicitud-documento')?.outerHTML;
-    
-    if (!printContents) {
-      console.error('No se encontró el contenido para imprimir');
-      return;
-    }
-
-    const originalContents = document.body.innerHTML;
-    
-    // Crear un documento temporal para imprimir
-    document.body.innerHTML = `
-      <html>
-        <head>
-          <title>Solicitud de Autorización - ${fecha}</title>
-          <style>
-            * {
-              margin: 0;
-              padding: 0;
-              box-sizing: border-box;
-            }
-            
-            body {
-              font-family: Arial, sans-serif;
-              font-size: 14px;
-              line-height: 1.4;
-              color: black;
-              background: white;
-              padding: 1cm;
-            }
-            
-            .solicitud-documento {
-              width: 100%;
-              max-width: none;
-              background: white;
-              margin: 0;
-              padding: 0;
-              box-shadow: none;
-              border: none;
-            }
-            
-            table {
-              width: 100%;
-              border-collapse: collapse;
-              margin: 10px 0;
-            }
-            
-            th, td {
-              border: 1px solid black;
-              padding: 8px;
-              text-align: left;
-              font-size: 12px;
-            }
-            
-            th {
-              background-color: #f0f0f0;
-              font-weight: bold;
-              text-align: center;
-            }
-            
-            h1 {
-              font-size: 18px;
-              margin: 10px 0;
-              text-align: center;
-            }
-            
-            h2 {
-              font-size: 14px;
-              margin: 10px 0;
-            }
-            
-            img {
-              max-width: 100px;
-              height: auto;
-            }
-            
-            .header-row {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              margin-bottom: 20px;
-            }
-            
-            .signatures {
-              margin-top: 50px;
-              display: flex;
-              justify-content: space-between;
-            }
-            
-            .signature-box {
-              text-align: center;
-              width: 200px;
-            }
-            
-            .signature-line {
-              border-top: 1px solid black;
-              margin-top: 30px;
-              padding-top: 5px;
-            }
-          </style>
-        </head>
-        <body>
-          ${printContents}
-        </body>
-      </html>
-    `;
-
-    // Imprimir y restaurar contenido
-    setTimeout(() => {
-      window.print();
-      document.body.innerHTML = originalContents;
-      // No recargar la página, solo restaurar event listeners necesarios
-    }, 100);
+    window.print();
   };
 
   // Función para descargar PDF - usando print nativo del navegador
@@ -226,25 +115,30 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
   return (
     <div className="solicitud-container">
       {/* Botones de acción - solo visible en pantalla */}
-      <div className="d-print-none mb-3">
-        <button 
-          className="btn btn-primary me-2" 
-          onClick={handlePrint}
-        >
-          🖨️ Imprimir
-        </button>
-        <button 
-          className="btn btn-success me-2" 
-          onClick={handleDownloadPDF}
-        >
-          📄 Descargar PDF
-        </button>
-        <button 
-          className="btn btn-secondary" 
-          onClick={onClose}
-        >
-          ❌ Cerrar
-        </button>
+      <div className="d-print-none mb-4">
+        <div className="d-flex justify-content-center gap-3">
+          <button 
+            className="btn btn-primary px-4 py-2" 
+            onClick={handlePrint}
+            style={{ minWidth: '140px' }}
+          >
+            🖨️ Imprimir
+          </button>
+          <button 
+            className="btn btn-success px-4 py-2" 
+            onClick={handleDownloadPDF}
+            style={{ minWidth: '140px' }}
+          >
+            📄 Descargar PDF
+          </button>
+          <button 
+            className="btn btn-secondary px-4 py-2" 
+            onClick={onClose}
+            style={{ minWidth: '140px' }}
+          >
+            ❌ Cerrar
+          </button>
+        </div>
       </div>
 
       {/* Documento principal */}

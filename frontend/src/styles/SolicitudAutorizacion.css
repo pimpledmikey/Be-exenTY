@@ -568,3 +568,116 @@
     align-items: center;
   }
 }
+
+/* Estilos específicos para impresión */
+@media print {
+  .solicitud-container {
+    margin: 0;
+    padding: 0;
+    background: white;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .solicitud-documento {
+    background: white;
+    border: none;
+    box-shadow: none;
+    padding: 20px;
+    margin: 0;
+    color: black;
+  }
+
+  /* Header para impresión - sin colores */
+  .documento-header {
+    background: white !important;
+    color: black !important;
+    border-bottom: 2px solid black;
+    padding: 20px 0;
+  }
+
+  .titulo-principal {
+    color: black !important;
+    font-size: 20px !important;
+    font-weight: bold;
+  }
+
+  .info-documento {
+    color: black !important;
+    font-size: 14px !important;
+  }
+
+  /* Tabla para impresión */
+  .tabla-container {
+    border: 2px solid black;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .tabla-articulos th {
+    background: #f0f0f0 !important;
+    color: black !important;
+    border: 1px solid black !important;
+    font-weight: bold;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .tabla-articulos td {
+    border: 1px solid black !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  .tabla-articulos tbody tr:nth-child(even) td {
+    background: #f9f9f9 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Campos para impresión */
+  .campo-label {
+    color: black !important;
+    font-weight: bold;
+  }
+
+  .campo-valor {
+    color: black !important;
+    border-bottom: 1px solid black;
+  }
+
+  .observaciones-label {
+    color: black !important;
+    font-weight: bold;
+  }
+
+  .observaciones-texto {
+    color: black !important;
+    border: 1px solid black;
+  }
+
+  /* Firmas para impresión */
+  .firma-label {
+    color: black !important;
+  }
+
+  .linea-firma {
+    border-top: 1px solid black !important;
+  }
+
+  /* Ocultar elementos no necesarios en impresión */
+  .d-print-none {
+    display: none !important;
+  }
+
+  /* Ajustar tamaños para impresión */
+  @page {
+    margin: 1cm;
+    size: A4;
+  }
+
+  body {
+    font-size: 12px;
+    line-height: 1.3;
+  }
+}
