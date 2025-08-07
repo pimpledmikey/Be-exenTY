@@ -334,34 +334,48 @@
     display: none !important;
   }
   
-  /* Encabezado con colores verdes */
+  /* Encabezado con layout exacto como vista previa */
   .documento-header {
     display: flex !important;
-    align-items: center !important;
+    align-items: flex-start !important;
     justify-content: space-between !important;
-    margin-bottom: 20px !important;
-    padding: 15px 0 !important;
+    margin-bottom: 25px !important;
+    padding: 20px 0 !important;
     border-bottom: 2px solid #e0e0e0 !important;
     background: transparent !important;
   }
   
+  .logo-container {
+    flex-shrink: 0 !important;
+    margin-right: 20px !important;
+  }
+  
+  .logo-beexen {
+    height: 60px !important;
+    width: auto !important;
+  }
+  
+  .header-info {
+    text-align: right !important;
+    flex-grow: 1 !important;
+    margin-left: 0 !important;
+  }
+  
   .titulo-principal {
     color: #28a745 !important;
-    font-size: 22px !important;
+    font-size: 24px !important;
     font-weight: bold !important;
     margin: 0 0 8px 0 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
   }
   
   .info-documento {
     color: #28a745 !important;
-    font-size: 14px !important;
+    font-size: 16px !important;
     font-weight: 600 !important;
-    margin: 3px 0 !important;
-  }
-  
-  .logo-beexen {
-    height: 50px !important;
-    width: auto !important;
+    margin: 4px 0 !important;
+    text-transform: uppercase !important;
   }
   
   /* Información general */
