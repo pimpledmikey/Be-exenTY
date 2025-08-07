@@ -89,14 +89,13 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
     });
   }
 
-  // Función para imprimir - SIMPLE Y NATURAL
+  // Función para imprimir - ROBUSTA Y CONFIABLE
   const handlePrint = () => {
     window.print();
   };
 
-  // Función para generar PDF con html2pdf.js - ANTI-DUPLICACIÓN TOTAL
+  // Función para generar PDF - SIMPLIFICADA Y ROBUSTA
   const handleDownloadPDF = async () => {
-    // Buscar SOLO el elemento del documento específico
     const elemento = document.querySelector('.solicitud-documento') as HTMLElement;
     if (!elemento) {
       alert("Error: No se pudo encontrar el documento");
@@ -106,57 +105,16 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
     setGenerandoPDF(true);
 
     try {
-      // Ocultar TODOS los elementos que pueden causar duplicación
-      const elementsToHide = [
-        '.botones-accion',
-        '.modal',
-        '.modal-dialog',
-        '.modal-content',
-        '.modal-header',
-        '.d-print-none',
-        '[data-bs-theme]'
-      ];
-      
-      const hiddenElements: HTMLElement[] = [];
-      
-      elementsToHide.forEach(selector => {
-        const els = document.querySelectorAll(selector) as NodeListOf<HTMLElement>;
-        els.forEach(el => {
-          hiddenElements.push(el);
-          el.style.display = 'none';
-        });
-      });
-
-      // Crear un elemento temporal limpio solo con el documento
-      const tempContainer = document.createElement('div');
-      tempContainer.style.cssText = `
-        position: absolute;
-        top: -9999px;
-        left: -9999px;
-        width: 794px;
-        background: white;
-        padding: 20px;
-        font-family: Arial, sans-serif;
-      `;
-      
-      // Clonar solo el contenido del documento
-      const clonedElement = elemento.cloneNode(true) as HTMLElement;
-      tempContainer.appendChild(clonedElement);
-      document.body.appendChild(tempContainer);
-
-      // Configuración ultra-específica
+      // Configuración simple y robusta
       const opciones = {
-        margin: [5, 5, 5, 5],
+        margin: 10,
         filename: `Solicitud_${tipo === 'entrada' ? 'Entrada' : 'Salida'}_${new Date().toLocaleDateString('es-ES').replace(/\//g, '-')}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
+        image: { type: 'jpeg', quality: 0.8 },
         html2canvas: { 
-          scale: 1.0,
-          useCORS: true,
-          backgroundColor: '#ffffff',
-          width: 794,
-          height: tempContainer.scrollHeight,
-          scrollX: 0,
-          scrollY: 0
+          scale: 1,
+          useCORS: false,
+          allowTaint: true,
+          backgroundColor: '#ffffff'
         },
         jsPDF: { 
           unit: 'mm', 
@@ -165,20 +123,19 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
         }
       };
 
-      // Generar PDF del elemento temporal
-      await html2pdf().set(opciones).from(tempContainer).save();
-
-      // Limpiar elemento temporal
-      document.body.removeChild(tempContainer);
-      
-      // Restaurar elementos ocultos
-      hiddenElements.forEach(el => {
-        el.style.display = '';
-      });
+      // Generar PDF directamente
+      await html2pdf().from(elemento).set(opciones).save();
 
     } catch (error) {
       console.error("Error al generar PDF:", error);
-      alert("Error al generar el PDF. Por favor, intenta nuevamente.");
+      // Si falla el PDF, sugerir usar la función de imprimir
+      const usarImprimir = confirm(
+        "Hubo un problema al generar el PDF. ¿Deseas imprimir el documento en su lugar? " + 
+        "(Puedes usar 'Guardar como PDF' en las opciones de impresión)"
+      );
+      if (usarImprimir) {
+        window.print();
+      }
     } finally {
       setGenerandoPDF(false);
     }

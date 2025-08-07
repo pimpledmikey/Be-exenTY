@@ -303,126 +303,55 @@
   box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
 }
 
-/* REGLAS ANTI-DUPLICACIÓN ESPECÍFICAS PARA MODALES */
+/* REGLAS DE IMPRESIÓN SIMPLIFICADAS - SIN CONFLICTOS */
 @media print {
-  /* Resetear todo para impresión limpia */
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
+  /* Ocultar elementos no deseados */
+  .botones-accion,
+  .d-print-none,
+  .modal,
+  .modal-dialog,
+  .modal-content,
+  .modal-header,
+  .modal-body {
+    display: none !important;
+    visibility: hidden !important;
   }
   
   /* Configuración de página */
   @page {
     size: A4;
-    margin: 10mm;
+    margin: 15mm;
   }
   
-  /* Ocultar ABSOLUTAMENTE TODO excepto el documento */
-  body,
-  body * {
-    visibility: hidden !important;
-    display: none !important;
-  }
-  
-  /* Mostrar SOLO el documento de solicitud */
-  .solicitud-documento,
-  .solicitud-documento * {
-    visibility: visible !important;
-    display: block !important;
-  }
-  
-  /* Resetear el documento a la raíz de la página */
+  /* Documento para impresión */
   .solicitud-documento {
-    position: absolute !important;
-    left: 0 !important;
-    top: 0 !important;
     width: 100% !important;
-    height: auto !important;
+    max-width: none !important;
     margin: 0 !important;
-    padding: 15mm !important;
+    padding: 0 !important;
     box-shadow: none !important;
     border: none !important;
     background: white !important;
-    transform: none !important;
-    z-index: 999999 !important;
+    color: black !important;
   }
   
-  /* Elementos inline del documento */
-  .solicitud-documento table,
-  .solicitud-documento tbody,
-  .solicitud-documento thead,
-  .solicitud-documento tr {
-    display: table !important;
-  }
-  
-  .solicitud-documento tbody,
-  .solicitud-documento thead {
-    display: table-header-group !important;
-  }
-  
-  .solicitud-documento tbody {
-    display: table-row-group !important;
-  }
-  
-  .solicitud-documento tr {
-    display: table-row !important;
-  }
-  
-  .solicitud-documento td,
-  .solicitud-documento th {
-    display: table-cell !important;
-  }
-  
-  /* Firmas como flex */
-  .firmas-section {
-    display: flex !important;
-  }
-  
-  /* Header como flex */
-  .documento-header {
-    display: flex !important;
-  }
-  
-  /* Ocultar modales y elementos no deseados */
-  .modal,
-  .modal-dialog,
-  .modal-content,
-  .modal-header,
-  .modal-body,
-  .botones-accion,
-  .d-print-none,
-  [data-bs-theme] {
-    display: none !important;
-    visibility: hidden !important;
-  }
-  
-  /* Header específico */
-  .documento-header {
-    border-bottom: 1px solid #333 !important;
-    margin-bottom: 20px !important;
-  }
-  
-  /* Tabla centrada */
-  .tabla-container {
-    margin: 20px auto !important;
-    width: 100% !important;
-    display: block !important;
-  }
-  
-  /* Firmas */
-  .firmas-section {
-    margin-top: 40px !important;
-  }
-  
-  /* Colores para impresión */
+  /* Títulos en negro simple */
   .titulo-principal,
   .info-documento {
-    color: #000 !important;
+    color: #000000 !important;
   }
   
+  /* Tabla con colores básicos */
   .tabla-articulos th {
-    background-color: #28a745 !important;
-    color: white !important;
+    background-color: #cccccc !important;
+    color: #000000 !important;
+  }
+  
+  /* Texto en negro */
+  .firma-label,
+  .campo-label,
+  .observaciones-label {
+    color: #000000 !important;
   }
 }
 
