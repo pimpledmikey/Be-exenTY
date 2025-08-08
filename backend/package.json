@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "build": "npx playwright install chromium --with-deps",
+    "postinstall": "npx playwright install chromium --with-deps"
   },
   "dependencies": {
     "@tabler/icons-react": "^3.34.0",
