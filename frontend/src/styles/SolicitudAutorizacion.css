@@ -281,10 +281,10 @@
   .solicitud-container-wrapper {
     padding: 0;
     background-color: white;
-    overflow: hidden; /* Mantener overflow hidden en impresión */
-    height: 100vh; /* Altura completa en impresión */
-    display: flex;
-    flex-direction: column;
+    overflow: visible !important; /* Permitir flujo normal en impresión */
+    height: auto !important; /* Altura automática para múltiples páginas */
+    display: block !important; /* Layout normal para impresión */
+    flex-direction: initial !important;
   }
   .d-print-none {
     display: none !important;
@@ -295,21 +295,21 @@
     box-shadow: none;
     width: 100%;
     min-height: auto;
-    padding: 0;
-    display: flex !important; /* Mantener flexbox para impresión */
-    flex-direction: column !important;
-    height: 100vh; /* Altura completa para impresión */
+    padding: 15mm;
+    display: block !important; /* Layout normal para impresión */
+    flex-direction: initial !important;
+    height: auto !important; /* Altura automática para múltiples páginas */
   }
   .header-print {
-    position: static !important; /* No sticky en impresión */
+    position: static !important; /* Header normal en impresión */
     flex-shrink: initial !important;
     break-inside: avoid; /* Evitar que se divida entre páginas */
     page-break-inside: avoid;
   }
   .contenido-scroll-print {
-    overflow-y: auto !important; /* Mantener scroll en impresión para tablas largas */
-    max-height: calc(100vh - 200px) !important; /* Altura máxima considerando header y firmas */
-    flex: 1 !important; /* Mantener flexbox */
+    overflow: visible !important; /* Sin scroll en impresión - layout normal */
+    max-height: none !important; /* Sin límite de altura - múltiples páginas */
+    flex: initial !important; /* Layout normal sin flexbox */
   }
   .tabla-articulos-print {
     margin-bottom: 30px !important;
@@ -326,26 +326,13 @@
   }
   .firmas-section-print {
     flex-shrink: initial !important;
-    margin-top: 60px !important; /* Más espacio en impresión */
+    margin-top: 40px !important; /* Espacio normal en impresión */
     padding-top: 0 !important;
     page-break-inside: avoid; /* Mantener firmas juntas */
     break-inside: avoid;
+    display: flex !important; /* Mantener layout de firmas */
+    justify-content: space-around !important;
   }
   
-  /* Header fijo para impresión - mantener posición sticky */
-  .header-print {
-    position: sticky !important; /* Mantener sticky en impresión */
-    top: 0 !important;
-    flex-shrink: 0 !important;
-    break-inside: avoid;
-    page-break-inside: avoid;
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: flex-start !important;
-    margin-bottom: 20px !important;
-    padding-bottom: 15px !important;
-    border-bottom: 1px solid #e8e8e8 !important;
-    background: white !important;
-    z-index: 1000 !important;
-  }
+  /* Eliminar el header sticky duplicado - solo usar el de arriba */
 }
