@@ -296,14 +296,13 @@
     box-shadow: none;
     width: 100%;
     padding: 15mm; /* Mantener márgenes internos */
-    display: table !important; /* Clave: convertir a tabla */
-    table-layout: fixed; /* Layout estable */
-    border-collapse: collapse;
-    height: auto !important;
+    display: block !important; /* No usar tabla para no repetir cabecera */
+    table-layout: initial !important;
+    border-collapse: initial !important;
   }
-  /* Header repetible en cada página de impresión */
+  /* Cabecera solo en la primera página (no repetida) */
   .header-print {
-    display: table-header-group !important; /* CLAVE */
+    display: block !important; /* Quitar table-header-group */
     position: static !important; /* Evitar sticky en impresión */
     break-inside: avoid; /* Evitar cortes */
     page-break-inside: avoid;
@@ -313,9 +312,9 @@
     padding: 0 0 12px 0 !important;
     border-bottom: 1px solid #e8e8e8 !important;
   }
-  /* Contenido fluido (tabla de artículos) */
+  /* Contenido fluido sin grupos de tabla */
   .contenido-scroll-print {
-    display: table-row-group !important; /* Parte del flujo de tabla */
+    display: block !important;
     overflow: visible !important; /* Sin scroll en impresión */
     height: auto !important;
     max-height: none !important;
@@ -336,9 +335,11 @@
   .tabla-articulos-print tr {
     page-break-inside: avoid; /* Evitar dividir filas */
   }
-  /* Firmas al final y juntas */
+  /* Firmas SOLO al final (no repetidas) y en dos columnas */
   .firmas-section-print {
-    display: table-footer-group !important; /* CLAVE: se repite al final de cada página si cabe, o cae en la última */
+    display: grid !important; /* No usar table-footer-group para evitar repetición */
+    grid-template-columns: 1fr 1fr;
+    gap: 24px 32px;
     page-break-inside: avoid;
     break-inside: avoid;
     background: white !important;
@@ -346,6 +347,7 @@
     margin-top: 20px !important;
     border-top: 1px solid #e8e8e8 !important;
   }
+  .firma-campo-print { width: auto !important; }
   /* Mantener colores del header de columnas en impresión */
   .tabla-articulos-print th {
     -webkit-print-color-adjust: exact;
