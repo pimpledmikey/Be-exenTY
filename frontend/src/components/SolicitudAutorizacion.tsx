@@ -47,22 +47,65 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
 }) => {
   const componentRef = useRef<HTMLDivElement>(null);
   
-  const handlePrint = useReactToPrint({
-    contentRef: componentRef,
-    documentTitle: `Solicitud_Autorizacion_${tipo}_${fecha}`,
-    pageStyle: `
-      @page {
-        size: A4;
-        margin: 10mm;
+  // Recolectar estilos activos del documento para embebidos en el HTML
+  const collectActiveStyles = () => {
+    let cssText = '';
+    for (const sheet of Array.from(document.styleSheets)) {
+      try {
+        const rules = (sheet as CSSStyleSheet).cssRules;
+        for (const rule of Array.from(rules)) cssText += rule.cssText + '\n';
+      } catch (_) {
+        // Ignorar hojas con CORS
       }
-      @media print {
-        body { 
-          -webkit-print-color-adjust: exact; 
-          color-adjust: exact;
-        }
-      }
-    `,
-  });
+    }
+    // Forzar ajustes de impresión
+    cssText += `\n@page{size:A4;margin:10mm;}\n`;
+    cssText += `\n@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}\n`;
+    return cssText;
+  };
+
+  const downloadBackendPdf = async () => {
+    if (!componentRef.current) return;
+    const node = componentRef.current.cloneNode(true) as HTMLElement;
+
+    // Construir HTML mínimo con solo el documento
+    const styles = collectActiveStyles();
+    const html = `<!doctype html><html><head><meta charset="utf-8"/><style>${styles}</style></head><body>${node.outerHTML}</body></html>`;
+
+    // Intentar obtener folio visible para nombre del archivo
+    let fileName = `Solicitud_Autorizacion_${tipo}_${new Date().toLocaleDateString('es-MX')}.pdf`;
+    try {
+      const folioEl = componentRef.current.querySelector('.folio-print');
+      const folioText = folioEl?.textContent?.replace('Folio:', '').trim().replace(/\s+/g, '_');
+      if (folioText) fileName = `Solicitud_Autorizacion_${folioText}.pdf`;
+    } catch {}
+
+    try {
+      const API_URL = (import.meta as any).env?.VITE_API_URL || '/api';
+      const resp = await fetch(`${API_URL}/pdf/solicitud`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : ''
+        },
+        body: JSON.stringify({ html, fileName, emulate: 'print', margin: { top: '10mm', right: '10mm', bottom: '12mm', left: '10mm' } })
+      });
+      if (!resp.ok) throw new Error(await resp.text());
+      const blob = await resp.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('Fallo al generar PDF en backend, usando impresión del navegador:', e);
+      // Fallback al flujo actual si hay error
+      handlePrint?.();
+    }
+  };
   
   const filasCompletas: SolicitudItem[] = [];
   
@@ -97,7 +140,7 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
       <div className="botones-accion-wrapper d-print-none">
         <button 
           className="btn-accion-print btn-pdf-print" 
-          onClick={handlePrint}
+          onClick={downloadBackendPdf}
         >
           🖨️ Imprimir / Guardar PDF
         </button>
