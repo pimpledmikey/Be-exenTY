@@ -46,59 +46,42 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
 }) => {
   const componentRef = useRef<HTMLDivElement>(null);
 
-  // Recolectar estilos activos del documento (style tags, link rel="stylesheet" y CSSOM accesible)
-  const collectActiveStyles = async (): Promise<string> => {
-    let cssText = '';
-
-    // 1) <style> embebidos
-    document.querySelectorAll('style').forEach((s) => {
-      if (s.textContent) cssText += s.textContent + '\n';
-    });
-
-    // 2) <link rel="stylesheet"> externos
-    const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]')) as HTMLLinkElement[];
-    for (const link of links) {
-      try {
-        const href = new URL(link.href, location.href).toString();
-        const resp = await fetch(href, { credentials: 'omit' });
-        if (resp.ok) cssText += (await resp.text()) + '\n';
-      } catch (_) {
-        // Ignorar errores CORS
-      }
-    }
-
-    // 3) CSSOM accesible (mismas-origin)
-    for (const sheet of Array.from(document.styleSheets)) {
-      try {
-        const rules = (sheet as CSSStyleSheet).cssRules;
-        for (const rule of Array.from(rules)) cssText += rule.cssText + '\n';
-      } catch (_) {
-        // Ignorar hojas con CORS
-      }
-    }
-
-    // Forzar ajustes de impresión
-    cssText += `\n@page{size:A4;margin:10mm;}\n`;
-    cssText += `\n@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}\n`;
-    return cssText;
-  };
-
   const downloadBackendPdf = async () => {
     if (!componentRef.current) return;
-    const node = componentRef.current.cloneNode(true) as HTMLElement;
 
     try {
-      const styles = await collectActiveStyles();
-      const baseHref = location.origin + '/';
-      const html = `<!doctype html><html><head><meta charset=\"utf-8\"/><base href=\"${baseHref}\"/><style>${styles}</style></head><body>${node.outerHTML}</body></html>`;
-
-      // Intentar obtener folio visible para nombre del archivo
-      let fileName = `Solicitud_Autorizacion_${tipo}_${new Date().toLocaleDateString('es-MX')}.pdf`;
+      // Obtener folio
+      let folio = `${tipo}-${new Date().getTime().toString().slice(-9)}`;
+      
+      // Convertir logo a base64
+      let logoBase64 = '';
       try {
-        const folioEl = componentRef.current.querySelector('.folio-print');
-        const folioText = folioEl?.textContent?.replace('Folio:', '').trim().replace(/\s+/g, '_');
-        if (folioText) fileName = `Solicitud_Autorizacion_${folioText}.pdf`;
-      } catch {}
+        const response = await fetch(logoBeExEn);
+        const blob = await response.blob();
+        logoBase64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const base64 = reader.result as string;
+            resolve(base64.split(',')[1]); // Remover prefijo data:image/...;base64,
+          };
+          reader.readAsDataURL(blob);
+        });
+      } catch (e) {
+        console.log('No se pudo cargar el logo:', e);
+      }
+
+      // Preparar datos para el PDF
+      const pdfData = {
+        folio,
+        fecha,
+        tipo,
+        sucursal: 'SUCURSAL PRINCIPAL', // Puedes hacer esto dinámico
+        items: filasCompletas.filter(item => item.descripcion), // Solo items con contenido
+        observaciones: '', // Puedes agregar un campo de observaciones si lo necesitas
+        usuarioSolicita: solicitante || usuario?.nombre || 'JUAN JESÚS ORTEGA SIMBRÓN',
+        usuarioAutoriza: autoriza || 'LIC. ELISA AVILA REQUENA',
+        logoBase64
+      };
 
       const API_URL = (import.meta as any).env?.VITE_API_URL || '/api';
       const resp = await fetch(`${API_URL}/pdf/solicitud`, {
@@ -107,20 +90,27 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
           'Content-Type': 'application/json',
           Authorization: localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : ''
         },
-        body: JSON.stringify({ html, fileName, emulate: 'print', margin: { top: '10mm', right: '10mm', bottom: '12mm', left: '10mm' } })
+        body: JSON.stringify(pdfData)
       });
-      if (!resp.ok) throw new Error(await resp.text());
+      
+      if (!resp.ok) {
+        const errorText = await resp.text();
+        throw new Error(`Error del servidor: ${errorText}`);
+      }
+      
       const blob = await resp.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = fileName;
+      a.download = `Solicitud_Autorizacion_${folio}.pdf`;
       document.body.appendChild(a);
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
+      
     } catch (e) {
-      console.error('Fallo al generar PDF en backend, usando impresión del navegador:', e);
+      console.error('Error al generar PDF:', e);
+      // Fallback a impresión del navegador
       window.print();
     }
   };

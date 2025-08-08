@@ -1,9 +1,12 @@
 import { Router } from 'express';
-import { generarPdfSolicitud, pingPdf } from '../controllers/pdfController.js';
+import { generarPdfSolicitudSimple } from '../controllers/pdfControllerJsPDF.js';
 
 const router = Router();
 
-router.get('/ping', pingPdf);
-router.post('/solicitud', generarPdfSolicitud);
+router.get('/ping', (req, res) => {
+  res.json({ status: 'OK', message: 'PDF service is running with jsPDF' });
+});
+
+router.post('/solicitud', generarPdfSolicitudSimple);
 
 export default router;
