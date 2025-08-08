@@ -164,24 +164,24 @@ const generarPdfSolicitudSimple = async (req, res) => {
     if (currentY > 740) { // Si estamos muy abajo, usar 2 filas
       firmas = [
         // Primera fila - 2 firmas
-        { titulo: 'SOLICITADO POR:', nombre: usuarioSolicita || 'Juan Jesús Ortega Simbrón', x: 50, y: currentY },
-        { titulo: 'AUTORIZADO POR:', nombre: usuarioAutoriza || 'Lic. Elisa Avila Requena', x: 130, y: currentY },
+        { titulo: 'SOLICITADO POR:', nombre: usuarioSolicita || 'Juan Jesús Ortega Simbrón', x: 40, y: currentY },
+        { titulo: 'AUTORIZADO POR:', nombre: usuarioAutoriza || 'Lic. Elisa Avila Requena', x: 110, y: currentY },
         // Segunda fila - 1 firma
-        { titulo: 'RECIBIDO POR:', nombre: 'Nombre y Firma', x: 50, y: currentY + 35 }
+        { titulo: 'RECIBIDO POR:', nombre: 'Nombre y Firma', x: 40, y: currentY + 35 }
       ];
-    } else { // Si hay espacio, usar 1 fila
+    } else { // Si hay espacio, usar 1 fila - MÁS A LA IZQUIERDA
       firmas = [
-        { titulo: 'SOLICITADO POR:', nombre: usuarioSolicita || 'Juan Jesús Ortega Simbrón', x: 45, y: currentY },
-        { titulo: 'AUTORIZADO POR:', nombre: usuarioAutoriza || 'Lic. Elisa Avila Requena', x: 115, y: currentY },
-        { titulo: 'RECIBIDO POR:', nombre: 'Nombre y Firma', x: 185, y: currentY }
+        { titulo: 'SOLICITADO POR:', nombre: usuarioSolicita || 'Juan Jesús Ortega Simbrón', x: 35, y: currentY },
+        { titulo: 'AUTORIZADO POR:', nombre: usuarioAutoriza || 'Lic. Elisa Avila Requena', x: 100, y: currentY },
+        { titulo: 'RECIBIDO POR:', nombre: 'Nombre y Firma', x: 165, y: currentY } // Movida hacia la izquierda
       ];
     }
     
     firmas.forEach((firma) => {
-      // Línea individual para cada firma - más a la izquierda
+      // Línea individual para cada firma - más pequeñas para que no se salgan
       doc.setLineWidth(0.5);
       doc.setDrawColor(...colors.negro);
-      doc.line(firma.x - 25, firma.y + 15, firma.x + 25, firma.y + 15);
+      doc.line(firma.x - 22, firma.y + 15, firma.x + 22, firma.y + 15); // Reducido de 25 a 22
       
       // Título de la sección
       doc.setFont('helvetica', 'bold');
