@@ -101,7 +101,12 @@ export const createSalida = async (req, res) => {
 
 export const getStock = async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM inventory_stock');
+    const [rows] = await pool.query(`
+      SELECT s.*, a.code, a.name, a.size, a.unit_code as unit
+      FROM inventory_stock s
+      LEFT JOIN articles a ON s.article_id = a.article_id
+      ORDER BY a.name
+    `);
     res.json(rows);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -110,8 +115,80 @@ export const getStock = async (req, res) => {
 
 export const getArticulosSimple = async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT article_id, name, size, measure FROM articles WHERE status = "activo"');
+    const [rows] = await pool.query(`
+      SELECT a.article_id, a.code, a.name, a.size, a.measure, a.unit_code, s.stock
+      FROM articles a
+      LEFT JOIN inventory_stock s ON a.article_id = s.article_id
+      WHERE a.status = "activo"
+      ORDER BY a.name
+    `);
     res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Función para validar stock disponible sin crear la salida
+export const validarStockDisponible = async (req, res) => {
+  try {
+    const { article_id, quantity } = req.body;
+    
+    if (!article_id || !quantity) {
+      return res.status(400).json({ error: 'Faltan datos de artículo o cantidad' });
+    }
+    
+    const [rows] = await pool.query('SELECT stock FROM inventory_stock WHERE article_id = ?', [article_id]);
+    const stockActual = rows.length > 0 ? rows[0].stock : 0;
+    
+    const stockSuficiente = stockActual >= quantity;
+    
+    res.json({ 
+      stockSuficiente,
+      stockActual,
+      stockSolicitado: quantity,
+      stockRestante: stockActual - quantity
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Función para validar múltiples items de stock de una vez
+export const validarStockMultiple = async (req, res) => {
+  try {
+    const { items } = req.body; // Array de {article_id, quantity, codigo, descripcion}
+    
+    if (!items || !Array.isArray(items)) {
+      return res.status(400).json({ error: 'Se requiere un array de items' });
+    }
+    
+    const validaciones = [];
+    
+    for (const item of items) {
+      if (item.article_id && item.quantity) {
+        const [rows] = await pool.query('SELECT stock FROM inventory_stock WHERE article_id = ?', [item.article_id]);
+        const stockActual = rows.length > 0 ? rows[0].stock : 0;
+        
+        validaciones.push({
+          article_id: item.article_id,
+          codigo: item.codigo,
+          descripcion: item.descripcion,
+          quantity: item.quantity,
+          stockActual,
+          stockSuficiente: stockActual >= item.quantity,
+          stockRestante: stockActual - item.quantity
+        });
+      }
+    }
+    
+    const todoStockSuficiente = validaciones.every(v => v.stockSuficiente);
+    const itemsSinStock = validaciones.filter(v => !v.stockSuficiente);
+    
+    res.json({ 
+      todoStockSuficiente,
+      validaciones,
+      itemsSinStock
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

@@ -9,6 +9,7 @@ interface Stock {
   article_id: number;
   code: string;
   name: string;
+  size?: string; // Medida del artículo
   stock: number;
   last_unit_cost: number;
   total_cost: number;
@@ -107,6 +108,7 @@ export default function StockList() {
               <th>ID</th>
               <th>Código</th>
               <th>Nombre</th>
+              <th>Medida</th>
               <th>Stock</th>
               <th>Último Costo</th>
               <th>Costo Total</th>
@@ -116,9 +118,14 @@ export default function StockList() {
             {stockPagina.map(s => (
               <tr key={s.article_id}>
                 <td>{s.article_id}</td>
-                <td>{s.code}</td>
+                <td><strong>{s.code || 'SIN-CODIGO'}</strong></td>
                 <td>{s.name}</td>
-                <td>{s.stock}</td>
+                <td><span className="text-muted small">{s.size || 'N/A'}</span></td>
+                <td>
+                  <span className={`badge ${s.stock > 5 ? 'bg-success' : s.stock > 0 ? 'bg-warning text-dark' : 'bg-danger'}`}>
+                    {s.stock}
+                  </span>
+                </td>
                 <td>{s.last_unit_cost}</td>
                 <td>{s.total_cost}</td>
               </tr>

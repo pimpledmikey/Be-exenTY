@@ -5,6 +5,10 @@ const API_URL = import.meta.env.VITE_API_URL;
 interface ArticuloSimple {
   article_id: number;
   name: string;
+  code?: string; // Código del artículo
+  size?: string; // Medida del artículo
+  stock?: number; // Stock disponible
+  unit_code?: string;
 }
 interface UsuarioSimple {
   user_id: number;
@@ -38,6 +42,8 @@ const SalidaForm: React.FC<SalidaFormProps> = ({ salida, onClose }) => {
   const [error, setError] = useState<string | null>(null);
   const [articulos, setArticulos] = useState<ArticuloSimple[]>([]);
   const [usuarios, setUsuarios] = useState<UsuarioSimple[]>([]);
+  const [stockInfo, setStockInfo] = useState<{stockActual: number, stockSuficiente: boolean} | null>(null);
+  const [validandoStock, setValidandoStock] = useState(false);
 
   useEffect(() => {
     fetch(`${API_URL}/almacen/articulos-simple`, {
@@ -61,11 +67,62 @@ const SalidaForm: React.FC<SalidaFormProps> = ({ salida, onClose }) => {
   }, [salida]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    
+    // Validar stock cuando cambie el artículo o la cantidad
+    if (name === 'article_id' || name === 'quantity') {
+      const articleId = name === 'article_id' ? value : form.article_id;
+      const quantity = name === 'quantity' ? parseInt(value) : form.quantity;
+      
+      if (articleId && quantity > 0) {
+        validarStock(articleId, quantity);
+      } else {
+        setStockInfo(null);
+      }
+    }
+  };
+  
+  const validarStock = async (article_id: string, quantity: number) => {
+    if (!article_id || quantity <= 0) {
+      setStockInfo(null);
+      return;
+    }
+    
+    setValidandoStock(true);
+    try {
+      const response = await fetch(`${API_URL}/almacen/validar-stock`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ article_id: parseInt(article_id), quantity })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setStockInfo({
+          stockActual: data.stockActual,
+          stockSuficiente: data.stockSuficiente
+        });
+      }
+    } catch (error) {
+      console.error('Error al validar stock:', error);
+    } finally {
+      setValidandoStock(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validar stock antes de enviar
+    if (stockInfo && !stockInfo.stockSuficiente) {
+      setError('No se puede crear la salida. Stock insuficiente.');
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     setSuccess(false);
@@ -77,7 +134,12 @@ const SalidaForm: React.FC<SalidaFormProps> = ({ salida, onClose }) => {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
         body: JSON.stringify(form)
       });
-      if (!res.ok) throw new Error('Error al guardar salida');
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Error al guardar salida');
+      }
+      
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
@@ -97,13 +159,47 @@ const SalidaForm: React.FC<SalidaFormProps> = ({ salida, onClose }) => {
         <select className="form-select" name="article_id" value={form.article_id} onChange={handleChange} required>
           <option value="">Seleccione un artículo</option>
           {articulos.map(a => (
-            <option key={a.article_id} value={a.article_id}>{a.name}</option>
+            <option key={a.article_id} value={a.article_id}>
+              [{a.code || 'SIN-CODIGO'}] {a.name} {a.size ? `- ${a.size}` : ''} {a.stock !== undefined ? `(Stock: ${a.stock})` : ''}
+            </option>
           ))}
         </select>
       </div>
       <div className="mb-3">
         <label className="form-label">Cantidad</label>
-        <input className="form-control" name="quantity" type="number" value={form.quantity} onChange={handleChange} required />
+        <input 
+          className={`form-control ${stockInfo && !stockInfo.stockSuficiente ? 'is-invalid' : stockInfo?.stockSuficiente ? 'is-valid' : ''}`}
+          name="quantity" 
+          type="number" 
+          value={form.quantity} 
+          onChange={handleChange} 
+          min="1"
+          required 
+        />
+        {validandoStock && (
+          <div className="form-text">
+            <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+            Validando stock...
+          </div>
+        )}
+        {stockInfo && (
+          <div className={`form-text ${stockInfo.stockSuficiente ? 'text-success' : 'text-danger'}`}>
+            {stockInfo.stockSuficiente ? (
+              <>
+                ✅ Stock suficiente. Disponible: <strong>{stockInfo.stockActual}</strong>
+              </>
+            ) : (
+              <>
+                ❌ Stock insuficiente. Disponible: <strong>{stockInfo.stockActual}</strong>, Solicitado: <strong>{form.quantity}</strong>
+              </>
+            )}
+          </div>
+        )}
+        {stockInfo && !stockInfo.stockSuficiente && (
+          <div className="invalid-feedback d-block">
+            No hay suficiente stock para realizar esta salida.
+          </div>
+        )}
       </div>
       <div className="mb-3">
         <label className="form-label">Nombre del Proyecto</label>
@@ -132,7 +228,13 @@ const SalidaForm: React.FC<SalidaFormProps> = ({ salida, onClose }) => {
       </div>
       <div className="d-flex justify-content-end gap-2">
         <button type="button" className="btn btn-secondary" onClick={onClose}>Cancelar</button>
-        <button type="submit" className="btn btn-primary" disabled={loading}>{loading ? 'Guardando...' : 'Guardar'}</button>
+        <button 
+          type="submit" 
+          className="btn btn-primary" 
+          disabled={loading || (stockInfo !== null && !stockInfo.stockSuficiente)}
+        >
+          {loading ? 'Guardando...' : 'Guardar'}
+        </button>
       </div>
       {success && <div className="alert alert-success mt-3">Salida guardada correctamente</div>}
       {error && <div className="alert alert-danger mt-3">Error: {error}</div>}

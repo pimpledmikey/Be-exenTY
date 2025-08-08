@@ -1,4 +1,5 @@
 import { jsPDF } from 'jspdf';
+import pool from '../db.js';
 
 const generarPdfSolicitudSimple = async (req, res) => {
   try {
@@ -13,6 +14,53 @@ const generarPdfSolicitudSimple = async (req, res) => {
       usuarioAutoriza,
       logoBase64 // Logo en base64 desde el frontend
     } = req.body;
+
+    // Validar stock para salidas antes de generar el PDF
+    if (tipo === 'SALIDA' && items && items.length > 0) {
+      const itemsConCodigo = items.filter(item => item.codigo && item.cantidad > 0);
+      
+      if (itemsConCodigo.length > 0) {
+        // Preparar datos para validación múltiple
+        const itemsParaValidar = await Promise.all(itemsConCodigo.map(async (item) => {
+          // Buscar article_id por código
+          const [rows] = await pool.query('SELECT article_id FROM articles WHERE code = ?', [item.codigo]);
+          const article_id = rows.length > 0 ? rows[0].article_id : null;
+          
+          return {
+            article_id,
+            codigo: item.codigo,
+            descripcion: item.descripcion,
+            cantidad: item.cantidad
+          };
+        }));
+        
+        // Validar stock para cada item
+        const itemsSinStock = [];
+        for (const itemValidar of itemsParaValidar) {
+          if (itemValidar.article_id) {
+            const [stockRows] = await pool.query('SELECT stock FROM inventory_stock WHERE article_id = ?', [itemValidar.article_id]);
+            const stockActual = stockRows.length > 0 ? stockRows[0].stock : 0;
+            
+            if (stockActual < itemValidar.cantidad) {
+              itemsSinStock.push({
+                codigo: itemValidar.codigo,
+                descripcion: itemValidar.descripcion,
+                stockSolicitado: itemValidar.cantidad,
+                stockDisponible: stockActual
+              });
+            }
+          }
+        }
+        
+        // Si hay items sin stock suficiente, retornar error
+        if (itemsSinStock.length > 0) {
+          return res.status(400).json({
+            error: 'Stock insuficiente para generar la solicitud de salida',
+            itemsSinStock
+          });
+        }
+      }
+    }
 
     // Crear nuevo documento PDF optimizado
     const doc = new jsPDF('portrait', 'mm', 'a4');
@@ -47,7 +95,7 @@ const generarPdfSolicitudSimple = async (req, res) => {
     doc.text('SOLICITUD DE AUTORIZACIÓN', 200, 18, { align: 'right' });
     
     doc.setFontSize(14);
-    doc.text('ENTRADA DE MATERIALES', 200, 26, { align: 'right' });
+    doc.text(`${tipo} DE MATERIALES`, 200, 26, { align: 'right' });
     
     // Información del header en recuadros
     doc.setTextColor(...colors.negro);
@@ -77,14 +125,25 @@ const generarPdfSolicitudSimple = async (req, res) => {
     let currentY = headerHeight + 20; // Más espacio después de la línea verde
     
     if (items && items.length > 0) {
-      // Headers de la tabla con configuración optimizada
-      const tableHeaders = ['NO.', 'CÓDIGO', 'DESCRIPCIÓN', 'UNIDAD', 'CANTIDAD', 'PRECIO U', 'PRECIO T'];
-      const colPositions = [15, 27, 47, 107, 125, 145, 170];
+      // Headers de la tabla según el tipo de solicitud
+      let tableHeaders = [];
+      let colPositions = [];
+      
+      if (tipo === 'SALIDA') {
+        // Para SALIDAS: sin columnas de precios
+        tableHeaders = ['NO.', 'CÓDIGO', 'DESCRIPCIÓN', 'UNIDAD', 'CANTIDAD'];
+        colPositions = [15, 35, 70, 140, 165];
+      } else {
+        // Para ENTRADAS: con columnas de precios (como está actualmente)
+        tableHeaders = ['NO.', 'CÓDIGO', 'DESCRIPCIÓN', 'UNIDAD', 'CANTIDAD', 'PRECIO U', 'PRECIO T'];
+        colPositions = [15, 27, 47, 107, 125, 145, 170];
+      }
       
       // Función auxiliar para dibujar header de tabla
       const drawTableHeader = (y) => {
+        const tableWidth = tipo === 'SALIDA' ? 165 : 180; // Ancho según tipo
         doc.setFillColor(...colors.verde);
-        doc.rect(15, y, 180, 8, 'F');
+        doc.rect(15, y, tableWidth, 8, 'F');
         doc.setTextColor(...colors.blanco);
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(9);
@@ -109,32 +168,48 @@ const generarPdfSolicitudSimple = async (req, res) => {
           currentY = 25;
         }
         
+        const tableWidth = tipo === 'SALIDA' ? 165 : 180; // Ancho según tipo
+        
         // Fondo alternativo optimizado
         if (index % 2 === 0) {
           doc.setFillColor(...colors.grisFondo);
-          doc.rect(15, currentY, 180, 7, 'F');
+          doc.rect(15, currentY, tableWidth, 7, 'F');
         }
         
         // Bordes de tabla optimizados
         doc.setDrawColor(...colors.grisBorde);
         doc.setLineWidth(0.1);
-        doc.rect(15, currentY, 180, 7);
+        doc.rect(15, currentY, tableWidth, 7);
         
         // Líneas verticales de separación
         colPositions.slice(1).forEach(pos => {
           doc.line(pos, currentY, pos, currentY + 7);
         });
         
-        // Datos de la fila optimizados
-        const rowData = [
-          (index + 1).toString(),
-          item.codigo || '',
-          item.descripcion?.length > 25 ? item.descripcion.substring(0, 22) + '...' : item.descripcion || '',
-          item.unidad || 'PZA',
-          (item.cantidad || 1).toString(),
-          item.precioUnitario || '',
-          item.precioTotal || ''
-        ];
+        // Datos de la fila según el tipo
+        let rowData = [];
+        
+        if (tipo === 'SALIDA') {
+          // Para SALIDAS: sin precios
+          rowData = [
+            (index + 1).toString(),
+            item.codigo || '',
+            item.descripcion?.length > 35 ? item.descripcion.substring(0, 32) + '...' : item.descripcion || '',
+            item.unidad || 'PZA',
+            (item.cantidad || 1).toString()
+          ];
+        } else {
+          // Para ENTRADAS: con precios
+          rowData = [
+            (index + 1).toString(),
+            item.codigo || '',
+            item.descripcion?.length > 25 ? item.descripcion.substring(0, 22) + '...' : item.descripcion || '',
+            item.unidad || 'PZA',
+            (item.cantidad || 1).toString(),
+            item.precioUnitario || '',
+            item.precioTotal || ''
+          ];
+        }
         
         rowData.forEach((data, idx) => {
           doc.text(data, colPositions[idx] + 2, currentY + 4.5);

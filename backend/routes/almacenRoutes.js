@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as almacenController from '../controllers/almacenController.js';
 import { verifyAuth, checkPermission } from '../middleware/authMiddleware.js';
+import validarStock from '../middlewares/validarStock.js';
 
 const router = Router();
 
@@ -14,9 +15,11 @@ router.delete('/articulos/:id', verifyAuth, checkPermission('almacen', 'delete')
 router.get('/entradas', verifyAuth, checkPermission('entradas', 'view'), almacenController.getEntradas);
 router.post('/entradas', verifyAuth, checkPermission('entradas', 'create'), almacenController.createEntrada);
 
-// Rutas de salidas con permisos granulares
+// Rutas de salidas con permisos granulares y validación de stock
 router.get('/salidas', verifyAuth, checkPermission('salidas', 'view'), almacenController.getSalidas);
-router.post('/salidas', verifyAuth, checkPermission('salidas', 'create'), almacenController.createSalida);
+router.post('/salidas', verifyAuth, checkPermission('salidas', 'create'), validarStock, almacenController.createSalida);
+router.post('/validar-stock', verifyAuth, checkPermission('salidas', 'create'), almacenController.validarStockDisponible);
+router.post('/validar-stock-multiple', verifyAuth, checkPermission('salidas', 'create'), almacenController.validarStockMultiple);
 
 // Rutas de consulta (solo requieren permisos de vista)
 router.get('/stock', verifyAuth, checkPermission('almacen', 'view'), almacenController.getStock);

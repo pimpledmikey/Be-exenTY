@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 
 interface ArticuloSimple {
   article_id: number;
+  code?: string; // Código del artículo
   name: string;
+  size?: string; // Medida del artículo
+  unit_code?: string; // Unidad
 }
 
 interface Entrada {
@@ -89,7 +92,9 @@ const EntradaForm: React.FC<EntradaFormProps> = ({ entrada, onClose }) => {
         <select className="form-select" name="article_id" value={form.article_id} onChange={handleChange} required>
           <option value="">Seleccione un artículo</option>
           {articulos.map(a => (
-            <option key={a.article_id} value={a.article_id}>{a.name}</option>
+            <option key={a.article_id} value={a.article_id}>
+              [{a.code || 'SIN-CODIGO'}] {a.name} {a.size ? `- ${a.size}` : ''} {a.unit_code ? `(${a.unit_code})` : ''}
+            </option>
           ))}
         </select>
       </div>

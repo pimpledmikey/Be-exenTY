@@ -17,8 +17,9 @@ interface SolicitudItem {
 interface ArticuloStock {
   id: number;
   article_id: number;
-  code: string;  // Cambié de 'codigo' a 'code' que es el real
+  code: string;  // Código del artículo
   name: string;
+  size?: string; // Medida del artículo
   unit: string;
   stock: number;
 }
@@ -166,6 +167,21 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
     if (itemsValidos.length === 0) {
       alert('Debe agregar al menos un artículo con descripción');
       return;
+    }
+    
+    // Validar stock para salidas
+    if (tipo === 'salida') {
+      const itemsSinStock = itemsValidos.filter(item => {
+        if (!item.codigo) return false;
+        const articulo = articulosStock.find(a => a.code === item.codigo);
+        return articulo && (articulo.stock || 0) < item.cantidad;
+      });
+      
+      if (itemsSinStock.length > 0) {
+        const nombres = itemsSinStock.map(item => `- ${item.descripcion} (Solicitado: ${item.cantidad}, Disponible: ${articulosStock.find(a => a.code === item.codigo)?.stock || 0})`).join('\n');
+        alert(`No se puede generar la solicitud. Los siguientes artículos no tienen stock suficiente:\n\n${nombres}`);
+        return;
+      }
     }
     
     setShowPreview(true);
@@ -356,6 +372,7 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
                           <th style={{ width: '10%' }}>Código</th>
                           <th style={{ width: '30%' }}>Descripción *</th>
                           <th style={{ width: '10%' }}>Unidad</th>
+                          {tipo === 'salida' && <th style={{ width: '10%' }}>Stock</th>}
                           <th style={{ width: '10%' }}>Cantidad *</th>
                           {tipo === 'entrada' && (
                             <>
@@ -420,16 +437,43 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
                               <option value="JGO">JGO</option>
                             </select>
                           </td>
+                          {tipo === 'salida' && (
+                            <td>
+                              {item.codigo && articulosStock.find(a => a.code === item.codigo) ? (
+                                <span className={`badge ${
+                                  (articulosStock.find(a => a.code === item.codigo)?.stock || 0) >= item.cantidad 
+                                    ? 'bg-success' 
+                                    : (articulosStock.find(a => a.code === item.codigo)?.stock || 0) > 0 
+                                      ? 'bg-warning text-dark' 
+                                      : 'bg-danger'
+                                }`}>
+                                  {articulosStock.find(a => a.code === item.codigo)?.stock || 0}
+                                </span>
+                              ) : (
+                                <span className="badge bg-secondary">N/A</span>
+                              )}
+                            </td>
+                          )}
                           <td>
                             <input
                               type="number"
-                              className="form-control"
+                              className={`form-control ${
+                                tipo === 'salida' && item.codigo && articulosStock.find(a => a.code === item.codigo) 
+                                  ? ((articulosStock.find(a => a.code === item.codigo)?.stock || 0) >= item.cantidad ? 'is-valid' : 'is-invalid')
+                                  : ''
+                              }`}
                               value={item.cantidad}
                               onChange={(e) => actualizarItem(index, 'cantidad', parseFloat(e.target.value) || 0)}
                               min="0"
                               step="0.01"
                               style={{ minHeight: '40px', fontSize: '14px' }}
                             />
+                            {tipo === 'salida' && item.codigo && articulosStock.find(a => a.code === item.codigo) && 
+                             (articulosStock.find(a => a.code === item.codigo)?.stock || 0) < item.cantidad && (
+                              <div className="invalid-feedback">
+                                Stock insuficiente
+                              </div>
+                            )}
                           </td>
                           {tipo === 'entrada' && (
                             <>
@@ -531,6 +575,7 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
                       <tr>
                         <th>Código</th>
                         <th>Descripción</th>
+                        <th>Medida</th>
                         <th>Unidad</th>
                         <th>Stock</th>
                         <th>Acción</th>
@@ -542,6 +587,9 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
                           <tr key={articulo.id}>
                             <td><strong>{articulo.code}</strong></td>
                             <td>{articulo.name}</td>
+                            <td>
+                              <span className="text-muted small">{articulo.size || 'N/A'}</span>
+                            </td>
                             <td>
                               <span className="badge bg-secondary">{articulo.unit}</span>
                             </td>

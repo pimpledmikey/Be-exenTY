@@ -106,6 +106,19 @@ const AlmacenMenu: React.FC<AlmacenMenuProps> = ({ initialTab }) => {
       
       <div>{content}</div>
       
+      {/* Alerta informativa sobre control de stock */}
+      {submenu === 'salidas' && (
+        <div className="alert alert-info mt-3" style={{ borderRadius: '8px' }}>
+          <div className="d-flex align-items-center">
+            <span className="me-2">📦</span>
+            <div>
+              <strong>Control de Stock Activado:</strong> Las salidas ahora verifican automáticamente el stock disponible. 
+              No se permitirán salidas que excedan el inventario actual.
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Modal de Formulario de Solicitud */}
       {showFormSolicitud && (
         <div className="modal fade show d-block" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.8)', zIndex: 9999 }}>

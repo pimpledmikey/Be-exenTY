@@ -112,7 +112,26 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
       
       if (!resp.ok) {
         const errorText = await resp.text();
-        throw new Error(`Error del servidor: ${errorText}`);
+        let errorObj;
+        try {
+          errorObj = JSON.parse(errorText);
+        } catch (e) {
+          throw new Error(`Error del servidor: ${errorText}`);
+        }
+        
+        // Manejar específicamente errores de stock
+        if (errorObj.error && errorObj.itemsSinStock) {
+          const detalleStock = errorObj.itemsSinStock.map((item: any) => 
+            `• ${item.descripcion} (${item.codigo}): Solicitado ${item.stockSolicitado}, Disponible ${item.stockDisponible}`
+          ).join('\n');
+          
+          alert(`❌ No se puede generar el PDF de salida\n\n${errorObj.error}\n\nDetalles:\n${detalleStock}`);
+          setIsGeneratingPdf(false);
+          setPdfProgress(0);
+          return;
+        }
+        
+        throw new Error(errorObj.error || `Error del servidor: ${errorText}`);
       }
       
       const blob = await resp.blob();
