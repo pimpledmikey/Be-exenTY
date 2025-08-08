@@ -144,37 +144,38 @@ const generarPdfSolicitudSimple = async (req, res) => {
       });
     }
     
-    // FIRMAS PROFESIONALES - Después de la tabla, cada una con su línea
+    // FIRMAS EN COLUMNAS - En la misma fila después de la tabla
     currentY += 15; // Espacio pequeño después de la tabla
     
-    // Verificar si necesitamos espacio para las firmas (solo si no caben)
-    if (currentY > 230) {
+    // NO crear nueva página - siempre continuar después de la tabla
+    // Solo verificar si hay espacio mínimo (60px para las 3 firmas)
+    if (currentY > 780) { // Solo si realmente no cabe
       doc.addPage();
       currentY = 30;
     }
     
-    // Tres secciones de firmas, cada una con su propia línea
-    const firmaSecciones = [
-      { titulo: 'SOLICITADO POR:', nombre: usuarioSolicita || 'Juan Jesús Ortega Simbrón', x: 55, y: currentY },
-      { titulo: 'AUTORIZADO POR:', nombre: usuarioAutoriza || 'Lic. Elisa Avila Requena', x: 55, y: currentY + 30 },
-      { titulo: 'RECIBIDO POR:', nombre: 'Nombre y Firma', x: 55, y: currentY + 60 }
+    // Tres firmas en columnas horizontales (misma fila)
+    const firmas = [
+      { titulo: 'SOLICITADO POR:', nombre: usuarioSolicita || 'Juan Jesús Ortega Simbrón', x: 70 },
+      { titulo: 'AUTORIZADO POR:', nombre: usuarioAutoriza || 'Lic. Elisa Avila Requena', x: 165 },
+      { titulo: 'RECIBIDO POR:', nombre: 'Nombre y Firma', x: 260 }
     ];
     
-    firmaSecciones.forEach((seccion) => {
-      // Línea individual para cada firma - centrada
+    firmas.forEach((firma) => {
+      // Línea individual para cada firma
       doc.setLineWidth(0.5);
       doc.setDrawColor(...colors.negro);
-      doc.line(seccion.x - 30, seccion.y + 15, seccion.x + 30, seccion.y + 15);
+      doc.line(firma.x - 35, currentY + 15, firma.x + 35, currentY + 15);
       
       // Título de la sección
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(8);
-      doc.text(seccion.titulo, seccion.x, seccion.y + 20, { align: 'center' });
+      doc.text(firma.titulo, firma.x, currentY + 22, { align: 'center' });
       
-      // Nombre del usuario centrado en la línea
+      // Nombre del usuario
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
-      doc.text(seccion.nombre.toUpperCase(), seccion.x, seccion.y + 25, { align: 'center' });
+      doc.text(firma.nombre.toUpperCase(), firma.x, currentY + 30, { align: 'center' });
     });
     
     // Generar el PDF optimizado

@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import logoBeExEn from '../assets/logoBeExEn.png';
 import '../styles/SolicitudAutorizacion.css';
 
@@ -45,19 +45,32 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
   onClose = () => {}
 }) => {
   const componentRef = useRef<HTMLDivElement>(null);
+  
+  // Estados para el loader de PDF
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [pdfProgress, setPdfProgress] = useState(0);
 
   const downloadBackendPdf = async () => {
     if (!componentRef.current) return;
 
+    // Evitar múltiples clics
+    if (isGeneratingPdf) return;
+
     try {
+      setIsGeneratingPdf(true);
+      setPdfProgress(10);
+
       // Obtener folio
       let folio = `${tipo}-${new Date().getTime().toString().slice(-9)}`;
+      setPdfProgress(20);
       
       // Convertir logo a base64
       let logoBase64 = '';
       try {
         const response = await fetch(logoBeExEn);
         const blob = await response.blob();
+        setPdfProgress(40);
+        
         logoBase64 = await new Promise<string>((resolve) => {
           const reader = new FileReader();
           reader.onloadend = () => {
@@ -66,6 +79,7 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
           };
           reader.readAsDataURL(blob);
         });
+        setPdfProgress(60);
       } catch (e) {
         console.log('No se pudo cargar el logo:', e);
       }
@@ -75,13 +89,14 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
         folio,
         fecha,
         tipo,
-        sucursal: 'SUCURSAL PRINCIPAL', // Puedes hacer esto dinámico
-        items: filasCompletas.filter(item => item.descripcion), // Solo items con contenido
-        observaciones: '', // Puedes agregar un campo de observaciones si lo necesitas
+        sucursal: 'SUCURSAL PRINCIPAL',
+        items: filasCompletas.filter(item => item.descripcion),
+        observaciones: '',
         usuarioSolicita: solicitante || usuario?.nombre || 'JUAN JESÚS ORTEGA SIMBRÓN',
         usuarioAutoriza: autoriza || 'LIC. ELISA AVILA REQUENA',
         logoBase64
       };
+      setPdfProgress(70);
 
       const API_URL = (import.meta as any).env?.VITE_API_URL || '/api';
       const resp = await fetch(`${API_URL}/pdf/solicitud`, {
@@ -93,12 +108,16 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
         body: JSON.stringify(pdfData)
       });
       
+      setPdfProgress(85);
+      
       if (!resp.ok) {
         const errorText = await resp.text();
         throw new Error(`Error del servidor: ${errorText}`);
       }
       
       const blob = await resp.blob();
+      setPdfProgress(95);
+      
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -108,8 +127,18 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
       a.remove();
       window.URL.revokeObjectURL(url);
       
+      setPdfProgress(100);
+      
+      // Limpiar loading después de un momento
+      setTimeout(() => {
+        setIsGeneratingPdf(false);
+        setPdfProgress(0);
+      }, 1000);
+      
     } catch (e) {
       console.error('Error al generar PDF:', e);
+      setIsGeneratingPdf(false);
+      setPdfProgress(0);
       // Fallback a impresión del navegador
       window.print();
     }
@@ -147,10 +176,36 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
     <div className="solicitud-container-wrapper">
       <div className="botones-accion-wrapper d-print-none">
         <button 
-          className="btn-accion-print btn-pdf-print" 
+          className={`btn-accion-print btn-pdf-print ${isGeneratingPdf ? 'generating' : ''}`}
           onClick={downloadBackendPdf}
+          disabled={isGeneratingPdf}
+          style={{
+            position: 'relative',
+            overflow: 'hidden',
+            opacity: isGeneratingPdf ? 0.8 : 1,
+            cursor: isGeneratingPdf ? 'not-allowed' : 'pointer'
+          }}
         >
-          🖨️ Imprimir / Guardar PDF
+          {isGeneratingPdf && (
+            <div 
+              style={{
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                height: '100%',
+                backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                width: `${pdfProgress}%`,
+                transition: 'width 0.3s ease',
+                zIndex: 1
+              }}
+            />
+          )}
+          <span style={{ position: 'relative', zIndex: 2 }}>
+            {isGeneratingPdf 
+              ? `🔄 Generando PDF... ${pdfProgress}%` 
+              : '🖨️ Imprimir / Guardar PDF'
+            }
+          </span>
         </button>
         {onClose && (
           <button 
