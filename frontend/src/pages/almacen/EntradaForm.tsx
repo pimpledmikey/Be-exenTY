@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Select from 'react-select';
 
 interface ArticuloSimple {
   article_id: number;
@@ -89,14 +90,31 @@ const EntradaForm: React.FC<EntradaFormProps> = ({ entrada, onClose }) => {
     <form onSubmit={handleSubmit}>
       <div className="mb-3">
         <label className="form-label">Artículo</label>
-        <select className="form-select" name="article_id" value={form.article_id} onChange={handleChange} required>
-          <option value="">Seleccione un artículo</option>
-          {articulos.map(a => (
-            <option key={a.article_id} value={a.article_id}>
-              [{a.code || 'SIN-CODIGO'}] {a.name} {a.size ? `- ${a.size}` : ''} {a.unit_code ? `(${a.unit_code})` : ''}
-            </option>
-          ))}
-        </select>
+                                <Select
+                          value={articulos.find(art => art.article_id.toString() === form.article_id) ? {
+                            value: form.article_id,
+                            label: `${articulos.find(art => art.article_id.toString() === form.article_id)?.code || ''} - ${articulos.find(art => art.article_id.toString() === form.article_id)?.name || ''} (${articulos.find(art => art.article_id.toString() === form.article_id)?.size || 'N/A'})`
+                          } : null}
+                          onChange={(selectedOption: any) => setForm({...form, article_id: selectedOption?.value || ''})}
+                          options={articulos.map(articulo => ({
+                            value: articulo.article_id.toString(),
+                            label: `${articulo.code || ''} - ${articulo.name} (${articulo.size || 'N/A'})`
+                          }))}
+                          placeholder="Seleccionar artículo..."
+                          isClearable
+                          isSearchable
+                          styles={{
+                            control: (provided) => ({
+                              ...provided,
+                              minHeight: '38px',
+                              borderColor: '#ced4da'
+                            }),
+                            menu: (provided) => ({
+                              ...provided,
+                              zIndex: 1000
+                            })
+                          }}
+                        />
       </div>
       <div className="mb-3">
         <label className="form-label">Cantidad</label>

@@ -24,6 +24,7 @@ router.post('/validar-stock-multiple', verifyAuth, checkPermission('salidas', 'c
 // Rutas de consulta (solo requieren permisos de vista)
 router.get('/stock', verifyAuth, checkPermission('almacen', 'view'), almacenController.getStock);
 router.get('/articulos-simple', verifyAuth, checkPermission('almacen', 'view'), almacenController.getArticulosSimple);
+router.get('/articulos-con-stock', verifyAuth, checkPermission('almacen', 'view'), almacenController.getArticulosConStock);
 router.get('/catalogos/grupos', verifyAuth, checkPermission('almacen', 'view'), almacenController.getCatalogoGrupos);
 router.get('/catalogos/medidas', verifyAuth, checkPermission('almacen', 'view'), almacenController.getCatalogoMedidas);
 router.get('/catalogos/unidades', verifyAuth, checkPermission('almacen', 'view'), almacenController.getCatalogoUnidades);

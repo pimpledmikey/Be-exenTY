@@ -128,6 +128,22 @@ export const getArticulosSimple = async (req, res) => {
   }
 };
 
+// Función para obtener solo artículos con stock > 0 para salidas
+export const getArticulosConStock = async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT a.article_id, a.code, a.name, a.size, a.measure, a.unit_code, s.stock
+      FROM articles a
+      LEFT JOIN inventory_stock s ON a.article_id = s.article_id
+      WHERE a.status = "activo" AND s.stock > 0
+      ORDER BY a.name
+    `);
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // Función para validar stock disponible sin crear la salida
 export const validarStockDisponible = async (req, res) => {
   try {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Select from 'react-select';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -46,7 +47,8 @@ const SalidaForm: React.FC<SalidaFormProps> = ({ salida, onClose }) => {
   const [validandoStock, setValidandoStock] = useState(false);
 
   useEffect(() => {
-    fetch(`${API_URL}/almacen/articulos-simple`, {
+    // Usar endpoint específico para salidas que solo trae artículos con stock > 0
+    fetch(`${API_URL}/almacen/articulos-con-stock`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
     })
       .then(res => res.json())
@@ -155,15 +157,35 @@ const SalidaForm: React.FC<SalidaFormProps> = ({ salida, onClose }) => {
   return (
     <form onSubmit={handleSubmit}>
       <div className="mb-3">
-        <label className="form-label">Artículo</label>
-        <select className="form-select" name="article_id" value={form.article_id} onChange={handleChange} required>
-          <option value="">Seleccione un artículo</option>
-          {articulos.map(a => (
-            <option key={a.article_id} value={a.article_id}>
-              [{a.code || 'SIN-CODIGO'}] {a.name} {a.size ? `- ${a.size}` : ''} {a.stock !== undefined ? `(Stock: ${a.stock})` : ''}
-            </option>
-          ))}
-        </select>
+        <label className="form-label">Artículo *</label>
+        <Select
+          options={articulos.map(a => ({
+            value: a.article_id.toString(),
+            label: `[${a.code || 'SIN-CODIGO'}] ${a.name} ${a.size ? `- ${a.size}` : ''} (Stock: ${a.stock})`,
+            article: a
+          }))}
+          value={form.article_id ? {
+            value: form.article_id,
+            label: articulos.find(a => a.article_id.toString() === form.article_id)
+              ? `[${articulos.find(a => a.article_id.toString() === form.article_id)?.code || 'SIN-CODIGO'}] ${articulos.find(a => a.article_id.toString() === form.article_id)?.name} ${articulos.find(a => a.article_id.toString() === form.article_id)?.size ? `- ${articulos.find(a => a.article_id.toString() === form.article_id)?.size}` : ''} (Stock: ${articulos.find(a => a.article_id.toString() === form.article_id)?.stock})`
+              : 'Artículo seleccionado'
+          } : null}
+          onChange={(selectedOption) => {
+            const newValue = selectedOption ? selectedOption.value : '';
+            setForm(prev => ({ ...prev, article_id: newValue }));
+            handleChange({ target: { name: 'article_id', value: newValue } } as any);
+          }}
+          placeholder="Buscar artículo por código o nombre..."
+          isClearable
+          isSearchable
+          noOptionsMessage={() => "No se encontraron artículos con stock"}
+          styles={{
+            control: (provided) => ({
+              ...provided,
+              minHeight: '38px'
+            })
+          }}
+        />
       </div>
       <div className="mb-3">
         <label className="form-label">Cantidad</label>
