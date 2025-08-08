@@ -29,7 +29,7 @@ const generarPdfSolicitudSimple = async (req, res) => {
     doc.setFont('helvetica');
     
     // HEADER PROFESIONAL - Optimizado
-    const headerHeight = 45;
+    const headerHeight = 55; // Aumentamos el espacio para más separación
     
     // Logo (si está disponible)
     if (logoBase64) {
@@ -64,9 +64,9 @@ const generarPdfSolicitudSimple = async (req, res) => {
     doc.setFont('helvetica', 'normal');
     doc.text(`Folio: ${folio || 'ENTRADA-' + Date.now().toString().slice(-6)}`, 155, 42);
     
-    // Información de usuarios
-    doc.text(`Solicitante: ${usuarioSolicita || 'N/A'}`, 15, 42);
-    doc.text(`Autoriza: ${usuarioAutoriza || 'N/A'}`, 15, 48);
+    // Información de usuarios - con más separación de la línea verde
+    doc.text(`Solicitante: ${usuarioSolicita || 'N/A'}`, 15, 52);
+    doc.text(`Autoriza: ${usuarioAutoriza || 'N/A'}`, 15, 58);
     
     // Línea separadora del header
     doc.setLineWidth(0.8);
@@ -74,7 +74,7 @@ const generarPdfSolicitudSimple = async (req, res) => {
     doc.line(15, headerHeight, 195, headerHeight);
     
     // TABLA DE ITEMS - Optimizada y profesional
-    let currentY = headerHeight + 15;
+    let currentY = headerHeight + 20; // Más espacio después de la línea verde
     
     if (items && items.length > 0) {
       // Headers de la tabla con configuración optimizada
@@ -144,42 +144,37 @@ const generarPdfSolicitudSimple = async (req, res) => {
       });
     }
     
-    // FIRMAS PROFESIONALES - Como en la vista previa
-    currentY += 20;
+    // FIRMAS PROFESIONALES - Después de la tabla, cada una con su línea
+    currentY += 15; // Espacio pequeño después de la tabla
     
-    // Verificar si necesitamos espacio para las firmas
-    if (currentY > 220) {
+    // Verificar si necesitamos espacio para las firmas (solo si no caben)
+    if (currentY > 230) {
       doc.addPage();
       currentY = 30;
     }
     
-    // Espaciado para firmas
-    currentY = Math.max(currentY, 200);
-    
-    // Tres secciones de firmas como en la vista previa
+    // Tres secciones de firmas, cada una con su propia línea
     const firmaSecciones = [
-      { titulo: 'SOLICITADO POR:', nombre: usuarioSolicita, x: 55 },
-      { titulo: 'AUTORIZADO POR:', nombre: usuarioAutoriza, x: 105 },
-      { titulo: 'RECIBIDO POR:', nombre: '', x: 155 }
+      { titulo: 'SOLICITADO POR:', nombre: usuarioSolicita || 'Juan Jesús Ortega Simbrón', x: 55, y: currentY },
+      { titulo: 'AUTORIZADO POR:', nombre: usuarioAutoriza || 'Lic. Elisa Avila Requena', x: 55, y: currentY + 30 },
+      { titulo: 'RECIBIDO POR:', nombre: 'Nombre y Firma', x: 55, y: currentY + 60 }
     ];
     
     firmaSecciones.forEach((seccion) => {
-      // Línea para firma
+      // Línea individual para cada firma - centrada
       doc.setLineWidth(0.5);
-      doc.setDrawColor(0, 0, 0);
-      doc.line(seccion.x - 25, currentY + 15, seccion.x + 25, currentY + 15);
+      doc.setDrawColor(...colors.negro);
+      doc.line(seccion.x - 30, seccion.y + 15, seccion.x + 30, seccion.y + 15);
       
       // Título de la sección
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(8);
-      doc.text(seccion.titulo, seccion.x, currentY + 22, { align: 'center' });
+      doc.text(seccion.titulo, seccion.x, seccion.y + 20, { align: 'center' });
       
-      // Nombre del usuario
-      if (seccion.nombre) {
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(9);
-        doc.text(seccion.nombre.toUpperCase(), seccion.x, currentY + 30, { align: 'center' });
-      }
+      // Nombre del usuario centrado en la línea
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.text(seccion.nombre.toUpperCase(), seccion.x, seccion.y + 25, { align: 'center' });
     });
     
     // Generar el PDF optimizado
