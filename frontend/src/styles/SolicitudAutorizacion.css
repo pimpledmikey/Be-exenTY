@@ -289,34 +289,46 @@
   .d-print-none {
     display: none !important;
   }
+  /* Documento impreso como tabla para soportar header/footer repetibles */
   .solicitud-documento-print {
     margin: 0;
     border: none;
     box-shadow: none;
     width: 100%;
-    min-height: auto;
-    padding: 15mm;
-    display: block !important; /* Layout normal para impresión */
-    flex-direction: initial !important;
-    height: auto !important; /* Altura automática para múltiples páginas */
+    padding: 15mm; /* Mantener márgenes internos */
+    display: table !important; /* Clave: convertir a tabla */
+    table-layout: fixed; /* Layout estable */
+    border-collapse: collapse;
+    height: auto !important;
   }
+  /* Header repetible en cada página de impresión */
   .header-print {
-    position: static !important; /* Header normal en impresión */
-    flex-shrink: initial !important;
-    break-inside: avoid; /* Evitar que se divida entre páginas */
+    display: table-header-group !important; /* CLAVE */
+    position: static !important; /* Evitar sticky en impresión */
+    break-inside: avoid; /* Evitar cortes */
     page-break-inside: avoid;
+    background: white !important;
+    z-index: auto !important;
+    margin: 0 0 12px 0 !important;
+    padding: 0 0 12px 0 !important;
+    border-bottom: 1px solid #e8e8e8 !important;
   }
+  /* Contenido fluido (tabla de artículos) */
   .contenido-scroll-print {
-    overflow: visible !important; /* Sin scroll en impresión - layout normal */
-    max-height: none !important; /* Sin límite de altura - múltiples páginas */
-    flex: initial !important; /* Layout normal sin flexbox */
+    display: table-row-group !important; /* Parte del flujo de tabla */
+    overflow: visible !important; /* Sin scroll en impresión */
+    height: auto !important;
+    max-height: none !important;
+    padding-right: 0 !important;
   }
+  /* Repetir también el encabezado de columnas de la tabla */
   .tabla-articulos-print {
     margin-bottom: 30px !important;
     page-break-inside: auto; /* Permitir división de tabla entre páginas */
+    width: 100% !important;
   }
   .tabla-articulos-print thead {
-    display: table-header-group; /* Repetir header de tabla en cada página */
+    display: table-header-group; /* Repetir header de columnas */
   }
   .tabla-articulos-print tbody {
     display: table-row-group;
@@ -324,15 +336,19 @@
   .tabla-articulos-print tr {
     page-break-inside: avoid; /* Evitar dividir filas */
   }
+  /* Firmas al final y juntas */
   .firmas-section-print {
-    flex-shrink: initial !important;
-    margin-top: 40px !important; /* Espacio normal en impresión */
-    padding-top: 0 !important;
-    page-break-inside: avoid; /* Mantener firmas juntas */
+    display: table-footer-group !important; /* CLAVE: se repite al final de cada página si cabe, o cae en la última */
+    page-break-inside: avoid;
     break-inside: avoid;
-    display: flex !important; /* Mantener layout de firmas */
-    justify-content: space-around !important;
+    background: white !important;
+    padding-top: 12px !important;
+    margin-top: 20px !important;
+    border-top: 1px solid #e8e8e8 !important;
   }
-  
-  /* Eliminar el header sticky duplicado - solo usar el de arriba */
+  /* Mantener colores del header de columnas en impresión */
+  .tabla-articulos-print th {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 }
