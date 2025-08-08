@@ -144,7 +144,7 @@ const generarPdfSolicitudSimple = async (req, res) => {
       });
     }
     
-    // FIRMAS EN COLUMNAS - En la misma fila después de la tabla
+    // FIRMAS EN COLUMNAS - Ajustadas más a la izquierda, a la altura de la tabla
     currentY += 15; // Espacio pequeño después de la tabla
     
     // NO crear nueva página - siempre continuar después de la tabla
@@ -154,28 +154,44 @@ const generarPdfSolicitudSimple = async (req, res) => {
       currentY = 30;
     }
     
-    // Tres firmas en columnas horizontales (misma fila)
-    const firmas = [
-      { titulo: 'SOLICITADO POR:', nombre: usuarioSolicita || 'Juan Jesús Ortega Simbrón', x: 70 },
-      { titulo: 'AUTORIZADO POR:', nombre: usuarioAutoriza || 'Lic. Elisa Avila Requena', x: 165 },
-      { titulo: 'RECIBIDO POR:', nombre: 'Nombre y Firma', x: 260 }
-    ];
+    // Verificar si las 3 firmas caben en una fila o si necesitamos 2 filas
+    const espacioDisponible = 195 - 15; // Ancho de página menos márgenes
+    const anchoFirma = 60; // Ancho de cada firma
+    const separacion = 10; // Separación entre firmas
+    
+    let firmas = [];
+    
+    if (currentY > 740) { // Si estamos muy abajo, usar 2 filas
+      firmas = [
+        // Primera fila - 2 firmas
+        { titulo: 'SOLICITADO POR:', nombre: usuarioSolicita || 'Juan Jesús Ortega Simbrón', x: 50, y: currentY },
+        { titulo: 'AUTORIZADO POR:', nombre: usuarioAutoriza || 'Lic. Elisa Avila Requena', x: 130, y: currentY },
+        // Segunda fila - 1 firma
+        { titulo: 'RECIBIDO POR:', nombre: 'Nombre y Firma', x: 50, y: currentY + 35 }
+      ];
+    } else { // Si hay espacio, usar 1 fila
+      firmas = [
+        { titulo: 'SOLICITADO POR:', nombre: usuarioSolicita || 'Juan Jesús Ortega Simbrón', x: 45, y: currentY },
+        { titulo: 'AUTORIZADO POR:', nombre: usuarioAutoriza || 'Lic. Elisa Avila Requena', x: 115, y: currentY },
+        { titulo: 'RECIBIDO POR:', nombre: 'Nombre y Firma', x: 185, y: currentY }
+      ];
+    }
     
     firmas.forEach((firma) => {
-      // Línea individual para cada firma
+      // Línea individual para cada firma - más a la izquierda
       doc.setLineWidth(0.5);
       doc.setDrawColor(...colors.negro);
-      doc.line(firma.x - 35, currentY + 15, firma.x + 35, currentY + 15);
+      doc.line(firma.x - 25, firma.y + 15, firma.x + 25, firma.y + 15);
       
       // Título de la sección
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(8);
-      doc.text(firma.titulo, firma.x, currentY + 22, { align: 'center' });
+      doc.text(firma.titulo, firma.x, firma.y + 22, { align: 'center' });
       
       // Nombre del usuario
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
-      doc.text(firma.nombre.toUpperCase(), firma.x, currentY + 30, { align: 'center' });
+      doc.text(firma.nombre.toUpperCase(), firma.x, firma.y + 30, { align: 'center' });
     });
     
     // Generar el PDF optimizado
