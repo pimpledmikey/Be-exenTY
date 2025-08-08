@@ -1,5 +1,4 @@
 import React, { useRef } from 'react';
-import { useReactToPrint } from 'react-to-print';
 import logoBeExEn from '../assets/logoBeExEn.png';
 import '../styles/SolicitudAutorizacion.css';
 
@@ -102,8 +101,7 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
       window.URL.revokeObjectURL(url);
     } catch (e) {
       console.error('Fallo al generar PDF en backend, usando impresión del navegador:', e);
-      // Fallback al flujo actual si hay error
-      handlePrint?.();
+      window.print();
     }
   };
   
