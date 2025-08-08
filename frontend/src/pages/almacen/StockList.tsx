@@ -122,7 +122,7 @@ export default function StockList() {
                 <td>{s.name}</td>
                 <td><span className="text-muted small">{s.size || 'N/A'}</span></td>
                 <td>
-                  <span className={`badge ${s.stock > 5 ? 'bg-success' : s.stock > 0 ? 'bg-warning text-dark' : 'bg-danger'}`}>
+                  <span className={`badge ${s.stock > 5 ? 'bg-success text-dark' : s.stock > 0 ? 'bg-warning text-dark' : 'bg-danger text-dark'}`}>
                     {s.stock}
                   </span>
                 </td>

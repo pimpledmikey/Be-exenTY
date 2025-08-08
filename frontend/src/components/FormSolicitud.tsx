@@ -442,15 +442,15 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
                               {item.codigo && articulosStock.find(a => a.code === item.codigo) ? (
                                 <span className={`badge ${
                                   (articulosStock.find(a => a.code === item.codigo)?.stock || 0) >= item.cantidad 
-                                    ? 'bg-success' 
+                                    ? 'bg-success text-dark' 
                                     : (articulosStock.find(a => a.code === item.codigo)?.stock || 0) > 0 
                                       ? 'bg-warning text-dark' 
-                                      : 'bg-danger'
+                                      : 'bg-danger text-dark'
                                 }`}>
                                   {articulosStock.find(a => a.code === item.codigo)?.stock || 0}
                                 </span>
                               ) : (
-                                <span className="badge bg-secondary">N/A</span>
+                                <span className="badge bg-secondary text-dark">N/A</span>
                               )}
                             </td>
                           )}
@@ -591,10 +591,10 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
                               <span className="text-muted small">{articulo.size || 'N/A'}</span>
                             </td>
                             <td>
-                              <span className="badge bg-secondary">{articulo.unit}</span>
+                              <span className="badge bg-secondary text-dark">{articulo.unit}</span>
                             </td>
                             <td>
-                              <span className={`badge ${articulo.stock > 5 ? 'bg-success' : articulo.stock > 0 ? 'bg-warning' : 'bg-danger'}`}>
+                              <span className={`badge ${articulo.stock > 5 ? 'bg-success text-dark' : articulo.stock > 0 ? 'bg-warning text-dark' : 'bg-danger text-dark'}`}>
                                 {articulo.stock}
                               </span>
                             </td>

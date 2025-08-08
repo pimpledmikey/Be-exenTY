@@ -119,15 +119,15 @@ export default function StockAlertas({ onClose }: StockAlertasProps) {
                       <td><code>{item.code}</code></td>
                       <td>{item.name}</td>
                       <td>
-                        <span className={`badge ${item.stock < 5 ? 'bg-danger' : item.stock < 10 ? 'bg-warning' : 'bg-info'}`}>
+                        <span className={`badge ${item.stock < 5 ? 'bg-danger text-dark' : item.stock < 10 ? 'bg-warning text-dark' : 'bg-info text-dark'}`}>
                           {item.stock}
                         </span>
                       </td>
                       <td>{item.unit}</td>
                       <td>
-                        {item.stock < 5 && <span className="badge bg-danger">Crítico</span>}
-                        {item.stock >= 5 && item.stock < 10 && <span className="badge bg-warning">Muy Bajo</span>}
-                        {item.stock >= 10 && item.stock < 20 && <span className="badge bg-info">Bajo</span>}
+                        {item.stock < 5 && <span className="badge bg-danger text-dark">Crítico</span>}
+                        {item.stock >= 5 && item.stock < 10 && <span className="badge bg-warning text-dark">Muy Bajo</span>}
+                        {item.stock >= 10 && item.stock < 20 && <span className="badge bg-info text-dark">Bajo</span>}
                       </td>
                     </tr>
                   ))}
