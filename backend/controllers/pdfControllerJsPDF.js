@@ -14,191 +14,175 @@ const generarPdfSolicitudSimple = async (req, res) => {
       logoBase64 // Logo en base64 desde el frontend
     } = req.body;
 
-    // Crear nuevo documento PDF
+    // Crear nuevo documento PDF optimizado
     const doc = new jsPDF('portrait', 'mm', 'a4');
     
-    // Configurar fuentes
+    // Pre-configurar colores y fuentes para optimizar rendimiento
+    const colors = {
+      verde: [76, 175, 80],
+      negro: [0, 0, 0],
+      blanco: [255, 255, 255],
+      grisFondo: [245, 245, 245],
+      grisBorde: [200, 200, 200]
+    };
+    
     doc.setFont('helvetica');
     
-    // HEADER FIJO - Logo y datos principales
-    const headerHeight = 40;
+    // HEADER PROFESIONAL - Optimizado
+    const headerHeight = 45;
     
     // Logo (si está disponible)
     if (logoBase64) {
       try {
-        doc.addImage(logoBase64, 'PNG', 15, 10, 30, 20);
+        doc.addImage(logoBase64, 'PNG', 15, 8, 25, 25);
       } catch (error) {
         console.log('Error al agregar logo:', error);
       }
     }
     
-    // Título del documento
-    doc.setFontSize(16);
+    // Títulos del documento - Lado derecho como en la vista previa
+    doc.setTextColor(...colors.verde);
+    doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    doc.text('DOCUMENTO DE SOLICITUD DE AUTORIZACIÓN', 105, 15, { align: 'center' });
+    doc.text('SOLICITUD DE AUTORIZACIÓN', 200, 18, { align: 'right' });
     
-    // Información del header (lado derecho)
+    doc.setFontSize(14);
+    doc.text('ENTRADA DE MATERIALES', 200, 26, { align: 'right' });
+    
+    // Información del header en recuadros
+    doc.setTextColor(...colors.negro);
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.text(`FOLIO: ${folio || 'N/A'}`, 150, 25);
-    doc.text(`FECHA: ${fecha || new Date().toLocaleDateString()}`, 150, 30);
-    doc.text(`TIPO: ${tipo || 'N/A'}`, 150, 35);
+    
+    // Fecha en recuadro
+    doc.rect(155, 30, 40, 6);
+    doc.text('Fecha:', 157, 34);
+    doc.setFont('helvetica', 'bold');
+    doc.text(fecha || new Date().toLocaleDateString('es-ES'), 170, 34);
+    
+    // Folio
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Folio: ${folio || 'ENTRADA-' + Date.now().toString().slice(-6)}`, 155, 42);
+    
+    // Información de usuarios
+    doc.text(`Solicitante: ${usuarioSolicita || 'N/A'}`, 15, 42);
+    doc.text(`Autoriza: ${usuarioAutoriza || 'N/A'}`, 15, 48);
     
     // Línea separadora del header
-    doc.setLineWidth(0.5);
+    doc.setLineWidth(0.8);
+    doc.setDrawColor(...colors.verde);
     doc.line(15, headerHeight, 195, headerHeight);
     
-    // Información adicional
+    // TABLA DE ITEMS - Optimizada y profesional
     let currentY = headerHeight + 15;
     
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text('INFORMACIÓN GENERAL', 15, currentY);
-    
-    currentY += 8;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.text(`Sucursal: ${sucursal || 'N/A'}`, 15, currentY);
-    doc.text(`Usuario Solicita: ${usuarioSolicita || 'N/A'}`, 105, currentY);
-    
-    currentY += 10;
-    
-    // TABLA DE ITEMS
     if (items && items.length > 0) {
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(11);
-      doc.text('DETALLE DE ITEMS', 15, currentY);
+      // Headers de la tabla con configuración optimizada
+      const tableHeaders = ['NO.', 'CÓDIGO', 'DESCRIPCIÓN', 'UNIDAD', 'CANTIDAD', 'PRECIO U', 'PRECIO T'];
+      const colPositions = [15, 27, 47, 107, 125, 145, 170];
       
+      // Función auxiliar para dibujar header de tabla
+      const drawTableHeader = (y) => {
+        doc.setFillColor(...colors.verde);
+        doc.rect(15, y, 180, 8, 'F');
+        doc.setTextColor(...colors.blanco);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        tableHeaders.forEach((header, index) => {
+          doc.text(header, colPositions[index] + 2, y + 5.5);
+        });
+        doc.setTextColor(...colors.negro);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+      };
+      
+      // Dibujar header inicial
+      drawTableHeader(currentY);
       currentY += 8;
       
-      // Headers de la tabla
-      const tableHeaders = ['#', 'Código', 'Descripción', 'Unidad', 'Cantidad'];
-      const colWidths = [10, 25, 80, 20, 25];
-      const colPositions = [15, 25, 50, 130, 150];
-      
-      // Fondo del header de la tabla
-      doc.setFillColor(76, 175, 80); // Verde de la marca
-      doc.rect(15, currentY, 165, 6, 'F');
-      
-      // Texto del header
-      doc.setTextColor(255, 255, 255); // Blanco
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8);
-      
-      tableHeaders.forEach((header, index) => {
-        doc.text(header, colPositions[index], currentY + 4);
-      });
-      
-      currentY += 8;
-      doc.setTextColor(0, 0, 0); // Negro
-      doc.setFont('helvetica', 'normal');
-      
-      // Filas de la tabla
+      // Optimizar dibujo de filas
       items.forEach((item, index) => {
-        // Verificar si necesitamos nueva página
+        // Verificar nueva página
         if (currentY > 250) {
           doc.addPage();
-          
-          // Repetir header en nueva página
-          doc.setFillColor(76, 175, 80);
-          doc.rect(15, 15, 165, 6, 'F');
-          
-          doc.setTextColor(255, 255, 255);
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(8);
-          
-          tableHeaders.forEach((header, idx) => {
-            doc.text(header, colPositions[idx], 19);
-          });
-          
+          drawTableHeader(15);
           currentY = 25;
-          doc.setTextColor(0, 0, 0);
-          doc.setFont('helvetica', 'normal');
         }
         
-        // Alternar color de filas
+        // Fondo alternativo optimizado
         if (index % 2 === 0) {
-          doc.setFillColor(248, 248, 248);
-          doc.rect(15, currentY - 2, 165, 6, 'F');
+          doc.setFillColor(...colors.grisFondo);
+          doc.rect(15, currentY, 180, 7, 'F');
         }
         
-        // Datos de la fila
-        doc.text((index + 1).toString(), colPositions[0], currentY + 2);
-        doc.text(item.codigo || '', colPositions[1], currentY + 2);
+        // Bordes de tabla optimizados
+        doc.setDrawColor(...colors.grisBorde);
+        doc.setLineWidth(0.1);
+        doc.rect(15, currentY, 180, 7);
         
-        // Descripción con manejo de texto largo
-        const descripcion = item.descripcion || '';
-        if (descripcion.length > 35) {
-          doc.text(descripcion.substring(0, 32) + '...', colPositions[2], currentY + 2);
-        } else {
-          doc.text(descripcion, colPositions[2], currentY + 2);
-        }
+        // Líneas verticales de separación
+        colPositions.slice(1).forEach(pos => {
+          doc.line(pos, currentY, pos, currentY + 7);
+        });
         
-        doc.text(item.unidad || '', colPositions[3], currentY + 2);
-        doc.text((item.cantidad || 0).toString(), colPositions[4], currentY + 2);
+        // Datos de la fila optimizados
+        const rowData = [
+          (index + 1).toString(),
+          item.codigo || '',
+          item.descripcion?.length > 25 ? item.descripcion.substring(0, 22) + '...' : item.descripcion || '',
+          item.unidad || 'PZA',
+          (item.cantidad || 1).toString(),
+          item.precioUnitario || '',
+          item.precioTotal || ''
+        ];
         
-        currentY += 6;
+        rowData.forEach((data, idx) => {
+          doc.text(data, colPositions[idx] + 2, currentY + 4.5);
+        });
+        
+        currentY += 7;
       });
     }
     
-    // OBSERVACIONES
-    currentY += 10;
-    if (observaciones) {
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(11);
-      doc.text('OBSERVACIONES', 15, currentY);
-      
-      currentY += 8;
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      
-      // Dividir observaciones en líneas
-      const obsLines = doc.splitTextToSize(observaciones, 165);
-      obsLines.forEach((line) => {
-        if (currentY > 270) {
-          doc.addPage();
-          currentY = 20;
-        }
-        doc.text(line, 15, currentY);
-        currentY += 5;
-      });
-    }
+    // FIRMAS PROFESIONALES - Como en la vista previa
+    currentY += 20;
     
-    // FIRMAS
     // Verificar si necesitamos espacio para las firmas
-    if (currentY > 230) {
+    if (currentY > 220) {
       doc.addPage();
-      currentY = 20;
-    } else {
-      currentY = Math.max(currentY + 20, 230); // Posición mínima para firmas
+      currentY = 30;
     }
     
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
-    doc.text('FIRMAS', 15, currentY);
+    // Espaciado para firmas
+    currentY = Math.max(currentY, 200);
     
-    currentY += 15;
+    // Tres secciones de firmas como en la vista previa
+    const firmaSecciones = [
+      { titulo: 'SOLICITADO POR:', nombre: usuarioSolicita, x: 55 },
+      { titulo: 'AUTORIZADO POR:', nombre: usuarioAutoriza, x: 105 },
+      { titulo: 'RECIBIDO POR:', nombre: '', x: 155 }
+    ];
     
-    // Cuadros de firmas
-    doc.setLineWidth(0.3);
-    doc.rect(15, currentY, 80, 25); // Firma izquierda
-    doc.rect(105, currentY, 80, 25); // Firma derecha
+    firmaSecciones.forEach((seccion) => {
+      // Línea para firma
+      doc.setLineWidth(0.5);
+      doc.setDrawColor(0, 0, 0);
+      doc.line(seccion.x - 25, currentY + 15, seccion.x + 25, currentY + 15);
+      
+      // Título de la sección
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.text(seccion.titulo, seccion.x, currentY + 22, { align: 'center' });
+      
+      // Nombre del usuario
+      if (seccion.nombre) {
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.text(seccion.nombre.toUpperCase(), seccion.x, currentY + 30, { align: 'center' });
+      }
+    });
     
-    // Labels de firmas
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.text('USUARIO SOLICITA', 20, currentY + 30);
-    doc.text('USUARIO AUTORIZA', 110, currentY + 30);
-    
-    // Nombres de usuarios
-    if (usuarioSolicita) {
-      doc.text(usuarioSolicita, 20, currentY + 35);
-    }
-    if (usuarioAutoriza) {
-      doc.text(usuarioAutoriza, 110, currentY + 35);
-    }
-    
-    // Generar el PDF
+    // Generar el PDF optimizado
     const pdfBuffer = doc.output('arraybuffer');
     
     // Configurar headers para descarga
