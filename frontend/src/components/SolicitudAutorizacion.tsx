@@ -45,10 +45,29 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
   onClose = () => {}
 }) => {
   const componentRef = useRef<HTMLDivElement>(null);
-  
-  // Recolectar estilos activos del documento para embebidos en el HTML
-  const collectActiveStyles = () => {
+
+  // Recolectar estilos activos del documento (style tags, link rel="stylesheet" y CSSOM accesible)
+  const collectActiveStyles = async (): Promise<string> => {
     let cssText = '';
+
+    // 1) <style> embebidos
+    document.querySelectorAll('style').forEach((s) => {
+      if (s.textContent) cssText += s.textContent + '\n';
+    });
+
+    // 2) <link rel="stylesheet"> externos
+    const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]')) as HTMLLinkElement[];
+    for (const link of links) {
+      try {
+        const href = new URL(link.href, location.href).toString();
+        const resp = await fetch(href, { credentials: 'omit' });
+        if (resp.ok) cssText += (await resp.text()) + '\n';
+      } catch (_) {
+        // Ignorar errores CORS
+      }
+    }
+
+    // 3) CSSOM accesible (mismas-origin)
     for (const sheet of Array.from(document.styleSheets)) {
       try {
         const rules = (sheet as CSSStyleSheet).cssRules;
@@ -57,6 +76,7 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
         // Ignorar hojas con CORS
       }
     }
+
     // Forzar ajustes de impresión
     cssText += `\n@page{size:A4;margin:10mm;}\n`;
     cssText += `\n@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}\n`;
@@ -67,19 +87,19 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
     if (!componentRef.current) return;
     const node = componentRef.current.cloneNode(true) as HTMLElement;
 
-    // Construir HTML mínimo con solo el documento
-    const styles = collectActiveStyles();
-    const html = `<!doctype html><html><head><meta charset="utf-8"/><style>${styles}</style></head><body>${node.outerHTML}</body></html>`;
-
-    // Intentar obtener folio visible para nombre del archivo
-    let fileName = `Solicitud_Autorizacion_${tipo}_${new Date().toLocaleDateString('es-MX')}.pdf`;
     try {
-      const folioEl = componentRef.current.querySelector('.folio-print');
-      const folioText = folioEl?.textContent?.replace('Folio:', '').trim().replace(/\s+/g, '_');
-      if (folioText) fileName = `Solicitud_Autorizacion_${folioText}.pdf`;
-    } catch {}
+      const styles = await collectActiveStyles();
+      const baseHref = location.origin + '/';
+      const html = `<!doctype html><html><head><meta charset=\"utf-8\"/><base href=\"${baseHref}\"/><style>${styles}</style></head><body>${node.outerHTML}</body></html>`;
 
-    try {
+      // Intentar obtener folio visible para nombre del archivo
+      let fileName = `Solicitud_Autorizacion_${tipo}_${new Date().toLocaleDateString('es-MX')}.pdf`;
+      try {
+        const folioEl = componentRef.current.querySelector('.folio-print');
+        const folioText = folioEl?.textContent?.replace('Folio:', '').trim().replace(/\s+/g, '_');
+        if (folioText) fileName = `Solicitud_Autorizacion_${folioText}.pdf`;
+      } catch {}
+
       const API_URL = (import.meta as any).env?.VITE_API_URL || '/api';
       const resp = await fetch(`${API_URL}/pdf/solicitud`, {
         method: 'POST',
