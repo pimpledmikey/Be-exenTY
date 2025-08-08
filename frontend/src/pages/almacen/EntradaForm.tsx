@@ -104,14 +104,66 @@ const EntradaForm: React.FC<EntradaFormProps> = ({ entrada, onClose }) => {
                           isClearable
                           isSearchable
                           styles={{
-                            control: (provided) => ({
+                            control: (provided, state) => ({
                               ...provided,
                               minHeight: '38px',
-                              borderColor: '#ced4da'
+                              backgroundColor: '#2b3035',
+                              borderColor: state.isFocused ? '#495057' : '#495057',
+                              color: '#ffffff',
+                              '&:hover': {
+                                borderColor: '#6c757d'
+                              }
                             }),
                             menu: (provided) => ({
                               ...provided,
+                              backgroundColor: '#2b3035',
+                              border: '1px solid #495057',
                               zIndex: 1000
+                            }),
+                            option: (provided, state) => ({
+                              ...provided,
+                              backgroundColor: state.isSelected 
+                                ? '#495057' 
+                                : state.isFocused 
+                                  ? '#3a3f44' 
+                                  : '#2b3035',
+                              color: '#ffffff',
+                              '&:hover': {
+                                backgroundColor: '#3a3f44'
+                              }
+                            }),
+                            singleValue: (provided) => ({
+                              ...provided,
+                              color: '#ffffff'
+                            }),
+                            placeholder: (provided) => ({
+                              ...provided,
+                              color: '#adb5bd'
+                            }),
+                            input: (provided) => ({
+                              ...provided,
+                              color: '#ffffff'
+                            }),
+                            indicatorSeparator: () => ({
+                              display: 'none'
+                            }),
+                            dropdownIndicator: (provided) => ({
+                              ...provided,
+                              color: '#adb5bd',
+                              '&:hover': {
+                                color: '#ffffff'
+                              }
+                            }),
+                            clearIndicator: (provided) => ({
+                              ...provided,
+                              color: '#adb5bd',
+                              '&:hover': {
+                                color: '#ffffff'
+                              }
+                            }),
+                            noOptionsMessage: (provided) => ({
+                              ...provided,
+                              color: '#adb5bd'
                             })
                           }}
                         />
