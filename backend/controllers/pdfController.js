@@ -1,3 +1,5 @@
+import puppeteer from 'puppeteer';
+
 // Genera un PDF desde una URL pública o HTML enviado por POST
 // Body soportado:
 // { url?: string, html?: string, fileName?: string, emulate?: 'print'|'screen', margin?: {top,right,bottom,left} }
@@ -10,12 +12,9 @@ export async function generarPdfSolicitud(req, res) {
 
   let browser;
   try {
-    // Lazy import para evitar fallo en arranque si puppeteer no está instalado
-    const { default: puppeteer } = await import('puppeteer');
-
     browser = await puppeteer.launch({
       headless: 'new',
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--font-render-hinting=medium'],
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
     });
 
     const page = await browser.newPage();
