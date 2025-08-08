@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer';
+import { chromium } from 'playwright';
 
 // Genera un PDF desde una URL pública o HTML enviado por POST
 // Body soportado:
@@ -12,28 +12,27 @@ export async function generarPdfSolicitud(req, res) {
 
   let browser;
   try {
-    browser = await puppeteer.launch({
-      headless: 'new',
+    browser = await chromium.launch({
+      headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
     });
 
     const page = await browser.newPage();
-    await page.setViewport({ width: 1280, height: 960, deviceScaleFactor: 1 });
-    page.setDefaultNavigationTimeout(60000);
+    await page.setViewportSize({ width: 1280, height: 960 });
 
     // Emular media para aplicar estilos correctos
-    await page.emulateMediaType(emulate === 'screen' ? 'screen' : 'print');
+    await page.emulateMedia({ media: emulate === 'screen' ? 'screen' : 'print' });
 
     if (url) {
-      await page.goto(url, { waitUntil: 'networkidle0' });
+      await page.goto(url, { waitUntil: 'networkidle' });
     } else if (html) {
-      await page.setContent(html, { waitUntil: 'networkidle0' });
+      await page.setContent(html, { waitUntil: 'networkidle' });
     }
 
     // Esperar a que las fuentes estén listas
     try { await page.evaluate(() => document.fonts && document.fonts.ready); } catch {}
 
-    // Asegurar que no salgan encabezados/pies del navegador y respetar colores
+    // Generar PDF con Playwright
     const pdfBuffer = await page.pdf({
       format: 'A4',
       printBackground: true,
