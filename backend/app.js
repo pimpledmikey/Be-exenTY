@@ -41,4 +41,22 @@ app.use('/api/roles', roleRoutes);
 app.use('/api/pdf', pdfRoutes);
 app.use('/api/solicitudes', solicitudesRoutes);
 
+// Middleware de manejo de errores global
+app.use((err, req, res, next) => {
+  console.error('❌ Error global capturado:', err);
+  res.status(500).json({
+    success: false,
+    message: 'Error interno del servidor',
+    error: process.env.NODE_ENV === 'development' ? err.message : 'Error interno'
+  });
+});
+
+// Middleware para rutas no encontradas
+app.use('*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `Ruta ${req.originalUrl} no encontrada`
+  });
+});
+
 export default app;

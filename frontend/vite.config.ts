@@ -13,8 +13,19 @@ export default defineConfig({
     },
   },
   preview: {
-    host: true,
+    host: '0.0.0.0',
     port: 4173,
-    allowedHosts: ['.onrender.com']
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom']
+        }
+      }
+    }
   }
 })
