@@ -89,15 +89,13 @@ export const useSolicitudes = () => {
         if (item.article_id && item.cantidad > 0) {
           const salidaData = {
             article_id: item.article_id,
-            cantidad: item.cantidad,
-            fecha: new Date().toISOString().split('T')[0],
-            usuario_registro_id: userInfo.user_id,
-            tipo_movimiento: 'SALIDA_SOLICITUD',
-            observaciones: `Salida automática por solicitud #${solicitudId} - ${item.observaciones}`,
-            solicitud_id: solicitudId
+            quantity: item.cantidad, // Usar 'quantity' según el esquema de inventory_exits
+            date: new Date().toISOString().split('T')[0],
+            reason: `Salida automática por solicitud #${solicitudId} - ${item.observaciones}`,
+            user_id: userInfo.user_id // Usar user_id según el esquema
           };
 
-          const response = await fetch(`${API_URL}/almacen/salidas`, {
+          const response = await fetch(`${API_URL}/almacen/exits`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

@@ -14,8 +14,8 @@ CREATE TABLE IF NOT EXISTS solicitudes (
     INDEX idx_tipo (tipo),
     INDEX idx_estado (estado),
     INDEX idx_fecha (fecha),
-    FOREIGN KEY (usuario_solicita_id) REFERENCES usuarios(id),
-    FOREIGN KEY (usuario_autoriza_id) REFERENCES usuarios(id)
+    FOREIGN KEY (usuario_solicita_id) REFERENCES users(user_id),
+    FOREIGN KEY (usuario_autoriza_id) REFERENCES users(user_id)
 );
 
 -- Crear tabla de items de solicitudes
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS solicitudes_items (
     INDEX idx_solicitud (solicitud_id),
     INDEX idx_articulo (article_id),
     FOREIGN KEY (solicitud_id) REFERENCES solicitudes(id) ON DELETE CASCADE,
-    FOREIGN KEY (article_id) REFERENCES articles(id)
+    FOREIGN KEY (article_id) REFERENCES articles(article_id)
 );
 
 -- Función para generar folio automático

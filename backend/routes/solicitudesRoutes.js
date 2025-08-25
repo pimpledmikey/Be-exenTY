@@ -9,5 +9,6 @@ router.get('/', verifyAuth, checkPermission('solicitudes', 'view'), solicitudesC
 router.post('/', verifyAuth, checkPermission('solicitudes', 'create'), solicitudesController.createSolicitud);
 router.get('/:id', verifyAuth, checkPermission('solicitudes', 'view'), solicitudesController.getSolicitudById);
 router.get('/folio/:folio', verifyAuth, checkPermission('solicitudes', 'view'), solicitudesController.getSolicitudByFolio);
+router.put('/:id/status', verifyAuth, checkPermission('solicitudes', 'edit'), solicitudesController.updateSolicitudStatus);
 
 export default router;
