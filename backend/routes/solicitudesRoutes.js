@@ -1,14 +1,20 @@
 import { Router } from 'express';
-import * as solicitudesController from '../controllers/solicitudesController.js';
-import { verifyAuth, checkPermission } from '../middleware/authMiddleware.js';
+import { 
+  getSolicitudes, 
+  createSolicitud, 
+  getSolicitudById, 
+  getSolicitudByFolio, 
+  updateSolicitudStatus 
+} from '../controllers/solicitudesController.js';
+import { verifyAuth } from '../middleware/authMiddleware.js';
 
 const router = Router();
 
 // Rutas de solicitudes
-router.get('/', verifyAuth, checkPermission('solicitudes', 'view'), solicitudesController.getSolicitudes);
-router.post('/', verifyAuth, checkPermission('solicitudes', 'create'), solicitudesController.createSolicitud);
-router.get('/:id', verifyAuth, checkPermission('solicitudes', 'view'), solicitudesController.getSolicitudById);
-router.get('/folio/:folio', verifyAuth, checkPermission('solicitudes', 'view'), solicitudesController.getSolicitudByFolio);
-router.put('/:id/status', verifyAuth, checkPermission('solicitudes', 'edit'), solicitudesController.updateSolicitudStatus);
+router.get('/', verifyAuth, getSolicitudes);
+router.post('/', verifyAuth, createSolicitud);
+router.get('/:id', verifyAuth, getSolicitudById);
+router.get('/folio/:folio', verifyAuth, getSolicitudByFolio);
+router.put('/:id/status', verifyAuth, updateSolicitudStatus);
 
 export default router;

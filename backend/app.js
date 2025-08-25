@@ -9,6 +9,7 @@ import catalogosRoutes from './routes/catalogosRoutes.js';
 import seguridadRoutes from './routes/seguridadRoutes.js';
 import roleRoutes from './routes/roleRoutes.js';
 import pdfRoutes from './routes/pdfRoutes.js';
+import solicitudesRoutes from './routes/solicitudesRoutes.js';
 
 const app = express();
 
@@ -38,5 +39,6 @@ app.use('/api/catalogos', catalogosRoutes);
 app.use('/api/seguridad', seguridadRoutes);
 app.use('/api/roles', roleRoutes);
 app.use('/api/pdf', pdfRoutes);
+app.use('/api/solicitudes', solicitudesRoutes);
 
 export default app;
