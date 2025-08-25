@@ -1,3 +1,7 @@
+/* Importar estilos responsivos */
+@import './styles/responsive.css';
+@import './styles/page-header.css';
+
 :root {
   --tblr-primary: #0f8158 !important; /* Verde principal */
   --tblr-illustrations-primary: #0f8158 !important;

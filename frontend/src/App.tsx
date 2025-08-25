@@ -381,21 +381,26 @@ function Dashboard({ user }: { user: any }) {
 					background: '#181a2a',
 					minHeight: 64,
 					zIndex: 1050,
-					width: '100vw',
+					width: '100%',
 					left: 0,
 					right: 0,
 					top: 0,
+					borderBottom: '1px solid rgba(255,255,255,0.1)'
 				}}
 			>
 				<div
-					className="container-xl d-flex align-items-center justify-content-between"
+					className="container-fluid d-flex align-items-center justify-content-between px-3 px-md-4"
 					style={{ height: 64 }}
 				>
-					<div className="d-flex align-items-center">
+					<div className="d-flex align-items-center flex-grow-1">
 						{/* Botón hamburguesa para móvil */}
 						<button 
 							className="btn btn-outline-light d-md-none me-3"
 							onClick={() => setShowMobileSidebar(!showMobileSidebar)}
+							style={{
+								padding: '0.375rem 0.75rem',
+								borderRadius: '0.375rem'
+							}}
 						>
 							<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
 								<line x1="3" y1="6" x2="21" y2="6"></line>
@@ -704,19 +709,22 @@ function Dashboard({ user }: { user: any }) {
 					paddingTop: 64,
 					minHeight: 'calc(100vh - 64px)',
 					background: '#181a2a',
+					transition: 'margin-left 0.3s ease'
 				}}
 			>
 				<div
-					className="page-header d-print-none"
-					style={{ display: 'none' }}
-				>
-					{/* Eliminado el header duplicado */}
-				</div>
-				<div
 					className="page-body"
-					style={{ minHeight: 'calc(100vh - 64px)' }}
+					style={{ 
+						minHeight: 'calc(100vh - 64px)',
+						padding: '1rem 0'
+					}}
 				>
-					<div className="container-xl px-3 px-md-4">{content}</div>
+					<div className="container-xl px-3 px-md-4">
+						{/* Header responsivo para evitar que se pegue al menú */}
+						<div className="page-header-responsive mb-3">
+							{content}
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

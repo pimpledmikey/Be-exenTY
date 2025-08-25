@@ -269,10 +269,6 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, onSuccess, initi
     }
   };
 
-  const calcularTotal = () => {
-    return items.reduce((sum, item) => sum + (item.precioT || 0), 0);
-  };
-
   const solicitudData = {
     tipo: tipo.toUpperCase() as 'ENTRADA' | 'SALIDA', // Convertir a mayúsculas
     fecha: new Date(fecha).toLocaleDateString('es-ES'),

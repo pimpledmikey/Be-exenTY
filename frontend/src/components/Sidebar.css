@@ -1,5 +1,3 @@
-/*
-
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
 :root {
@@ -45,6 +43,11 @@ body.dark-theme {
 
 .sidebar.collapsed {
   width: 90px;
+}
+
+.sidebar.mobile {
+  position: fixed;
+  z-index: 1050;
 }
 
 .sidebar .sidebar-header {

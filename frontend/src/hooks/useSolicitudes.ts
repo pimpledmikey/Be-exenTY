@@ -1,247 +1,260 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface SolicitudItem {
   article_id: number;
   cantidad: number;
   precio_unitario?: number;
-  observaciones?: string;
+  observaciones: string;
 }
 
 interface SolicitudData {
   tipo: 'ENTRADA' | 'SALIDA';
   fecha: string;
   usuario_solicita_id: number;
-  observaciones?: string;
+  observaciones: string;
   items: SolicitudItem[];
 }
 
-interface Solicitud {
-  solicitud_id: number;
-  folio: string;
-  tipo: 'ENTRADA' | 'SALIDA';
-  fecha: string;
-  estado: 'PENDIENTE' | 'APROBADA' | 'RECHAZADA' | 'PROCESADA';
-  usuario_solicita_nombre: string;
-  usuario_autoriza_nombre?: string;
-  total_items: number;
-  fecha_creacion: string;
-  fecha_autorizacion?: string;
-  fecha_procesado?: string;
-  observaciones?: string;
+interface CreateSolicitudResponse {
+  success: boolean;
+  folio?: string;
+  message?: string;
+  solicitud_id?: number;
 }
 
 export const useSolicitudes = () => {
-  const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [solicitudes, setSolicitudes] = useState<any[]>([]);
 
-  const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000';
-
-  // Obtener todas las solicitudes
-  const fetchSolicitudes = async () => {
+  const createSolicitud = async (data: SolicitudData): Promise<CreateSolicitudResponse> => {
     setLoading(true);
     setError(null);
-    
+
     try {
-      const response = await fetch(`${API_BASE}/api/solicitudes`);
-      
-      if (!response.ok) {
-        throw new Error('Error al obtener solicitudes');
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No se encontró token de autenticación');
       }
-      
-      const data = await response.json();
-      setSolicitudes(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  // Obtener solicitudes pendientes
-  const fetchSolicitudesPendientes = async () => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const response = await fetch(`${API_BASE}/api/solicitudes/pendientes`);
-      
-      if (!response.ok) {
-        throw new Error('Error al obtener solicitudes pendientes');
-      }
-      
-      const data = await response.json();
-      setSolicitudes(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Obtener solicitudes aprobadas
-  const fetchSolicitudesAprobadas = async () => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const response = await fetch(`${API_BASE}/api/solicitudes/aprobadas`);
-      
-      if (!response.ok) {
-        throw new Error('Error al obtener solicitudes aprobadas');
-      }
-      
-      const data = await response.json();
-      setSolicitudes(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Crear nueva solicitud
-  const createSolicitud = async (solicitudData: SolicitudData): Promise<{ success: boolean; solicitud_id?: number; folio?: string; message?: string }> => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const response = await fetch(`${API_BASE}/api/solicitudes`, {
+      const response = await fetch(`${API_URL}/solicitudes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(solicitudData),
+        body: JSON.stringify(data)
       });
-      
-      const data = await response.json();
-      
+
+      const result = await response.json();
+
       if (!response.ok) {
-        throw new Error(data.error || 'Error al crear solicitud');
+        throw new Error(result.message || 'Error al crear solicitud');
       }
-      
-      return data;
+
+      // Si es una solicitud de SALIDA, también crear las salidas automáticamente
+      if (data.tipo === 'SALIDA' && result.success && result.solicitud_id) {
+        try {
+          await createSalidasAutomaticas(result.solicitud_id, data.items);
+        } catch (salidaError) {
+          console.warn('Error al crear salidas automáticas:', salidaError);
+          // No fallar completamente si las salidas fallan
+        }
+      }
+
+      // Actualizar la lista después de crear
+      await fetchSolicitudes();
+
+      return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
       setError(errorMessage);
-      return { success: false, message: errorMessage };
+      return {
+        success: false,
+        message: errorMessage
+      };
     } finally {
       setLoading(false);
     }
   };
 
-  // Autorizar solicitud
-  const autorizarSolicitud = async (
-    solicitudId: number, 
-    accion: 'APROBAR' | 'RECHAZAR', 
-    usuarioAutorizaId: number,
-    observaciones?: string
-  ): Promise<{ success: boolean; message?: string }> => {
+  const createSalidasAutomaticas = async (solicitudId: number, items: SolicitudItem[]) => {
+    try {
+      const token = localStorage.getItem('token');
+      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+
+      const salidasPromises = items.map(async (item) => {
+        if (item.article_id && item.cantidad > 0) {
+          const salidaData = {
+            article_id: item.article_id,
+            cantidad: item.cantidad,
+            fecha: new Date().toISOString().split('T')[0],
+            usuario_registro_id: userInfo.user_id,
+            tipo_movimiento: 'SALIDA_SOLICITUD',
+            observaciones: `Salida automática por solicitud #${solicitudId} - ${item.observaciones}`,
+            solicitud_id: solicitudId
+          };
+
+          const response = await fetch(`${API_URL}/almacen/salidas`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(salidaData)
+          });
+
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(`Error en artículo ${item.article_id}: ${error.message}`);
+          }
+
+          return response.json();
+        }
+      });
+
+      await Promise.all(salidasPromises.filter(Boolean));
+      console.log('✅ Salidas automáticas creadas exitosamente');
+    } catch (error) {
+      console.error('❌ Error al crear salidas automáticas:', error);
+      throw error;
+    }
+  };
+
+  const getSolicitudes = async (filters?: any) => {
     setLoading(true);
     setError(null);
-    
+
     try {
-      const response = await fetch(`${API_BASE}/api/solicitudes/${solicitudId}/autorizar`, {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No se encontró token de autenticación');
+      }
+
+      const queryParams = new URLSearchParams();
+      if (filters) {
+        Object.keys(filters).forEach(key => {
+          if (filters[key]) {
+            queryParams.append(key, filters[key]);
+          }
+        });
+      }
+
+      const url = `${API_URL}/solicitudes${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Error al obtener solicitudes');
+      }
+
+      return result;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+      setError(errorMessage);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchSolicitudes = async () => {
+    try {
+      const result = await getSolicitudes();
+      setSolicitudes(result);
+    } catch (error) {
+      console.error('Error al cargar solicitudes:', error);
+    }
+  };
+
+  const fetchSolicitudesPendientes = async () => {
+    try {
+      const result = await getSolicitudes({ estado: 'PENDIENTE' });
+      return result;
+    } catch (error) {
+      console.error('Error al cargar solicitudes pendientes:', error);
+      return [];
+    }
+  };
+
+  const fetchSolicitudesAprobadas = async () => {
+    try {
+      const result = await getSolicitudes({ estado: 'AUTORIZADA' });
+      return result;
+    } catch (error) {
+      console.error('Error al cargar solicitudes aprobadas:', error);
+      return [];
+    }
+  };
+
+  const autorizarSolicitud = async (solicitudId: number) => {
+    return await updateSolicitudStatus(solicitudId, 'AUTORIZADA');
+  };
+
+  const procesarSolicitud = async (solicitudId: number) => {
+    return await updateSolicitudStatus(solicitudId, 'COMPLETADA');
+  };
+
+  const updateSolicitudStatus = async (solicitudId: number, status: string) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No se encontró token de autenticación');
+      }
+
+      const response = await fetch(`${API_URL}/solicitudes/${solicitudId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          accion,
-          usuario_autoriza_id: usuarioAutorizaId,
-          observaciones_autorizacion: observaciones
-        }),
+        body: JSON.stringify({ status })
       });
-      
-      const data = await response.json();
-      
+
+      const result = await response.json();
+
       if (!response.ok) {
-        throw new Error(data.error || 'Error al autorizar solicitud');
+        throw new Error(result.message || 'Error al actualizar estado');
       }
-      
-      return data;
+
+      // Actualizar la lista después de cambiar estado
+      await fetchSolicitudes();
+
+      return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
       setError(errorMessage);
-      return { success: false, message: errorMessage };
+      return {
+        success: false,
+        message: errorMessage
+      };
     } finally {
       setLoading(false);
     }
   };
-
-  // Procesar solicitud (ejecutar entrada/salida)
-  const procesarSolicitud = async (
-    solicitudId: number, 
-    usuarioProcesaId: number
-  ): Promise<{ success: boolean; message?: string }> => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const response = await fetch(`${API_BASE}/api/solicitudes/${solicitudId}/procesar`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          usuario_procesa_id: usuarioProcesaId
-        }),
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Error al procesar solicitud');
-      }
-      
-      return data;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-      setError(errorMessage);
-      return { success: false, message: errorMessage };
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Obtener una solicitud específica
-  const fetchSolicitudById = async (id: number) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const response = await fetch(`${API_BASE}/api/solicitudes/${id}`);
-      
-      if (!response.ok) {
-        throw new Error('Error al obtener solicitud');
-      }
-      
-      const data = await response.json();
-      return data;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchSolicitudes();
-  }, []);
 
   return {
-    solicitudes,
-    loading,
-    error,
+    createSolicitud,
+    getSolicitudes,
     fetchSolicitudes,
     fetchSolicitudesPendientes,
     fetchSolicitudesAprobadas,
-    createSolicitud,
     autorizarSolicitud,
     procesarSolicitud,
-    fetchSolicitudById,
-    setSolicitudes,
-    setError
+    updateSolicitudStatus,
+    solicitudes,
+    loading,
+    error
   };
 };

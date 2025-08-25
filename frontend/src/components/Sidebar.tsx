@@ -1,87 +1,174 @@
-import logoBeExEn from '../assets/logoBeExEn.png';
+import React, { useState, useEffect } from 'react';
+import './Sidebar.css';
 
 interface SidebarProps {
-  user: { username: string; group: string };
-  current: string;
-  onChange: (key: string) => void;
+  isCollapsed: boolean;
+  isMobile: boolean;
+  onToggle: () => void;
+  onClose: () => void;
 }
 
-const menu = [
-  { key: 'dashboard', icon: 'ti ti-home', label: 'Dashboard' },
-  { key: 'usuarios', icon: 'ti ti-users', label: 'Usuarios' },
-  { key: 'stock', icon: 'ti ti-building-warehouse', label: 'Almacén' },
-  { key: 'administracion', icon: 'ti ti-settings', label: 'Administración' },
-  // Agrega más opciones según tu sistema
-];
+const Sidebar: React.FC<SidebarProps> = ({ 
+  isCollapsed, 
+  isMobile, 
+  onToggle, 
+  onClose 
+}) => {
+  const [userInfo, setUserInfo] = useState<any>(null);
 
-export default function Sidebar({ current, onChange }: SidebarProps) {
+  useEffect(() => {
+    // Obtener información del usuario desde localStorage
+    const storedUserInfo = localStorage.getItem('userInfo');
+    if (storedUserInfo) {
+      setUserInfo(JSON.parse(storedUserInfo));
+    }
+  }, []);
+
+  const menuItems = [
+    {
+      label: 'Almacén',
+      icon: 'ti ti-package',
+      href: '/almacen',
+      submenu: [
+        { label: 'Inventario', href: '/almacen' },
+        { label: 'Solicitudes', href: '/solicitudes' },
+        { label: 'Ajustes', href: '/ajustes' },
+        { label: 'Historial', href: '/historial' }
+      ]
+    },
+    {
+      label: 'Catálogos',
+      icon: 'ti ti-list',
+      href: '/catalogos',
+    },
+    {
+      label: 'Reportes',
+      icon: 'ti ti-chart-bar',
+      href: '/reportes',
+    },
+    {
+      label: 'Configuración',
+      icon: 'ti ti-settings',
+      href: '/configuracion',
+      submenu: [
+        { label: 'Usuarios', href: '/usuarios' },
+        { label: 'Roles', href: '/roles' },
+        { label: 'Permisos', href: '/permisos' }
+      ]
+    }
+  ];
+
+  const handleMenuClick = (href: string) => {
+    window.location.href = href;
+    if (isMobile) {
+      onClose();
+    }
+  };
+
+  const sidebarClasses = [
+    'sidebar',
+    isCollapsed ? 'sidebar-collapsed' : '',
+    isMobile ? 'sidebar-mobile' : ''
+  ].filter(Boolean).join(' ');
+
   return (
-    <nav className="navbar navbar-dark bg-dark flex-column p-3" style={{ minHeight: '100vh', width: 220 }}>
-      <div className="text-center mb-4">
-        {/* Logo y nombre de Be-ExEn */}
-        <div className="d-flex flex-column align-items-center gap-2">
-          <div style={{
-            height: 50,
-            width: 50,
-            borderRadius: '12px',
-            background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)',
-            padding: '6px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
-          }}>
+    <>
+      {/* Overlay para móvil */}
+      {isMobile && !isCollapsed && (
+        <div className="sidebar-overlay" onClick={onClose}></div>
+      )}
+      
+      <aside className={sidebarClasses}>
+        <div className="sidebar-header">
+          <div className="sidebar-brand">
             <img 
-              src={logoBeExEn} 
-              alt="Be-ExEn Logo" 
-              style={{ 
-                height: '100%', 
-                width: '100%',
-                objectFit: 'contain'
-              }} 
+              src="/src/assets/beexen-logo.png" 
+              alt="BeExEn" 
+              className="sidebar-logo"
             />
+            {!isCollapsed && <span className="brand-text">BeExEn</span>}
           </div>
-          <div className="text-center">
-            <div style={{ 
-              fontWeight: 700, 
-              fontSize: 24, 
-              color: '#fff', 
-              letterSpacing: '0.8px',
-              textShadow: '0 1px 2px rgba(0,0,0,0.2)'
-            }}>
-              Be-ExEn
-            </div>
-            <div style={{
-              fontSize: 11,
-              color: 'rgba(255,255,255,0.7)',
-              fontWeight: 400,
-              marginTop: '-2px'
-            }}>
-              Sistema de Gestión
-            </div>
-          </div>
-        </div>
-      </div>
-      <ul className="nav nav-pills flex-column mb-auto">
-        {menu.map(item => (
-          <li className="nav-item mb-2" key={item.key}>
-            <button
-              className={`nav-link d-flex align-items-center ${current === item.key ? 'active bg-primary' : 'text-white bg-dark'}`}
-              style={{ borderRadius: 8 }}
-              onClick={() => onChange(item.key)}
+          
+          {isMobile && (
+            <button 
+              className="btn-close-sidebar d-md-none"
+              onClick={onClose}
+              aria-label="Cerrar menú"
             >
-              <i className={`${item.icon} me-2`}></i>
-              {item.label}
+              <i className="ti ti-x"></i>
             </button>
-          </li>
-        ))}
-      </ul>
-      <div className="mt-auto text-center">
-        {/* Imagen de usuario dummy y datos */}
-        <img src="https://ui-avatars.com/api/?name=Usuario&background=0D6EFD&color=fff&size=64" alt="Usuario" width={48} height={48} style={{ borderRadius: '50%', objectFit: 'cover', marginBottom: 8 }} />
-        <div style={{ color: '#fff', fontWeight: 500, fontSize: 15 }}>Usuario</div>
-        <div style={{ color: '#b0b0b0', fontSize: 13 }}>Rol</div>
-      </div>
-    </nav>
+          )}
+        </div>
+
+        <div className="sidebar-content">
+          <nav className="sidebar-nav">
+            <ul className="nav nav-pills nav-sidebar flex-column">
+              {menuItems.map((item, index) => (
+                <li key={index} className="nav-item">
+                  <a 
+                    href={item.href}
+                    className="nav-link"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleMenuClick(item.href);
+                    }}
+                  >
+                    <i className={item.icon}></i>
+                    {!isCollapsed && <span className="nav-text">{item.label}</span>}
+                  </a>
+                  
+                  {item.submenu && !isCollapsed && (
+                    <ul className="nav-submenu">
+                      {item.submenu.map((subitem, subindex) => (
+                        <li key={subindex} className="nav-item">
+                          <a 
+                            href={subitem.href}
+                            className="nav-link nav-link-submenu"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleMenuClick(subitem.href);
+                            }}
+                          >
+                            <span className="nav-text">{subitem.label}</span>
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </div>
+
+        {/* Usuario info */}
+        {userInfo && !isCollapsed && (
+          <div className="sidebar-footer">
+            <div className="user-info">
+              <div className="user-avatar">
+                <i className="ti ti-user"></i>
+              </div>
+              <div className="user-details">
+                <div className="user-name">{userInfo.username || userInfo.name}</div>
+                <div className="user-role">{userInfo.role || 'Usuario'}</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Toggle button para desktop */}
+        {!isMobile && (
+          <button 
+            className="btn-toggle-sidebar"
+            onClick={onToggle}
+            aria-label={isCollapsed ? 'Expandir menú' : 'Colapsar menú'}
+          >
+            <i className={`ti ${isCollapsed ? 'ti-chevron-right' : 'ti-chevron-left'}`}></i>
+          </button>
+        )}
+      </aside>
+    </>
   );
-}
+};
+
+export default Sidebar;

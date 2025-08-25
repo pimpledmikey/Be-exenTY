@@ -1,348 +1,403 @@
 import React, { useState, useEffect } from 'react';
 import { useSolicitudes } from '../../hooks/useSolicitudes';
-import { useUserInfo } from '../../hooks/useUserInfo';
 import FormSolicitud from '../../components/FormSolicitud';
-
-interface Solicitud {
-  solicitud_id: number;
-  folio: string;
-  tipo: 'ENTRADA' | 'SALIDA';
-  fecha: string;
-  estado: 'PENDIENTE' | 'APROBADA' | 'RECHAZADA' | 'PROCESADA';
-  usuario_solicita_nombre: string;
-  usuario_autoriza_nombre?: string;
-  total_items: number;
-  fecha_creacion: string;
-  fecha_autorizacion?: string;
-  fecha_procesado?: string;
-  observaciones?: string;
-}
+import ResponsiveTable from '../../components/ResponsiveTable';
+import PageHeader from '../../components/PageHeader';
 
 const SolicitudesPanel: React.FC = () => {
-  const { 
-    solicitudes, 
-    loading, 
-    error, 
-    fetchSolicitudes, 
-    fetchSolicitudesPendientes, 
+  const {
+    solicitudes,
+    loading,
+    error,
+    fetchSolicitudes,
+    fetchSolicitudesPendientes,
     fetchSolicitudesAprobadas,
     autorizarSolicitud,
     procesarSolicitud
   } = useSolicitudes();
-  
-  const { userInfo } = useUserInfo();
-  const [showForm, setShowForm] = useState(false);
-  const [tipoSolicitud, setTipoSolicitud] = useState<'entrada' | 'salida'>('entrada');
-  const [filtroEstado, setFiltroEstado] = useState<'TODAS' | 'PENDIENTE' | 'APROBADA' | 'RECHAZADA' | 'PROCESADA'>('TODAS');
-  const [solicitudSeleccionada, setSolicitudSeleccionada] = useState<Solicitud | null>(null);
-  const [showModalAutorizacion, setShowModalAutorizacion] = useState(false);
-  const [observacionesAutorizacion, setObservacionesAutorizacion] = useState('');
+
+  const [activeTab, setActiveTab] = useState<'todas' | 'pendientes' | 'aprobadas'>('todas');
+  const [showFormSolicitud, setShowFormSolicitud] = useState(false);
+  const [selectedSolicitud, setSelectedSolicitud] = useState<any>(null);
+  const [filteredSolicitudes, setFilteredSolicitudes] = useState<any[]>([]);
 
   useEffect(() => {
-    if (filtroEstado === 'TODAS') {
-      fetchSolicitudes();
-    } else if (filtroEstado === 'PENDIENTE') {
-      fetchSolicitudesPendientes();
-    } else if (filtroEstado === 'APROBADA') {
-      fetchSolicitudesAprobadas();
-    }
-  }, [filtroEstado]);
+    loadSolicitudes();
+  }, [activeTab]);
 
-  const handleCrearSolicitud = (tipo: 'entrada' | 'salida') => {
-    setTipoSolicitud(tipo);
-    setShowForm(true);
-  };
+  useEffect(() => {
+    filterSolicitudes();
+  }, [solicitudes, activeTab]);
 
-  const handleAutorizar = async (solicitud: Solicitud, accion: 'APROBAR' | 'RECHAZAR') => {
-    if (!userInfo) {
-      alert('Usuario no identificado');
-      return;
-    }
-
-    const result = await autorizarSolicitud(
-      solicitud.solicitud_id,
-      accion,
-      userInfo.user_id,
-      observacionesAutorizacion
-    );
-
-    if (result.success) {
-      alert(`Solicitud ${accion === 'APROBAR' ? 'aprobada' : 'rechazada'} exitosamente`);
-      setShowModalAutorizacion(false);
-      setSolicitudSeleccionada(null);
-      setObservacionesAutorizacion('');
-      fetchSolicitudes();
-    } else {
-      alert(`Error: ${result.message}`);
+  const loadSolicitudes = async () => {
+    try {
+      switch (activeTab) {
+        case 'pendientes':
+          const pendientes = await fetchSolicitudesPendientes();
+          setFilteredSolicitudes(pendientes);
+          break;
+        case 'aprobadas':
+          const aprobadas = await fetchSolicitudesAprobadas();
+          setFilteredSolicitudes(aprobadas);
+          break;
+        default:
+          await fetchSolicitudes();
+          break;
+      }
+    } catch (error) {
+      console.error('Error al cargar solicitudes:', error);
     }
   };
 
-  const handleProcesar = async (solicitud: Solicitud) => {
-    if (!userInfo) {
-      alert('Usuario no identificado');
-      return;
-    }
+  const filterSolicitudes = () => {
+    if (!solicitudes) return;
 
-    if (!confirm(`¿Está seguro que desea procesar la solicitud ${solicitud.folio}?\n\nEsto registrará las ${solicitud.tipo.toLowerCase()}s en el inventario automáticamente.`)) {
-      return;
-    }
-
-    const result = await procesarSolicitud(solicitud.solicitud_id, userInfo.user_id);
-
-    if (result.success) {
-      alert(`Solicitud procesada exitosamente. Las ${solicitud.tipo.toLowerCase()}s han sido registradas en el inventario.`);
-      fetchSolicitudes();
-    } else {
-      alert(`Error: ${result.message}`);
+    switch (activeTab) {
+      case 'pendientes':
+        setFilteredSolicitudes(solicitudes.filter((s: any) => s.estado === 'PENDIENTE'));
+        break;
+      case 'aprobadas':
+        setFilteredSolicitudes(solicitudes.filter((s: any) => s.estado === 'AUTORIZADA'));
+        break;
+      default:
+        setFilteredSolicitudes(solicitudes);
+        break;
     }
   };
 
-  const abrirModalAutorizacion = (solicitud: Solicitud) => {
-    setSolicitudSeleccionada(solicitud);
-    setShowModalAutorizacion(true);
-    setObservacionesAutorizacion('');
+  const handleAutorizar = async (solicitud: any) => {
+    try {
+      const result = await autorizarSolicitud(solicitud.id);
+      if (result.success) {
+        alert('Solicitud autorizada exitosamente');
+        await loadSolicitudes();
+      } else {
+        alert('Error al autorizar solicitud: ' + result.message);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al autorizar solicitud');
+    }
   };
 
-  const getEstadoBadge = (estado: string) => {
-    const badges = {
+  const handleProcesar = async (solicitud: any) => {
+    try {
+      const result = await procesarSolicitud(solicitud.id);
+      if (result.success) {
+        alert('Solicitud procesada exitosamente');
+        await loadSolicitudes();
+      } else {
+        alert('Error al procesar solicitud: ' + result.message);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al procesar solicitud');
+    }
+  };
+
+  const handleFormSuccess = (folio: string) => {
+    alert(`Solicitud creada exitosamente con folio: ${folio}`);
+    setShowFormSolicitud(false);
+    loadSolicitudes();
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('es-ES');
+  };
+
+  const getStatusBadge = (estado: string) => {
+    const statusClasses = {
       'PENDIENTE': 'bg-warning text-dark',
-      'APROBADA': 'bg-success',
+      'AUTORIZADA': 'bg-success',
       'RECHAZADA': 'bg-danger',
-      'PROCESADA': 'bg-primary'
+      'COMPLETADA': 'bg-info'
     };
-    return badges[estado as keyof typeof badges] || 'bg-secondary';
-  };
-
-  const getTipoBadge = (tipo: string) => {
-    return tipo === 'ENTRADA' ? 'bg-info text-dark' : 'bg-warning text-dark';
-  };
-
-  if (showForm) {
+    
     return (
-      <div className="modal show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.8)' }}>
-        <div className="modal-dialog modal-fullscreen">
-          <div className="modal-content">
-            <FormSolicitud 
-              initialData={{ tipo: tipoSolicitud }}
-              onClose={() => setShowForm(false)}
-              onSuccess={(folio) => {
-                console.log(`Solicitud creada: ${folio}`);
-                fetchSolicitudes();
-              }}
-            />
-          </div>
-        </div>
-      </div>
+      <span className={`badge ${statusClasses[estado as keyof typeof statusClasses] || 'bg-secondary'}`}>
+        {estado}
+      </span>
     );
-  }
+  };
 
-  return (
-    <div className="container-fluid">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Gestión de Solicitudes</h2>
-        <div className="btn-group">
-          <button 
-            className="btn btn-success"
-            onClick={() => handleCrearSolicitud('entrada')}
+  const columns = [
+    {
+      key: 'folio',
+      label: 'Folio',
+      render: (value: string) => <span className="font-monospace">{value}</span>
+    },
+    {
+      key: 'tipo',
+      label: 'Tipo',
+      render: (value: string) => (
+        <span className={`badge ${value === 'ENTRADA' ? 'bg-primary' : 'bg-secondary'}`}>
+          {value}
+        </span>
+      )
+    },
+    {
+      key: 'fecha',
+      label: 'Fecha',
+      render: (value: string) => formatDate(value)
+    },
+    {
+      key: 'usuario_solicita_nombre',
+      label: 'Solicitante',
+      hideOnMobile: true
+    },
+    {
+      key: 'estado',
+      label: 'Estado',
+      render: (value: string) => getStatusBadge(value)
+    },
+    {
+      key: 'acciones',
+      label: 'Acciones',
+      render: (_: any, solicitud: any) => (
+        <div className="btn-group btn-group-sm">
+          <button
+            className="btn btn-outline-primary btn-sm"
+            onClick={() => setSelectedSolicitud(solicitud)}
+            title="Ver detalles"
           >
-            + Nueva Entrada
+            <i className="ti ti-eye"></i>
           </button>
-          <button 
-            className="btn btn-warning"
-            onClick={() => handleCrearSolicitud('salida')}
-          >
-            + Nueva Salida
-          </button>
-        </div>
-      </div>
-
-      {/* Filtros */}
-      <div className="card mb-4">
-        <div className="card-body">
-          <div className="row">
-            <div className="col-md-4">
-              <label className="form-label">Filtrar por Estado</label>
-              <select 
-                className="form-select"
-                value={filtroEstado}
-                onChange={(e) => setFiltroEstado(e.target.value as any)}
-              >
-                <option value="TODAS">Todas las solicitudes</option>
-                <option value="PENDIENTE">Pendientes de autorización</option>
-                <option value="APROBADA">Aprobadas (pendientes de procesar)</option>
-                <option value="PROCESADA">Procesadas</option>
-                <option value="RECHAZADA">Rechazadas</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Mensaje de error */}
-      {error && (
-        <div className="alert alert-danger">
-          {error}
-        </div>
-      )}
-
-      {/* Lista de solicitudes */}
-      <div className="card">
-        <div className="card-header">
-          <h5 className="card-title">
-            Solicitudes {filtroEstado !== 'TODAS' && `- ${filtroEstado}`}
-          </h5>
-        </div>
-        <div className="card-body">
-          {loading ? (
-            <div className="text-center">
-              <div className="spinner-border" role="status">
-                <span className="visually-hidden">Cargando...</span>
-              </div>
-            </div>
-          ) : (
-            <div className="table-responsive">
-              <table className="table table-striped table-hover">
-                <thead>
-                  <tr>
-                    <th>Folio</th>
-                    <th>Tipo</th>
-                    <th>Estado</th>
-                    <th>Solicitante</th>
-                    <th>Fecha</th>
-                    <th>Items</th>
-                    <th>Autoriza</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {solicitudes.length > 0 ? (
-                    solicitudes.map((solicitud) => (
-                      <tr key={solicitud.solicitud_id}>
-                        <td><strong>{solicitud.folio}</strong></td>
-                        <td>
-                          <span className={`badge ${getTipoBadge(solicitud.tipo)}`}>
-                            {solicitud.tipo}
-                          </span>
-                        </td>
-                        <td>
-                          <span className={`badge ${getEstadoBadge(solicitud.estado)}`}>
-                            {solicitud.estado}
-                          </span>
-                        </td>
-                        <td>{solicitud.usuario_solicita_nombre}</td>
-                        <td>{new Date(solicitud.fecha).toLocaleDateString('es-ES')}</td>
-                        <td>
-                          <span className="badge bg-secondary">{solicitud.total_items}</span>
-                        </td>
-                        <td>{solicitud.usuario_autoriza_nombre || '-'}</td>
-                        <td>
-                          <div className="btn-group btn-group-sm">
-                            {solicitud.estado === 'PENDIENTE' && (
-                              <button
-                                className="btn btn-outline-primary"
-                                onClick={() => abrirModalAutorizacion(solicitud)}
-                                title="Autorizar/Rechazar"
-                              >
-                                ⚖️
-                              </button>
-                            )}
-                            {solicitud.estado === 'APROBADA' && (
-                              <button
-                                className="btn btn-outline-success"
-                                onClick={() => handleProcesar(solicitud)}
-                                title="Procesar (ejecutar entrada/salida)"
-                              >
-                                ✅
-                              </button>
-                            )}
-                            <button
-                              className="btn btn-outline-info"
-                              onClick={() => alert('Función de detalle próximamente')}
-                              title="Ver detalles"
-                            >
-                              👁️
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={8} className="text-center text-muted">
-                        No hay solicitudes para mostrar
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+          
+          {solicitud.estado === 'PENDIENTE' && (
+            <button
+              className="btn btn-outline-success btn-sm"
+              onClick={() => handleAutorizar(solicitud)}
+              title="Autorizar"
+            >
+              <i className="ti ti-check"></i>
+            </button>
+          )}
+          
+          {solicitud.estado === 'AUTORIZADA' && (
+            <button
+              className="btn btn-outline-info btn-sm"
+              onClick={() => handleProcesar(solicitud)}
+              title="Procesar"
+            >
+              <i className="ti ti-truck"></i>
+            </button>
           )}
         </div>
+      )
+    }
+  ];
+
+  return (
+    <>
+      <PageHeader
+        title="Gestión de Solicitudes"
+        subtitle="Administra las solicitudes de entrada y salida de inventario"
+        actions={
+          <button
+            className="btn btn-primary"
+            onClick={() => setShowFormSolicitud(true)}
+          >
+            <i className="ti ti-plus me-2"></i>
+            Nueva Solicitud
+          </button>
+        }
+      />
+
+      <div className="row">
+        <div className="col-12">
+          <div className="card">
+            <div className="card-header">
+              <ul className="nav nav-tabs card-header-tabs">
+                <li className="nav-item">
+                  <button
+                    className={`nav-link ${activeTab === 'todas' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('todas')}
+                  >
+                    Todas
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button
+                    className={`nav-link ${activeTab === 'pendientes' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('pendientes')}
+                  >
+                    Pendientes
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button
+                    className={`nav-link ${activeTab === 'aprobadas' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('aprobadas')}
+                  >
+                    Aprobadas
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            <div className="card-body">
+              {error && (
+                <div className="alert alert-danger" role="alert">
+                  {error}
+                </div>
+              )}
+
+              <ResponsiveTable
+                columns={columns}
+                data={filteredSolicitudes}
+                loading={loading}
+                emptyMessage="No hay solicitudes disponibles"
+                stackOnMobile={true}
+                striped={true}
+                hover={true}
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Modal de autorización */}
-      {showModalAutorizacion && solicitudSeleccionada && (
-        <div className="modal show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog">
+      {/* Modal para nueva solicitud */}
+      {showFormSolicitud && (
+        <div className="modal show d-block" tabIndex={-1}>
+          <div className="modal-dialog modal-xl">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Autorizar Solicitud</h5>
+                <h5 className="modal-title">Nueva Solicitud</h5>
                 <button
                   type="button"
                   className="btn-close"
-                  onClick={() => setShowModalAutorizacion(false)}
+                  onClick={() => setShowFormSolicitud(false)}
                 ></button>
               </div>
               <div className="modal-body">
-                <div className="alert alert-info">
-                  <h6>📋 Solicitud: {solicitudSeleccionada.folio}</h6>
-                  <ul className="mb-0">
-                    <li><strong>Tipo:</strong> {solicitudSeleccionada.tipo}</li>
-                    <li><strong>Solicitante:</strong> {solicitudSeleccionada.usuario_solicita_nombre}</li>
-                    <li><strong>Fecha:</strong> {new Date(solicitudSeleccionada.fecha).toLocaleDateString('es-ES')}</li>
-                    <li><strong>Items:</strong> {solicitudSeleccionada.total_items}</li>
-                  </ul>
-                </div>
+                <FormSolicitud
+                  onClose={() => setShowFormSolicitud(false)}
+                  onSuccess={handleFormSuccess}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
-                <div className="mb-3">
-                  <label className="form-label">Observaciones de autorización</label>
-                  <textarea
-                    className="form-control"
-                    value={observacionesAutorizacion}
-                    onChange={(e) => setObservacionesAutorizacion(e.target.value)}
-                    rows={3}
-                    placeholder="Observaciones opcionales..."
-                  />
+      {/* Modal para ver detalles */}
+      {selectedSolicitud && (
+        <div className="modal show d-block" tabIndex={-1}>
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Detalles de Solicitud</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setSelectedSolicitud(null)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <div className="row mb-3">
+                  <div className="col-md-6">
+                    <strong>Folio:</strong> {selectedSolicitud.folio}
+                  </div>
+                  <div className="col-md-6">
+                    <strong>Tipo:</strong> {selectedSolicitud.tipo}
+                  </div>
                 </div>
+                <div className="row mb-3">
+                  <div className="col-md-6">
+                    <strong>Fecha:</strong> {formatDate(selectedSolicitud.fecha)}
+                  </div>
+                  <div className="col-md-6">
+                    <strong>Estado:</strong> {getStatusBadge(selectedSolicitud.estado)}
+                  </div>
+                </div>
+                <div className="row mb-3">
+                  <div className="col-12">
+                    <strong>Solicitante:</strong> {selectedSolicitud.usuario_solicita_nombre}
+                  </div>
+                </div>
+                {selectedSolicitud.observaciones && (
+                  <div className="row mb-3">
+                    <div className="col-12">
+                      <strong>Observaciones:</strong>
+                      <p className="mt-1">{selectedSolicitud.observaciones}</p>
+                    </div>
+                  </div>
+                )}
+                
+                {selectedSolicitud.items && selectedSolicitud.items.length > 0 && (
+                  <div className="row">
+                    <div className="col-12">
+                      <strong>Artículos:</strong>
+                      <div className="table-responsive mt-2">
+                        <table className="table table-sm">
+                          <thead>
+                            <tr>
+                              <th>Artículo</th>
+                              <th>Cantidad</th>
+                              {selectedSolicitud.tipo === 'ENTRADA' && <th>Precio Unit.</th>}
+                              <th>Observaciones</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {selectedSolicitud.items.map((item: any, index: number) => (
+                              <tr key={index}>
+                                <td>{item.articulo_nombre || item.observaciones}</td>
+                                <td>{item.cantidad}</td>
+                                {selectedSolicitud.tipo === 'ENTRADA' && (
+                                  <td>
+                                    {item.precio_unitario ? `$${item.precio_unitario}` : '-'}
+                                  </td>
+                                )}
+                                <td>{item.observaciones}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="modal-footer">
                 <button
                   type="button"
                   className="btn btn-secondary"
-                  onClick={() => setShowModalAutorizacion(false)}
+                  onClick={() => setSelectedSolicitud(null)}
                 >
-                  Cancelar
+                  Cerrar
                 </button>
-                <button
-                  type="button"
-                  className="btn btn-danger"
-                  onClick={() => handleAutorizar(solicitudSeleccionada, 'RECHAZAR')}
-                >
-                  ❌ Rechazar
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-success"
-                  onClick={() => handleAutorizar(solicitudSeleccionada, 'APROBAR')}
-                >
-                  ✅ Aprobar
-                </button>
+                
+                {selectedSolicitud.estado === 'PENDIENTE' && (
+                  <button
+                    type="button"
+                    className="btn btn-success"
+                    onClick={() => {
+                      handleAutorizar(selectedSolicitud);
+                      setSelectedSolicitud(null);
+                    }}
+                  >
+                    Autorizar
+                  </button>
+                )}
+                
+                {selectedSolicitud.estado === 'AUTORIZADA' && (
+                  <button
+                    type="button"
+                    className="btn btn-info"
+                    onClick={() => {
+                      handleProcesar(selectedSolicitud);
+                      setSelectedSolicitud(null);
+                    }}
+                  >
+                    Procesar
+                  </button>
+                )}
               </div>
             </div>
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

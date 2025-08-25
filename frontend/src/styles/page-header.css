@@ -1,0 +1,120 @@
+/* Estilos para el header de página - evitar que se pegue al menú superior */
+.page-header {
+  padding-top: 1.5rem;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #e6eaee;
+  background-color: #f8f9fa;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin-bottom: 0.5rem;
+}
+
+/* Espaciado responsivo para el header */
+@media (max-width: 768px) {
+  .page-header {
+    padding-top: 1rem;
+    padding-bottom: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+  }
+
+  .page-header .btn-toolbar {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .page-header .col-auto {
+    margin-top: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header {
+    padding-top: 0.75rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .page-title {
+    font-size: 1.25rem;
+  }
+
+  .page-header .row {
+    flex-direction: column;
+  }
+
+  .page-header .col-auto {
+    margin-top: 1rem;
+    margin-left: 0 !important;
+  }
+
+  .page-header .btn-toolbar {
+    justify-content: flex-start;
+  }
+}
+
+/* Breadcrumbs responsivos */
+.breadcrumb {
+  background-color: transparent;
+  padding: 0;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.breadcrumb-item {
+  color: #6c757d;
+}
+
+.breadcrumb-item.active {
+  color: #495057;
+  font-weight: 500;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  color: #6c757d;
+}
+
+@media (max-width: 576px) {
+  .breadcrumb {
+    font-size: 0.75rem;
+  }
+
+  .breadcrumb-item {
+    word-break: break-word;
+  }
+}
+
+/* Mejoras para el contenido principal */
+.main-content {
+  padding-top: 0;
+  min-height: calc(100vh - 120px);
+}
+
+/* Espaciado entre elementos */
+.page-header + .container-fluid,
+.page-header + .container {
+  padding-top: 0;
+}
+
+/* Cards después del header */
+.page-header + * .card:first-child {
+  margin-top: 0;
+}
+
+/* Alertas después del header */
+.page-header + * .alert:first-child {
+  margin-top: 0;
+}
+
+/* Tablas después del header */
+.page-header + * .table-responsive:first-child {
+  margin-top: 0;
+}
