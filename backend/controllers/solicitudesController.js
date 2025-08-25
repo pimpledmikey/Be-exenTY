@@ -47,7 +47,13 @@ export const createSolicitud = async (req, res) => {
       items 
     } = req.body;
 
-    console.log('Datos recibidos:', { tipo, fecha, usuario_solicita_id, observaciones, items });
+    console.log('📋 Datos recibidos para nueva solicitud:', { 
+      tipo, 
+      fecha, 
+      usuario_solicita_id, 
+      observaciones, 
+      itemsCount: items?.length 
+    });
 
     // Validar datos requeridos
     if (!tipo || !fecha || !usuario_solicita_id || !items || items.length === 0) {
@@ -58,9 +64,10 @@ export const createSolicitud = async (req, res) => {
       });
     }
 
-    // Generar folio automático simple (sin función DB por ahora)
+    // Generar folio automático simple
     const timestamp = Date.now();
     const folio = `${tipo}-${new Date().getFullYear()}-${timestamp.toString().slice(-6)}`;
+    console.log(`📄 Folio generado: ${folio}`);
 
     // Insertar la solicitud
     const [solicitudResult] = await connection.query(
@@ -70,6 +77,7 @@ export const createSolicitud = async (req, res) => {
     );
 
     const solicitudId = solicitudResult.insertId;
+    console.log(`🆔 Solicitud creada con ID: ${solicitudId}`);
 
     // Insertar los items
     for (const item of items) {
@@ -79,21 +87,66 @@ export const createSolicitud = async (req, res) => {
            VALUES (?, ?, ?, ?, ?)`,
           [solicitudId, item.article_id, item.cantidad, item.precio_unitario || null, item.observaciones]
         );
+        console.log(`📦 Item agregado: Artículo ${item.article_id}, Cantidad: ${item.cantidad}`);
+      }
+    }
+
+    // Si es solicitud de SALIDA, crear las salidas automáticamente
+    if (tipo === 'SALIDA') {
+      console.log('🚚 Procesando solicitud de SALIDA - creando salidas automáticas...');
+      try {
+        // Crear salidas automáticas directamente aquí
+        for (const item of items) {
+          if (item.article_id && item.cantidad > 0) {
+            console.log(`📦 Procesando salida para artículo ${item.article_id}, cantidad: ${item.cantidad}`);
+            
+            // Verificar que el artículo existe
+            const [articleCheck] = await connection.query(
+              'SELECT article_id, name FROM articles WHERE article_id = ?',
+              [item.article_id]
+            );
+
+            if (articleCheck.length === 0) {
+              console.log(`⚠️ Artículo con ID ${item.article_id} no encontrado`);
+              continue;
+            }
+
+            // Crear el registro de salida en inventory_exits
+            const razon = `Salida automática por solicitud #${solicitudId} - ${item.observaciones || 'Sin observaciones'}`;
+            
+            const [exitResult] = await connection.query(
+              `INSERT INTO inventory_exits (article_id, quantity, date, reason, user_id) 
+               VALUES (?, ?, NOW(), ?, ?)`,
+              [
+                item.article_id, 
+                item.cantidad, 
+                razon,
+                usuario_solicita_id
+              ]
+            );
+
+            console.log(`✅ Salida automática creada: Exit ID: ${exitResult.insertId}, Artículo: ${item.article_id}, Cantidad: ${item.cantidad}`);
+          }
+        }
+        console.log('✅ Todas las salidas automáticas creadas exitosamente');
+      } catch (salidaError) {
+        console.error('❌ Error al crear salidas automáticas:', salidaError);
       }
     }
 
     await connection.commit();
+    console.log(`✅ Transacción completada para solicitud ${solicitudId}`);
     
     res.json({ 
       success: true, 
       solicitud_id: solicitudId,
       folio: folio,
-      message: 'Solicitud creada exitosamente' 
+      message: 'Solicitud creada exitosamente' + (tipo === 'SALIDA' ? ' con salidas automáticas' : '')
     });
     
   } catch (error) {
     await connection.rollback();
-    console.error('Error al crear solicitud:', error);
+    console.error('❌ Error al crear solicitud:', error);
     res.status(500).json({ 
       success: false, 
       message: error.message 
