@@ -29,5 +29,9 @@ router.get('/catalogos/grupos', verifyAuth, checkPermission('almacen', 'view'), 
 router.get('/catalogos/medidas', verifyAuth, checkPermission('almacen', 'view'), almacenController.getCatalogoMedidas);
 router.get('/catalogos/unidades', verifyAuth, checkPermission('almacen', 'view'), almacenController.getCatalogoUnidades);
 
+// Nuevas rutas para historial de salidas automáticas
+router.get('/historial-salidas-automaticas', verifyAuth, checkPermission('salidas', 'view'), almacenController.getHistorialSalidasAutomaticas);
+router.get('/salidas-folio/:folio', verifyAuth, checkPermission('salidas', 'view'), almacenController.getSalidaPorFolio);
+
 export default router;
 

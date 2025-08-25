@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import SolicitudAutorizacion from './SolicitudAutorizacion';
 import { useTheme } from '../hooks/useTheme';
+import { useSolicitudes } from '../hooks/useSolicitudes';
+import { useUserInfo } from '../hooks/useUserInfo';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -26,6 +28,7 @@ interface ArticuloStock {
 
 interface FormSolicitudProps {
   onClose: () => void;
+  onSuccess?: (folio: string) => void;
   initialData?: {
     tipo: 'entrada' | 'salida';
     items?: SolicitudItem[];
@@ -33,9 +36,13 @@ interface FormSolicitudProps {
   };
 }
 
-const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) => {
+const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, onSuccess, initialData }) => {
   const { theme } = useTheme();
+  const { createSolicitud, loading } = useSolicitudes();
+  const { userInfo } = useUserInfo();
   const [showPreview, setShowPreview] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   // Estados para artículos del stock
   const [articulosStock, setArticulosStock] = useState<ArticuloStock[]>([]);
@@ -160,15 +167,24 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
     return items.reduce((sum, item) => sum + (item.precioT || 0), 0);
   };
 
-  const generarSolicitud = () => {
+  const validarFormulario = (): string | null => {
     // Filtrar items con descripción
     const itemsValidos = items.filter(item => item.descripcion.trim() !== '');
     
     if (itemsValidos.length === 0) {
-      alert('Debe agregar al menos un artículo con descripción');
-      return;
+      return 'Debe agregar al menos un artículo con descripción';
     }
-    
+
+    // Validar que el usuario esté logueado
+    if (!userInfo) {
+      return 'Usuario no identificado. Por favor, inicie sesión nuevamente.';
+    }
+
+    // Validar campos obligatorios según el tipo
+    if (tipo === 'entrada' && !proveedor.trim()) {
+      return 'El proveedor es obligatorio para solicitudes de entrada';
+    }
+
     // Validar stock para salidas
     if (tipo === 'salida') {
       const itemsSinStock = itemsValidos.filter(item => {
@@ -178,13 +194,83 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
       });
       
       if (itemsSinStock.length > 0) {
-        const nombres = itemsSinStock.map(item => `- ${item.descripcion} (Solicitado: ${item.cantidad}, Disponible: ${articulosStock.find(a => a.code === item.codigo)?.stock || 0})`).join('\n');
-        alert(`No se puede generar la solicitud. Los siguientes artículos no tienen stock suficiente:\n\n${nombres}`);
-        return;
+        const nombres = itemsSinStock.map(item => 
+          `- ${item.descripcion} (Solicitado: ${item.cantidad}, Disponible: ${articulosStock.find(a => a.code === item.codigo)?.stock || 0})`
+        ).join('\n');
+        return `Los siguientes artículos no tienen stock suficiente:\n\n${nombres}`;
       }
     }
-    
-    setShowPreview(true);
+
+    return null;
+  };
+
+  const generarSolicitud = () => {
+    const errorValidacion = validarFormulario();
+    if (errorValidacion) {
+      setError(errorValidacion);
+      setTimeout(() => setError(null), 5000);
+      return;
+    }
+
+    setError(null);
+    setShowConfirmation(true);
+  };
+
+  const confirmarSolicitud = async () => {
+    if (!userInfo) {
+      setError('Usuario no identificado');
+      return;
+    }
+
+    try {
+      // Preparar datos para la API
+      const itemsValidos = items.filter(item => item.descripcion.trim() !== '');
+      
+      // Buscar article_id para cada item
+      const itemsParaAPI = itemsValidos.map(item => {
+        const articulo = articulosStock.find(a => a.code === item.codigo);
+        return {
+          article_id: articulo?.article_id || 0, // Si no se encuentra, usar 0 para artículos nuevos
+          cantidad: item.cantidad,
+          precio_unitario: tipo === 'entrada' ? item.precioU : undefined,
+          observaciones: `${item.descripcion} - ${item.unidad}${item.codigo ? ` (${item.codigo})` : ''}`
+        };
+      });
+
+      const solicitudData = {
+        tipo: tipo.toUpperCase() as 'ENTRADA' | 'SALIDA',
+        fecha: fecha,
+        usuario_solicita_id: userInfo.user_id,
+        observaciones: `Proveedor: ${proveedor}\nSolicitante: ${solicitante}\nAutoriza: ${autoriza}`,
+        items: itemsParaAPI
+      };
+
+      const result = await createSolicitud(solicitudData);
+      
+      if (result.success) {
+        setShowConfirmation(false);
+        
+        // Mostrar mensaje de éxito
+        const successMessage = `¡Solicitud creada exitosamente!\nFolio: ${result.folio}\n\nEsta solicitud ha sido enviada para autorización.`;
+        alert(successMessage);
+        
+        // Llamar callback de éxito si existe
+        if (onSuccess && result.folio) {
+          onSuccess(result.folio);
+        }
+        
+        onClose();
+      } else {
+        setError(result.message || 'Error al crear solicitud');
+      }
+    } catch (err) {
+      setError('Error inesperado al crear la solicitud');
+      console.error('Error:', err);
+    }
+  };
+
+  const calcularTotal = () => {
+    return items.reduce((sum, item) => sum + (item.precioT || 0), 0);
   };
 
   const solicitudData = {
@@ -330,6 +416,13 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
                 </div>
               </div>
 
+              {/* Mensaje de error */}
+              {error && (
+                <div className="alert alert-danger" role="alert">
+                  <strong>Error:</strong> {error}
+                </div>
+              )}
+
               {/* Lista de Artículos */}
               <div className="card mb-4">
                 <div className="card-header">
@@ -347,19 +440,35 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
                       Agregar Artículo
                     </button>
                     <button 
-                      className="btn btn-primary btn-sm"
-                      onClick={generarSolicitud}
+                      className="btn btn-info btn-sm me-2"
+                      onClick={() => setShowPreview(true)}
                       disabled={items.every(item => item.descripcion.trim() === '')}
-                      title="Vista previa y generar solicitud"
+                      title="Vista previa del PDF"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="me-1">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14,2 14,8 20,8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <polyline points="10,9 9,9 8,9"></polyline>
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
                       </svg>
-                      Generar Solicitud
+                      Vista Previa
+                    </button>
+                    <button 
+                      className="btn btn-primary btn-sm"
+                      onClick={generarSolicitud}
+                      disabled={items.every(item => item.descripcion.trim() === '') || loading}
+                      title="Crear y enviar solicitud"
+                    >
+                      {loading ? (
+                        <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="me-1">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                          <polyline points="14,2 14,8 20,8"></polyline>
+                          <line x1="16" y1="13" x2="8" y2="13"></line>
+                          <line x1="16" y1="17" x2="8" y2="17"></line>
+                          <polyline points="10,9 9,9 8,9"></polyline>
+                        </svg>
+                      )}
+                      {loading ? 'Creando...' : 'Crear Solicitud'}
                     </button>
                   </div>
                 </div>
@@ -631,6 +740,79 @@ const FormSolicitud: React.FC<FormSolicitudProps> = ({ onClose, initialData }) =
                   onClick={() => setItemSeleccionando(null)}
                 >
                   Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Confirmación */}
+      {showConfirmation && (
+        <div className="modal show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog">
+            <div className="modal-content" data-bs-theme={theme}>
+              <div className="modal-header">
+                <h5 className="modal-title">Confirmar Solicitud</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowConfirmation(false)}
+                  disabled={loading}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <div className="alert alert-info">
+                  <h6>🔍 Resumen de la Solicitud:</h6>
+                  <ul className="mb-2">
+                    <li><strong>Tipo:</strong> {tipo.toUpperCase()}</li>
+                    <li><strong>Fecha:</strong> {new Date(fecha).toLocaleDateString('es-ES')}</li>
+                    {tipo === 'entrada' && proveedor && (
+                      <li><strong>Proveedor:</strong> {proveedor}</li>
+                    )}
+                    <li><strong>Artículos:</strong> {items.filter(item => item.descripcion.trim() !== '').length}</li>
+                    {tipo === 'entrada' && (
+                      <li><strong>Total:</strong> ${calcularTotal().toFixed(2)}</li>
+                    )}
+                  </ul>
+                </div>
+                
+                <p className="mb-3">
+                  ¿Está seguro que desea crear esta solicitud de {tipo.toLowerCase()}?
+                </p>
+                
+                <div className="alert alert-warning">
+                  <small>
+                    <strong>Nota:</strong> Una vez creada, la solicitud será enviada para autorización y 
+                    no podrá ser modificada. {tipo === 'entrada' ? 'Si es aprobada, se registrarán automáticamente las entradas de inventario.' : 'Si es aprobada, se registrarán automáticamente las salidas de inventario.'}
+                  </small>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowConfirmation(false)}
+                  disabled={loading}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-success"
+                  onClick={confirmarSolicitud}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Creando...
+                    </>
+                  ) : (
+                    <>
+                      ✓ Confirmar y Crear
+                    </>
+                  )}
                 </button>
               </div>
             </div>

@@ -1,6 +1,129 @@
 import { jsPDF } from 'jspdf';
 import pool from '../db.js';
 
+// Función para validar y confirmar solicitud antes de generar PDF
+const validarSolicitudParaPdf = async (req, res) => {
+  try {
+    const { 
+      folio,
+      fecha,
+      tipo,
+      sucursal,
+      items,
+      observaciones,
+      usuarioSolicita,
+      usuarioAutoriza
+    } = req.body;
+
+    // Validaciones básicas
+    const errores = [];
+    
+    if (!folio || folio.trim() === '') {
+      errores.push('El folio es requerido');
+    }
+    
+    if (!fecha) {
+      errores.push('La fecha es requerida');
+    }
+    
+    if (!tipo || !['ENTRADA', 'SALIDA'].includes(tipo)) {
+      errores.push('El tipo debe ser ENTRADA o SALIDA');
+    }
+    
+    if (!items || items.length === 0) {
+      errores.push('Debe incluir al menos un artículo');
+    }
+    
+    if (!usuarioSolicita || usuarioSolicita.trim() === '') {
+      errores.push('El usuario que solicita es requerido');
+    }
+
+    // Validar items específicos
+    const itemsValidos = [];
+    const itemsConErrores = [];
+    
+    if (items && items.length > 0) {
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const erroresItem = [];
+        
+        if (!item.codigo || item.codigo.trim() === '') {
+          erroresItem.push('Código requerido');
+        }
+        
+        if (!item.cantidad || item.cantidad <= 0) {
+          erroresItem.push('Cantidad debe ser mayor a 0');
+        }
+        
+        if (!item.descripcion || item.descripcion.trim() === '') {
+          erroresItem.push('Descripción requerida');
+        }
+        
+        // Si es salida, validar stock
+        if (tipo === 'SALIDA' && item.codigo && item.cantidad > 0) {
+          try {
+            const [articleRows] = await pool.query('SELECT article_id FROM articles WHERE code = ?', [item.codigo]);
+            if (articleRows.length > 0) {
+              const [stockRows] = await pool.query('SELECT stock FROM inventory_stock WHERE article_id = ?', [articleRows[0].article_id]);
+              const stockActual = stockRows.length > 0 ? stockRows[0].stock : 0;
+              
+              if (stockActual < item.cantidad) {
+                erroresItem.push(`Stock insuficiente (Disponible: ${stockActual}, Solicitado: ${item.cantidad})`);
+              }
+            } else {
+              erroresItem.push('Artículo no encontrado en el sistema');
+            }
+          } catch (stockError) {
+            erroresItem.push('Error verificando stock');
+          }
+        }
+        
+        if (erroresItem.length > 0) {
+          itemsConErrores.push({
+            indice: i + 1,
+            codigo: item.codigo,
+            descripcion: item.descripcion,
+            errores: erroresItem
+          });
+        } else {
+          itemsValidos.push(item);
+        }
+      }
+    }
+    
+    // Si hay errores, retornarlos
+    if (errores.length > 0 || itemsConErrores.length > 0) {
+      return res.status(400).json({
+        esValido: false,
+        erroresGenerales: errores,
+        itemsConErrores: itemsConErrores,
+        mensaje: 'La solicitud tiene errores que deben corregirse antes de generar el PDF'
+      });
+    }
+    
+    // Si todo está bien, retornar confirmación
+    res.json({
+      esValido: true,
+      mensaje: 'La solicitud es válida y está lista para generar el PDF',
+      resumen: {
+        folio,
+        fecha,
+        tipo,
+        totalItems: itemsValidos.length,
+        usuarioSolicita,
+        usuarioAutoriza: usuarioAutoriza || 'Por asignar'
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error validando solicitud:', error);
+    res.status(500).json({ 
+      error: 'Error al validar la solicitud',
+      details: error.message 
+    });
+  }
+};
+
 const generarPdfSolicitudSimple = async (req, res) => {
   try {
     const { 
@@ -272,6 +395,24 @@ const generarPdfSolicitudSimple = async (req, res) => {
     // Generar el PDF optimizado
     const pdfBuffer = doc.output('arraybuffer');
     
+    // Si es una salida, registrar las salidas en la base de datos
+    if (tipo === 'SALIDA' && items && items.length > 0) {
+      try {
+        await registrarSalidasInventario(items, {
+          folio,
+          fecha,
+          usuarioSolicita,
+          usuarioAutoriza,
+          observaciones
+        });
+        console.log(`✅ Salidas registradas exitosamente para solicitud ${folio}`);
+      } catch (salidasError) {
+        console.error('❌ Error registrando salidas:', salidasError);
+        // El PDF se genera aunque falle el registro de salidas
+        // Podrías cambiar este comportamiento si prefieres que falle todo
+      }
+    }
+    
     // Configurar headers para descarga
     res.set({
       'Content-Type': 'application/pdf',
@@ -291,4 +432,77 @@ const generarPdfSolicitudSimple = async (req, res) => {
   }
 };
 
-export { generarPdfSolicitudSimple };
+export { generarPdfSolicitudSimple, validarSolicitudParaPdf };
+
+// Función auxiliar para registrar las salidas en el inventario
+const registrarSalidasInventario = async (items, solicitudInfo) => {
+  try {
+    console.log('📤 Registrando salidas automáticas para:', solicitudInfo.folio);
+    
+    // Filtrar solo items con código y cantidad válidos
+    const itemsParaRegistrar = items.filter(item => 
+      item.codigo && 
+      item.cantidad > 0 && 
+      typeof item.cantidad === 'number'
+    );
+    
+    if (itemsParaRegistrar.length === 0) {
+      console.log('⚠️ No hay items válidos para registrar salidas');
+      return;
+    }
+    
+    // Procesar cada item
+    for (const item of itemsParaRegistrar) {
+      try {
+        // Buscar el article_id por código
+        const [articleRows] = await pool.query(
+          'SELECT article_id, name FROM articles WHERE code = ?', 
+          [item.codigo]
+        );
+        
+        if (articleRows.length === 0) {
+          console.log(`⚠️ Artículo no encontrado para código: ${item.codigo}`);
+          continue;
+        }
+        
+        const article_id = articleRows[0].article_id;
+        const articleName = articleRows[0].name;
+        
+        // Crear el registro de salida
+        const razon = `Solicitud ${solicitudInfo.folio} - ${item.descripcion || articleName} - Autorizado por: ${solicitudInfo.usuarioAutoriza || 'Sistema'}`;
+        
+        await pool.query(
+          'INSERT INTO inventory_exits (article_id, quantity, reason, user_id, exit_date) VALUES (?, ?, ?, ?, ?)',
+          [
+            article_id,
+            item.cantidad,
+            razon,
+            1, // ID del usuario del sistema, podrías cambiarlo por el ID real del usuario
+            solicitudInfo.fecha || new Date().toISOString().split('T')[0]
+          ]
+        );
+        
+        // Actualizar el stock en inventory_stock
+        await pool.query(`
+          UPDATE inventory_stock 
+          SET stock = stock - ?, 
+              last_updated = CURRENT_TIMESTAMP 
+          WHERE article_id = ?
+        `, [item.cantidad, article_id]);
+        
+        console.log(`✅ Salida registrada: ${item.codigo} - Cantidad: ${item.cantidad}`);
+        
+      } catch (itemError) {
+        console.error(`❌ Error registrando salida para ${item.codigo}:`, itemError);
+        // Continuar con el siguiente item en caso de error
+        continue;
+      }
+    }
+    
+    console.log('✅ Proceso de registro de salidas completado');
+    
+  } catch (error) {
+    console.error('❌ Error general en registrarSalidasInventario:', error);
+    throw error;
+  }
+};

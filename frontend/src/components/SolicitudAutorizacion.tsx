@@ -69,7 +69,7 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
       try {
         const response = await fetch(logoBeExEn);
         const blob = await response.blob();
-        setPdfProgress(40);
+        setPdfProgress(30);
         
         logoBase64 = await new Promise<string>((resolve) => {
           const reader = new FileReader();
@@ -79,7 +79,7 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
           };
           reader.readAsDataURL(blob);
         });
-        setPdfProgress(60);
+        setPdfProgress(40);
       } catch (e) {
         console.log('No se pudo cargar el logo:', e);
       }
@@ -96,9 +96,76 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
         usuarioAutoriza: autoriza || 'LIC. ELISA AVILA REQUENA',
         logoBase64
       };
-      setPdfProgress(70);
+      setPdfProgress(50);
 
       const API_URL = (import.meta as any).env?.VITE_API_URL || '/api';
+      
+      // PASO 1: Validar la solicitud antes de generar el PDF
+      console.log('🔍 Validando solicitud antes de generar PDF...');
+      const validationResp = await fetch(`${API_URL}/pdf/validar-solicitud`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : ''
+        },
+        body: JSON.stringify(pdfData)
+      });
+      
+      setPdfProgress(60);
+      
+      if (!validationResp.ok) {
+        const errorText = await validationResp.text();
+        let errorObj;
+        try {
+          errorObj = JSON.parse(errorText);
+        } catch (e) {
+          throw new Error(`Error de validación: ${errorText}`);
+        }
+        
+        // Mostrar errores de validación detallados
+        if (!errorObj.esValido) {
+          let mensaje = '❌ La solicitud tiene errores que deben corregirse:\n\n';
+          
+          if (errorObj.erroresGenerales && errorObj.erroresGenerales.length > 0) {
+            mensaje += 'Errores generales:\n';
+            errorObj.erroresGenerales.forEach((error: string) => {
+              mensaje += `• ${error}\n`;
+            });
+            mensaje += '\n';
+          }
+          
+          if (errorObj.itemsConErrores && errorObj.itemsConErrores.length > 0) {
+            mensaje += 'Errores en artículos:\n';
+            errorObj.itemsConErrores.forEach((item: any) => {
+              mensaje += `• Artículo ${item.indice} (${item.codigo}): ${item.errores.join(', ')}\n`;
+            });
+          }
+          
+          alert(mensaje);
+          setIsGeneratingPdf(false);
+          setPdfProgress(0);
+          return;
+        }
+      }
+      
+      const validationResult = await validationResp.json();
+      console.log('✅ Validación exitosa:', validationResult);
+      
+      // PASO 2: Mostrar confirmación antes de generar
+      const confirmMessage = tipo === 'SALIDA' 
+        ? `🔄 ¿Confirma generar el PDF y registrar las salidas de material?\n\nFolio: ${folio}\nTipo: ${tipo}\nItems: ${validationResult.resumen.totalItems}\nUsuario: ${validationResult.resumen.usuarioSolicita}\n\n⚠️ Esta acción registrará automáticamente las salidas en el inventario.`
+        : `📄 ¿Confirma generar el PDF de la solicitud?\n\nFolio: ${folio}\nTipo: ${tipo}\nItems: ${validationResult.resumen.totalItems}\nUsuario: ${validationResult.resumen.usuarioSolicita}`;
+      
+      if (!confirm(confirmMessage)) {
+        setIsGeneratingPdf(false);
+        setPdfProgress(0);
+        return;
+      }
+      
+      setPdfProgress(70);
+      
+      // PASO 3: Generar el PDF (y registrar salidas si es SALIDA)
+      console.log('📄 Generando PDF y registrando movimientos...');
       const resp = await fetch(`${API_URL}/pdf/solicitud`, {
         method: 'POST',
         headers: {

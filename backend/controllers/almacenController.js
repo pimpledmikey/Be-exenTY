@@ -275,3 +275,57 @@ export const getCatalogoUnidades = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+// Nueva función para obtener el historial de salidas registradas automáticamente
+export const getHistorialSalidasAutomaticas = async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT 
+        e.exit_id,
+        e.article_id,
+        a.code as article_code,
+        a.name as article_name,
+        e.quantity,
+        e.reason,
+        e.exit_date,
+        e.created_at,
+        CASE 
+          WHEN e.reason LIKE '%Solicitud%' THEN 'Solicitud Automática'
+          ELSE 'Manual'
+        END as tipo_salida
+      FROM inventory_exits e
+      LEFT JOIN articles a ON e.article_id = a.article_id
+      WHERE e.reason LIKE '%Solicitud%'
+      ORDER BY e.exit_date DESC, e.created_at DESC
+      LIMIT 100
+    `);
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Función para obtener detalles de una salida específica por folio
+export const getSalidaPorFolio = async (req, res) => {
+  try {
+    const { folio } = req.params;
+    const [rows] = await pool.query(`
+      SELECT 
+        e.exit_id,
+        e.article_id,
+        a.code as article_code,
+        a.name as article_name,
+        e.quantity,
+        e.reason,
+        e.exit_date,
+        e.created_at
+      FROM inventory_exits e
+      LEFT JOIN articles a ON e.article_id = a.article_id
+      WHERE e.reason LIKE CONCAT('%', ?, '%')
+      ORDER BY e.created_at DESC
+    `, [folio]);
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
