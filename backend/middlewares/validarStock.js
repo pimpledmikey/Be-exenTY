@@ -8,8 +8,8 @@ async function validarStock(req, res, next) {
       return res.status(400).json({ error: 'Faltan datos de artículo o cantidad' });
     }
     // Consultar el stock actual desde la vista inventory_stock
-    const [rows] = await pool.query('SELECT stock_actual FROM inventory_stock WHERE article_id = ?', [article_id]);
-    const stockActual = rows.length > 0 ? rows[0].stock_actual : 0;
+    const [rows] = await pool.query('SELECT stock FROM inventory_stock WHERE article_id = ?', [article_id]);
+    const stockActual = rows.length > 0 ? rows[0].stock : 0;
     if (stockActual < quantity) {
       return res.status(400).json({ error: `Stock insuficiente. Stock actual: ${stockActual}` });
     }

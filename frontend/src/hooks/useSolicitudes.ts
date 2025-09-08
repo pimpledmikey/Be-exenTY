@@ -54,15 +54,8 @@ export const useSolicitudes = () => {
         throw new Error(result.message || 'Error al crear solicitud');
       }
 
-      // Si es una solicitud de SALIDA, también crear las salidas automáticamente
-      if (data.tipo === 'SALIDA' && result.success && result.solicitud_id) {
-        try {
-          await createSalidasAutomaticas(result.solicitud_id, data.items);
-        } catch (salidaError) {
-          console.warn('Error al crear salidas automáticas:', salidaError);
-          // No fallar completamente si las salidas fallan
-        }
-      }
+      // ✅ Las salidas automáticas ahora se crean en el backend
+      // Ya no necesitamos crear salidas desde el frontend para evitar duplicación
 
       // Actualizar la lista después de crear
       await fetchSolicitudes();
@@ -77,47 +70,6 @@ export const useSolicitudes = () => {
       };
     } finally {
       setLoading(false);
-    }
-  };
-
-  const createSalidasAutomaticas = async (solicitudId: number, items: SolicitudItem[]) => {
-    try {
-      const token = localStorage.getItem('token');
-      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
-
-      const salidasPromises = items.map(async (item) => {
-        if (item.article_id && item.cantidad > 0) {
-          const salidaData = {
-            article_id: item.article_id,
-            quantity: item.cantidad, // Usar 'quantity' según el esquema de inventory_exits
-            date: new Date().toISOString().split('T')[0],
-            reason: `Salida automática por solicitud #${solicitudId} - ${item.observaciones}`,
-            user_id: userInfo.user_id // Usar user_id según el esquema
-          };
-
-          const response = await fetch(`${API_URL}/almacen/exits`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(salidaData)
-          });
-
-          if (!response.ok) {
-            const error = await response.json();
-            throw new Error(`Error en artículo ${item.article_id}: ${error.message}`);
-          }
-
-          return response.json();
-        }
-      });
-
-      await Promise.all(salidasPromises.filter(Boolean));
-      console.log('✅ Salidas automáticas creadas exitosamente');
-    } catch (error) {
-      console.error('❌ Error al crear salidas automáticas:', error);
-      throw error;
     }
   };
 
