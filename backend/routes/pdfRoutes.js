@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import { generarPdfSolicitudSimple, validarSolicitudParaPdf } from '../controllers/pdfControllerJsPDF.js';
+import { generarPdfSolicitudEspecifico } from '../controllers/pdfController.js';
+import { verifyAuth } from '../middleware/authMiddleware.js';
 
 const router = Router();
 
@@ -12,5 +14,8 @@ router.post('/validar-solicitud', validarSolicitudParaPdf);
 
 // Ruta para generar PDF (ahora registra salidas automáticamente)
 router.post('/solicitud', generarPdfSolicitudSimple);
+
+// Ruta para generar PDF de solicitud específica (para autorización)
+router.get('/solicitud/:id', verifyAuth, generarPdfSolicitudEspecifico);
 
 export default router;

@@ -283,3 +283,232 @@ export const updateSolicitudStatus = async (req, res) => {
     });
   }
 };
+
+// Obtener solicitudes pendientes de autorización
+export const getSolicitudesPendientes = async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT s.*, 
+             us.username as usuario_solicita_nombre,
+             us.name as usuario_solicita_nombre_completo,
+             COUNT(si.id) as total_items
+      FROM solicitudes s
+      LEFT JOIN users us ON s.usuario_solicita_id = us.user_id
+      LEFT JOIN solicitudes_items si ON s.id = si.solicitud_id
+      WHERE s.estado = 'PENDIENTE'
+      GROUP BY s.id
+      ORDER BY s.created_at ASC
+    `);
+    
+    res.json({ 
+      success: true, 
+      solicitudes: rows 
+    });
+  } catch (error) {
+    console.error('Error al obtener solicitudes pendientes:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+};
+
+// Obtener detalle completo de solicitud para autorización
+export const getSolicitudDetalleAutorizacion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Obtener solicitud
+    const [solicitudRows] = await pool.query(`
+      SELECT s.*, 
+             us.username as usuario_solicita_nombre,
+             us.name as usuario_solicita_nombre_completo,
+             ua.username as usuario_autoriza_nombre
+      FROM solicitudes s
+      LEFT JOIN users us ON s.usuario_solicita_id = us.user_id
+      LEFT JOIN users ua ON s.usuario_autoriza_id = ua.user_id
+      WHERE s.id = ?
+    `, [id]);
+
+    if (solicitudRows.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Solicitud no encontrada' 
+      });
+    }
+
+    const solicitud = solicitudRows[0];
+
+    // Obtener items con información de stock
+    const [items] = await pool.query(`
+      SELECT si.*, 
+             a.name as article_name,
+             a.code as article_code,
+             COALESCE(stock.stock, 0) as stock_actual
+      FROM solicitudes_items si
+      LEFT JOIN articles a ON si.article_id = a.article_id
+      LEFT JOIN inventory_stock stock ON si.article_id = stock.article_id
+      WHERE si.solicitud_id = ?
+      ORDER BY a.name
+    `, [id]);
+
+    solicitud.items = items;
+
+    res.json({ 
+      success: true, 
+      solicitud 
+    });
+  } catch (error) {
+    console.error('Error al obtener detalle de solicitud:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+};
+
+// Autorizar o rechazar solicitud
+export const autorizarSolicitud = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { estado, observaciones_autorizacion } = req.body;
+    const usuario_autoriza_id = req.user.user_id;
+
+    // Validar estado
+    if (!['AUTORIZADA', 'RECHAZADA'].includes(estado)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Estado no válido. Debe ser AUTORIZADA o RECHAZADA' 
+      });
+    }
+
+    // Verificar que la solicitud existe y está pendiente
+    const [solicitudRows] = await pool.query(`
+      SELECT * FROM solicitudes WHERE id = ? AND estado = 'PENDIENTE'
+    `, [id]);
+
+    if (solicitudRows.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Solicitud no encontrada o ya fue procesada' 
+      });
+    }
+
+    // Actualizar solicitud
+    const [result] = await pool.query(`
+      UPDATE solicitudes 
+      SET estado = ?, 
+          usuario_autoriza_id = ?, 
+          observaciones = CONCAT(COALESCE(observaciones, ''), 
+                                CASE WHEN observaciones IS NOT NULL THEN '\n--- AUTORIZACIÓN ---\n' ELSE '--- AUTORIZACIÓN ---\n' END,
+                                ?),
+          updated_at = NOW()
+      WHERE id = ?
+    `, [estado, usuario_autoriza_id, observaciones_autorizacion || '', id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Error al actualizar la solicitud' 
+      });
+    }
+
+    res.json({ 
+      success: true, 
+      message: `Solicitud ${estado.toLowerCase()} exitosamente`,
+      estado: estado
+    });
+  } catch (error) {
+    console.error('Error al procesar autorización:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+};
+
+// Obtener estadísticas para el dashboard
+export const getDashboardStats = async (req, res) => {
+  try {
+    // Solicitudes pendientes
+    const [pendientes] = await pool.query(`
+      SELECT COUNT(*) as count FROM solicitudes WHERE estado = 'PENDIENTE'
+    `);
+
+    // Autorizadas hoy
+    const [autorizadasHoy] = await pool.query(`
+      SELECT COUNT(*) as count FROM solicitudes 
+      WHERE estado = 'AUTORIZADA' AND DATE(updated_at) = CURDATE()
+    `);
+
+    // Rechazadas hoy
+    const [rechazadasHoy] = await pool.query(`
+      SELECT COUNT(*) as count FROM solicitudes 
+      WHERE estado = 'RECHAZADA' AND DATE(updated_at) = CURDATE()
+    `);
+
+    // Total este mes
+    const [totalMes] = await pool.query(`
+      SELECT COUNT(*) as count FROM solicitudes 
+      WHERE MONTH(created_at) = MONTH(CURDATE()) AND YEAR(created_at) = YEAR(CURDATE())
+      AND estado IN ('AUTORIZADA', 'RECHAZADA')
+    `);
+
+    // Tiempo promedio de respuesta (en horas)
+    const [tiempoPromedio] = await pool.query(`
+      SELECT AVG(TIMESTAMPDIFF(HOUR, created_at, updated_at)) as promedio
+      FROM solicitudes 
+      WHERE estado IN ('AUTORIZADA', 'RECHAZADA')
+      AND DATE(updated_at) >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+    `);
+
+    const stats = {
+      pendientes: pendientes[0].count,
+      autorizadas_hoy: autorizadasHoy[0].count,
+      rechazadas_hoy: rechazadasHoy[0].count,
+      total_mes: totalMes[0].count,
+      tiempo_promedio_respuesta: Math.round(tiempoPromedio[0].promedio || 0)
+    };
+
+    res.json({ 
+      success: true, 
+      stats 
+    });
+  } catch (error) {
+    console.error('Error al obtener estadísticas del dashboard:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+};
+
+// Obtener solicitudes recientes para el dashboard
+export const getDashboardSolicitudesRecientes = async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT s.id, s.folio, s.tipo, s.created_at,
+             us.username as usuario_solicita_nombre,
+             COUNT(si.id) as total_items,
+             TIMESTAMPDIFF(HOUR, s.created_at, NOW()) as tiempo_espera_horas
+      FROM solicitudes s
+      LEFT JOIN users us ON s.usuario_solicita_id = us.user_id
+      LEFT JOIN solicitudes_items si ON s.id = si.solicitud_id
+      WHERE s.estado = 'PENDIENTE'
+      GROUP BY s.id
+      ORDER BY tiempo_espera_horas DESC
+      LIMIT 10
+    `);
+
+    res.json({ 
+      success: true, 
+      solicitudes: rows 
+    });
+  } catch (error) {
+    console.error('Error al obtener solicitudes recientes:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+};
