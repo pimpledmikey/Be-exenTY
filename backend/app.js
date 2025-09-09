@@ -10,6 +10,7 @@ import seguridadRoutes from './routes/seguridadRoutes.js';
 import roleRoutes from './routes/roleRoutes.js';
 import pdfRoutes from './routes/pdfRoutes.js';
 import solicitudesRoutes from './routes/solicitudesRoutes.js';
+import debugRoutes from './routes/debugRoutes.js';
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use('/api/seguridad', seguridadRoutes);
 app.use('/api/roles', roleRoutes);
 app.use('/api/pdf', pdfRoutes);
 app.use('/api/solicitudes', solicitudesRoutes);
+app.use('/api/debug', debugRoutes); // Rutas temporales para debug
 
 // Middleware de manejo de errores global
 app.use((err, req, res, next) => {
