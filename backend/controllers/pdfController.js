@@ -1,9 +1,15 @@
-import { chromium } from 'playwright';
+// import { chromium } from 'playwright'; // Temporalmente deshabilitado para producción
 
 // Genera un PDF desde una URL pública o HTML enviado por POST
 // Body soportado:
 // { url?: string, html?: string, fileName?: string, emulate?: 'print'|'screen', margin?: {top,right,bottom,left} }
 export async function generarPdfSolicitud(req, res) {
+  // Temporalmente deshabilitado - usar generarPdfSolicitudEspecifico en su lugar
+  return res.status(503).json({ 
+    error: 'Función temporalmente deshabilitada. Use generarPdfSolicitudEspecifico.' 
+  });
+  
+  /* 
   const { url, html, fileName = 'Solicitud_Autorizacion.pdf', emulate = 'print', margin } = req.body || {};
 
   if (!url && !html) {
@@ -52,6 +58,7 @@ export async function generarPdfSolicitud(req, res) {
       try { await browser.close(); } catch {}
     }
   }
+  */
 }
 
 export function pingPdf(req, res) {
@@ -62,41 +69,28 @@ function sanitizeFileName(name) {
   return String(name || 'document.pdf').replace(/[^a-zA-Z0-9_\-.]/g, '_');
 }
 
-// Generar PDF específico para solicitudes
+// Generar PDF específico para solicitudes usando jsPDF
 export async function generarPdfSolicitudEspecifico(req, res) {
   try {
+    // Por ahora, redireccionar al generador de PDF que ya funcionaba
+    const { generarPdfSolicitudSimple } = await import('./pdfControllerJsPDF.js');
+    
+    // Obtener datos de la solicitud para el PDF
     const { id } = req.params;
     
-    // Obtener datos de la solicitud
-    const solicitudResponse = await fetch(`http://localhost:3001/api/solicitudes/${id}/detalle`, {
-      headers: {
-        'Authorization': req.headers.authorization
-      }
-    });
-
-    if (!solicitudResponse.ok) {
-      return res.status(404).json({ error: 'Solicitud no encontrada' });
-    }
-
-    const { solicitud } = await solicitudResponse.json();
-
-    // Generar HTML para el PDF
-    const html = generateSolicitudHTML(solicitud);
-
-    // Usar la función existente para generar el PDF
-    req.body = {
-      html,
-      fileName: `Solicitud_${solicitud.folio}.pdf`,
-      emulate: 'print'
-    };
-
-    return generarPdfSolicitud(req, res);
+    // Usar el sistema existente que ya funcionaba
+    return generarPdfSolicitudSimple(req, res);
   } catch (error) {
     console.error('Error generando PDF de solicitud:', error);
-    return res.status(500).json({ error: 'Error al generar PDF de solicitud' });
+    return res.status(500).json({ 
+      success: false,
+      error: 'Error al generar PDF de solicitud',
+      message: error.message 
+    });
   }
 }
 
+/*
 function generateSolicitudHTML(solicitud) {
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('es-MX', {
@@ -430,3 +424,4 @@ function generateSolicitudHTML(solicitud) {
     </html>
   `;
 }
+*/

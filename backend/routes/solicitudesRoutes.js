@@ -34,12 +34,16 @@ router.get('/dashboard/recientes', verifyAuth, getDashboardSolicitudesRecientes)
 // Ruta para generar PDF de solicitud
 router.get('/:id/pdf', verifyAuth, async (req, res) => {
   try {
-    // Reenviar la petición al controlador de PDF
-    const { generarPdfSolicitudEspecifico } = await import('../controllers/pdfController.js');
-    return generarPdfSolicitudEspecifico(req, res);
+    // Usar el generador de PDF que ya funcionaba (jsPDF)
+    const { generarPdfSolicitudSimple } = await import('../controllers/pdfControllerJsPDF.js');
+    return generarPdfSolicitudSimple(req, res);
   } catch (error) {
     console.error('Error generando PDF:', error);
-    res.status(500).json({ error: 'Error al generar PDF' });
+    res.status(500).json({ 
+      success: false, 
+      error: 'Error al generar PDF',
+      message: error.message 
+    });
   }
 });
 
