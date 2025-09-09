@@ -31,39 +31,22 @@ const DashboardAutorizacion: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      let currentToken = localStorage.getItem('token');
       
-      // Si no hay token, intentar obtener uno nuevo
-      if (!token) {
-        console.warn('No hay token en localStorage, intentando autenticar...');
-        try {
-          const loginResponse = await fetch('/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              username: 'mavila',  // Usuario por defecto para desarrollo
-              password: 'Soldier10-'  // Contraseña de desarrollo
-            })
-          });
-          
-          if (loginResponse.ok) {
-            const loginData = await loginResponse.json();
-            localStorage.setItem('token', loginData.token);
-            console.log('Nuevo token obtenido y guardado en localStorage');
-          }
-        } catch (loginError) {
-          console.error('Error al autenticar:', loginError);
-        }
+      // Si no hay token, mostrar error
+      if (!currentToken) {
+        console.error('No hay token de autenticación. Por favor, inicie sesión.');
+        setLoading(false);
+        return;
       }
 
       // Intentar hasta 3 veces con un retraso entre intentos
       for (let attempt = 0; attempt < 3; attempt++) {
         try {
-          const currentToken = localStorage.getItem('token');
+          currentToken = localStorage.getItem('token');
           if (!currentToken) {
-            console.warn('No hay token disponible después de intentar autenticar');
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            continue;
+            console.error('Token no disponible después de múltiples intentos');
+            break;
           }
 
           // Obtener estadísticas
@@ -92,27 +75,11 @@ const DashboardAutorizacion: React.FC = () => {
           } else {
             console.warn(`Intento ${attempt + 1} fallido. Stats Status: ${statsResponse.status}, Recientes Status: ${recentesResponse.status}`);
             if (statsResponse.status === 401 || recentesResponse.status === 401) {
-              // Si es error de autenticación, intentar renovar token
+              // Si es error de autenticación, limpiar token y terminar
               localStorage.removeItem('token');
-              // Intentar autenticar de nuevo
-              try {
-                const loginResponse = await fetch('/api/login', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ 
-                    username: 'mavila',
-                    password: 'Soldier10-'
-                  })
-                });
-                
-                if (loginResponse.ok) {
-                  const loginData = await loginResponse.json();
-                  localStorage.setItem('token', loginData.token);
-                  console.log('Token renovado después de error 401');
-                }
-              } catch (loginError) {
-                console.error('Error al renovar token:', loginError);
-              }
+              currentToken = null;
+              console.error('Token de autenticación inválido. Por favor, inicie sesión nuevamente.');
+              break;
             }
           }
           
