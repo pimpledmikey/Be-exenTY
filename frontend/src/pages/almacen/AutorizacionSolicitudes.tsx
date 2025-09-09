@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { IconCheck, IconX, IconEye, IconFileText, IconClock, IconUser } from '@tabler/icons-react';
+import { createApiUrl } from '../../config/api';
 
 interface SolicitudItem {
   id: number;
@@ -60,7 +61,7 @@ const AutorizacionSolicitudes: React.FC = () => {
             break;
           }
           
-          const response = await fetch('/api/solicitudes/pendientes', {
+          const response = await fetch(createApiUrl('solicitudes/pendientes'), {
             headers: {
               'Authorization': `Bearer ${currentToken}`,
               'Content-Type': 'application/json'
@@ -105,7 +106,7 @@ const AutorizacionSolicitudes: React.FC = () => {
   const verDetalleSolicitud = async (solicitudId: number) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/solicitudes/${solicitudId}/detalle`, {
+      const response = await fetch(createApiUrl(`solicitudes/${solicitudId}/detalle`), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -127,7 +128,7 @@ const AutorizacionSolicitudes: React.FC = () => {
       setProcesando(true);
       const token = localStorage.getItem('token');
       
-      const response = await fetch(`/api/solicitudes/${solicitudId}/autorizar`, {
+      const response = await fetch(createApiUrl(`solicitudes/${solicitudId}/autorizar`), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -162,7 +163,7 @@ const AutorizacionSolicitudes: React.FC = () => {
   const generarPDF = async (solicitudId: number) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/solicitudes/${solicitudId}/pdf`, {
+      const response = await fetch(createApiUrl(`solicitudes/${solicitudId}/pdf`), {
         headers: {
           'Authorization': `Bearer ${token}`,
         }

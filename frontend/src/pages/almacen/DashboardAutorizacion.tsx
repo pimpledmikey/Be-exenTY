@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { IconClock, IconCheck, IconX, IconFileText, IconTrendingUp, IconUser, IconCalendar } from '@tabler/icons-react';
+import { createApiUrl } from '../../config/api';
 
 interface ResumenStats {
   pendientes: number;
@@ -50,7 +51,7 @@ const DashboardAutorizacion: React.FC = () => {
           }
 
           // Obtener estadísticas
-          const statsResponse = await fetch('/api/solicitudes/dashboard/stats', {
+          const statsResponse = await fetch(createApiUrl('solicitudes/dashboard/stats'), {
             headers: {
               'Authorization': `Bearer ${currentToken}`,
               'Content-Type': 'application/json'
@@ -58,7 +59,7 @@ const DashboardAutorizacion: React.FC = () => {
           });
 
           // Obtener solicitudes recientes
-          const recentesResponse = await fetch('/api/solicitudes/dashboard/recientes', {
+          const recentesResponse = await fetch(createApiUrl('solicitudes/dashboard/recientes'), {
             headers: {
               'Authorization': `Bearer ${currentToken}`,
               'Content-Type': 'application/json'
