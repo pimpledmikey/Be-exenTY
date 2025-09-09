@@ -89,12 +89,27 @@ export const getSalidas = async (req, res) => {
 export const createSalida = async (req, res) => {
   try {
     const { article_id, quantity, reason, user_id } = req.body;
+    
+    // Convertir a números para asegurar tipos correctos
+    const articleId = parseInt(article_id);
+    const quantityNum = parseInt(quantity);
+    const userId = parseInt(user_id);
+    
+    console.log(`📤 Creando salida - Artículo: ${articleId}, Cantidad: ${quantityNum}, Usuario: ${userId}`);
+    
+    if (isNaN(articleId) || isNaN(quantityNum) || isNaN(userId)) {
+      return res.status(400).json({ error: 'Los valores de artículo, cantidad y usuario deben ser números válidos' });
+    }
+    
     await pool.query(
       'INSERT INTO inventory_exits (article_id, quantity, reason, user_id) VALUES (?, ?, ?, ?)',
-      [article_id, quantity, reason, user_id]
+      [articleId, quantityNum, reason, userId]
     );
+    
+    console.log(`✅ Salida creada exitosamente - Artículo: ${articleId}, Cantidad: ${quantityNum}`);
     res.json({ success: true });
   } catch (error) {
+    console.error('❌ Error al crear salida:', error);
     res.status(500).json({ error: error.message });
   }
 };

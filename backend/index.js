@@ -72,3 +72,5 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 startServer();
+
+console.log('🔄 Backend reiniciado con nuevos cambios');

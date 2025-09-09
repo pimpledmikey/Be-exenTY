@@ -34,6 +34,7 @@ app.use('/api/almacen', almacenRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/permiso-modulo', permisosRoutes);
 app.use('/api/login', loginRoutes);
+app.use('/api/auth', loginRoutes); // Alias para compatibilidad
 app.use('/api/ajustes', ajustesRoutes);
 app.use('/api/catalogos', catalogosRoutes);
 app.use('/api/seguridad', seguridadRoutes);
