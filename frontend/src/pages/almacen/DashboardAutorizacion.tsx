@@ -129,6 +129,13 @@ const DashboardAutorizacion: React.FC = () => {
     return 'bg-red-100 text-red-800';
   };
 
+  const getUrgenciaColorClass = (horas: number) => {
+    if (horas < 2) return 'bg-success';
+    if (horas < 8) return 'bg-warning';
+    if (horas < 24) return 'bg-orange';
+    return 'bg-danger';
+  };
+
   const toggleExpanded = (solicitudId: number) => {
     const newExpanded = new Set(expandedRows);
     if (newExpanded.has(solicitudId)) {
@@ -176,84 +183,117 @@ const DashboardAutorizacion: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="page-body">
+      <div className="container-xl">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Dashboard de Autorización</h1>
-              <p className="text-gray-600 mt-2">Resumen de solicitudes pendientes y actividad reciente</p>
+        <div className="row row-deck row-cards mb-4">
+          <div className="col-12">
+            <div className="card">
+              <div className="card-header">
+                <h3 className="card-title">
+                  <IconClock className="me-2" />
+                  Dashboard de Autorización
+                </h3>
+                <div className="card-actions">
+                  <button
+                    onClick={() => window.location.href = '/almacen/autorizacion-solicitudes'}
+                    className="btn btn-primary"
+                  >
+                    <IconFileText className="me-2" />
+                    Ver Todas las Solicitudes
+                  </button>
+                </div>
+              </div>
+              <div className="card-body">
+                <p className="text-muted">Resumen de solicitudes pendientes y actividad reciente</p>
+              </div>
             </div>
-            <button
-              onClick={() => window.location.href = '/almacen/autorizacion-solicitudes'}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm"
-            >
-              <IconFileText className="h-5 w-5" />
-              Ver Todas las Solicitudes
-            </button>
           </div>
         </div>
 
         {/* Stats Cards */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg shadow-md border border-orange-200 p-6 hover:shadow-lg transition-shadow">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="p-3 bg-orange-500 rounded-full">
-                    <IconClock className="h-6 w-6 text-white" />
+          <div className="row row-cards mb-4">
+            <div className="col-sm-6 col-lg-3">
+              <div className="card card-sm">
+                <div className="card-body">
+                  <div className="row align-items-center">
+                    <div className="col-auto">
+                      <span className="bg-orange text-white avatar">
+                        <IconClock />
+                      </span>
+                    </div>
+                    <div className="col">
+                      <div className="font-weight-medium">
+                        Pendientes
+                      </div>
+                      <div className="text-h1 mb-0">{stats.pendientes}</div>
+                      <div className="text-muted">Esperando autorización</div>
+                    </div>
                   </div>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-orange-800">Pendientes</p>
-                  <p className="text-3xl font-bold text-orange-900">{stats.pendientes}</p>
-                  <p className="text-xs text-orange-600 mt-1">Esperando autorización</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg shadow-md border border-green-200 p-6 hover:shadow-lg transition-shadow">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="p-3 bg-green-500 rounded-full">
-                    <IconCheck className="h-6 w-6 text-white" />
+            <div className="col-sm-6 col-lg-3">
+              <div className="card card-sm">
+                <div className="card-body">
+                  <div className="row align-items-center">
+                    <div className="col-auto">
+                      <span className="bg-success text-white avatar">
+                        <IconCheck />
+                      </span>
+                    </div>
+                    <div className="col">
+                      <div className="font-weight-medium">
+                        Autorizadas Hoy
+                      </div>
+                      <div className="text-h1 mb-0">{stats.autorizadas_hoy}</div>
+                      <div className="text-muted">Completadas hoy</div>
+                    </div>
                   </div>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-green-800">Autorizadas Hoy</p>
-                  <p className="text-3xl font-bold text-green-900">{stats.autorizadas_hoy}</p>
-                  <p className="text-xs text-green-600 mt-1">Completadas hoy</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-red-50 to-red-100 rounded-lg shadow-md border border-red-200 p-6 hover:shadow-lg transition-shadow">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="p-3 bg-red-500 rounded-full">
-                    <IconX className="h-6 w-6 text-white" />
+            <div className="col-sm-6 col-lg-3">
+              <div className="card card-sm">
+                <div className="card-body">
+                  <div className="row align-items-center">
+                    <div className="col-auto">
+                      <span className="bg-danger text-white avatar">
+                        <IconX />
+                      </span>
+                    </div>
+                    <div className="col">
+                      <div className="font-weight-medium">
+                        Rechazadas Hoy
+                      </div>
+                      <div className="text-h1 mb-0">{stats.rechazadas_hoy}</div>
+                      <div className="text-muted">No aprobadas</div>
+                    </div>
                   </div>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-red-800">Rechazadas Hoy</p>
-                  <p className="text-3xl font-bold text-red-900">{stats.rechazadas_hoy}</p>
-                  <p className="text-xs text-red-600 mt-1">No aprobadas</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg shadow-md border border-blue-200 p-6 hover:shadow-lg transition-shadow">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="p-3 bg-blue-500 rounded-full">
-                    <IconTrendingUp className="h-6 w-6 text-white" />
+            <div className="col-sm-6 col-lg-3">
+              <div className="card card-sm">
+                <div className="card-body">
+                  <div className="row align-items-center">
+                    <div className="col-auto">
+                      <span className="bg-primary text-white avatar">
+                        <IconTrendingUp />
+                      </span>
+                    </div>
+                    <div className="col">
+                      <div className="font-weight-medium">
+                        Total Este Mes
+                      </div>
+                      <div className="text-h1 mb-0">{stats.total_mes}</div>
+                      <div className="text-muted">Solicitudes procesadas</div>
+                    </div>
                   </div>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-blue-800">Total Este Mes</p>
-                  <p className="text-3xl font-bold text-blue-900">{stats.total_mes}</p>
-                  <p className="text-xs text-blue-600 mt-1">Solicitudes procesadas</p>
                 </div>
               </div>
             </div>
@@ -261,231 +301,272 @@ const DashboardAutorizacion: React.FC = () => {
         )}
 
         {/* Solicitudes Recientes */}
-        <div className="bg-white rounded-lg shadow-md border border-gray-200">
-          <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
-            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <IconList className="h-5 w-5 text-blue-600" />
-              Solicitudes Recientes (Urgentes)
-            </h3>
-            <div className="flex justify-between items-center mt-1">
-              <p className="text-sm text-gray-600">
-                Solicitudes ordenadas por tiempo de espera
-              </p>
-              <button 
-                onClick={fetchDashboardData}
-                className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-lg text-sm font-medium flex items-center gap-1 transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Actualizar
-              </button>
-            </div>
-          </div>
-
-          <div className="p-6">
-            {solicitudesRecientes.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="bg-green-50 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                  <IconCheck className="h-8 w-8 text-green-500" />
+        <div className="row row-cards">
+          <div className="col-12">
+            <div className="card">
+              <div className="card-header">
+                <h3 className="card-title">
+                  <IconList className="me-2" />
+                  Solicitudes Recientes (Urgentes)
+                </h3>
+                <div className="card-actions">
+                  <button 
+                    onClick={fetchDashboardData}
+                    className="btn btn-outline-primary btn-sm"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-refresh me-1" width="16" height="16" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                      <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Actualizar
+                  </button>
                 </div>
-                <h4 className="text-lg font-medium text-gray-900 mb-2">¡Todo al día!</h4>
-                <p className="text-gray-500">No hay solicitudes pendientes de autorización</p>
               </div>
-            ) : (
-              <div className="space-y-4">
-                {solicitudesRecientes.map((solicitud) => (
-                  <div key={solicitud.id} className="border border-gray-200 rounded-lg overflow-hidden">
-                    {/* Fila Principal */}
-                    <div className="bg-white hover:bg-gray-50 transition-colors">
-                      <div className="px-4 py-3">
-                        <div className="grid grid-cols-12 gap-4 items-center">
-                          {/* Expand Button + Folio */}
-                          <div className="col-span-12 md:col-span-3 flex items-center space-x-2">
-                            <button
-                              onClick={() => toggleExpanded(solicitud.id)}
-                              className="text-blue-600 hover:text-blue-800 flex items-center p-1 rounded hover:bg-blue-50"
-                            >
-                              {expandedRows.has(solicitud.id) ? (
-                                <IconChevronDown className="h-4 w-4" />
-                              ) : (
-                                <IconChevronRight className="h-4 w-4" />
-                              )}
-                            </button>
-                            <span className="font-medium text-blue-600">{solicitud.folio}</span>
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTipoColor(solicitud.tipo)}`}>
-                              {solicitud.tipo}
-                            </span>
-                          </div>
-
-                          {/* Solicitante */}
-                          <div className="col-span-12 md:col-span-3 flex items-center space-x-1">
-                            <IconUser className="h-4 w-4 text-gray-400" />
-                            <span className="text-sm truncate">{solicitud.usuario_solicita_nombre}</span>
-                          </div>
-
-                          {/* Items y Fecha */}
-                          <div className="col-span-6 md:col-span-2">
-                            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
-                              {solicitud.total_items} items
-                            </span>
-                          </div>
-                          <div className="col-span-6 md:col-span-2 text-sm text-gray-600">
-                            <div className="flex items-center space-x-1">
-                              <IconCalendar className="h-4 w-4" />
-                              <span className="hidden sm:inline">{new Date(solicitud.created_at).toLocaleDateString()}</span>
-                            </div>
-                          </div>
-
-                          {/* Tiempo Espera y Acción */}
-                          <div className="col-span-12 md:col-span-2 flex items-center justify-between md:justify-end space-x-2">
-                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getUrgenciaColor(solicitud.tiempo_espera_horas)}`}>
-                              {formatTiempoEspera(solicitud.tiempo_espera_horas)}
-                            </span>
-                            <button
-                              onClick={() => window.location.href = `/almacen/autorizacion-solicitudes?solicitud=${solicitud.id}`}
-                              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-medium transition-colors"
-                            >
-                              Revisar
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+              <div className="card-body">
+                <p className="text-muted mb-4">Solicitudes ordenadas por tiempo de espera</p>
+                
+                {solicitudesRecientes.length === 0 ? (
+                  <div className="empty">
+                    <div className="empty-img">
+                      <IconCheck size={48} className="text-success" />
                     </div>
-
-                    {/* Contenido Expandido */}
-                    {expandedRows.has(solicitud.id) && (
-                      <div className="bg-gray-50 border-t border-gray-200 px-4 py-3">
-                        <div className="space-y-3">
-                          <h5 className="text-sm font-semibold text-gray-700 flex items-center">
-                            <IconFileText className="h-4 w-4 mr-1" />
-                            Detalles de la Solicitud
-                          </h5>
-                          
-                          {solicitudItems[solicitud.id] ? (
-                            <div className="space-y-2">
-                              {solicitudItems[solicitud.id].map((item: any, index: number) => (
-                                <div key={index} className="bg-white rounded p-3 text-sm">
-                                  <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-                                    <div>
-                                      <span className="font-medium text-gray-700">Código:</span>
-                                      <span className="ml-1 font-mono text-blue-600">{item.article_code}</span>
-                                    </div>
-                                    <div className="md:col-span-2">
-                                      <span className="font-medium text-gray-700">Artículo:</span>
-                                      <span className="ml-1">{item.article_name}</span>
-                                    </div>
-                                    <div>
-                                      <span className="font-medium text-gray-700">Cantidad:</span>
-                                      <span className="ml-1 font-semibold text-green-600">{item.cantidad}</span>
-                                      <span className="ml-1 text-gray-500">(Stock: {item.stock_actual})</span>
+                    <p className="empty-title">¡Todo al día!</p>
+                    <p className="empty-subtitle text-muted">
+                      No hay solicitudes pendientes de autorización
+                    </p>
+                  </div>
+                ) : (
+                  <div className="table-responsive">
+                    <table className="table card-table table-vcenter">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>Folio</th>
+                          <th>Tipo</th>
+                          <th>Solicitante</th>
+                          <th>Items</th>
+                          <th>Fecha</th>
+                          <th>Tiempo Espera</th>
+                          <th>Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {solicitudesRecientes.map((solicitud) => (
+                          <>
+                            <tr key={solicitud.id} className="table-row-hover">
+                              <td>
+                                <button
+                                  onClick={() => toggleExpanded(solicitud.id)}
+                                  className="btn btn-icon btn-sm"
+                                  type="button"
+                                >
+                                  {expandedRows.has(solicitud.id) ? (
+                                    <IconChevronDown size={16} />
+                                  ) : (
+                                    <IconChevronRight size={16} />
+                                  )}
+                                </button>
+                              </td>
+                              <td>
+                                <span className="text-primary font-weight-medium">{solicitud.folio}</span>
+                              </td>
+                              <td>
+                                <span className={`badge ${solicitud.tipo === 'ENTRADA' ? 'bg-success' : 'bg-secondary'}`}>
+                                  {solicitud.tipo}
+                                </span>
+                              </td>
+                              <td>
+                                <div className="d-flex align-items-center">
+                                  <IconUser size={16} className="me-2 text-muted" />
+                                  {solicitud.usuario_solicita_nombre}
+                                </div>
+                              </td>
+                              <td>
+                                <span className="badge bg-azure">{solicitud.total_items} items</span>
+                              </td>
+                              <td>
+                                <div className="d-flex align-items-center text-muted">
+                                  <IconCalendar size={16} className="me-1" />
+                                  {new Date(solicitud.created_at).toLocaleDateString()}
+                                </div>
+                              </td>
+                              <td>
+                                <span className={`badge ${getUrgenciaColorClass(solicitud.tiempo_espera_horas)}`}>
+                                  {formatTiempoEspera(solicitud.tiempo_espera_horas)}
+                                </span>
+                              </td>
+                              <td>
+                                <button
+                                  onClick={() => window.location.href = `/almacen/autorizacion-solicitudes?solicitud=${solicitud.id}`}
+                                  className="btn btn-primary btn-sm"
+                                >
+                                  Revisar
+                                </button>
+                              </td>
+                            </tr>
+                            
+                            {/* Fila expandida */}
+                            {expandedRows.has(solicitud.id) && (
+                              <tr>
+                                <td colSpan={8}>
+                                  <div className="card card-sm">
+                                    <div className="card-body">
+                                      <h4 className="card-title mb-3">
+                                        <IconFileText size={20} className="me-2" />
+                                        Detalles de la Solicitud
+                                      </h4>
+                                      
+                                      {solicitudItems[solicitud.id] ? (
+                                        <div className="table-responsive">
+                                          <table className="table table-sm">
+                                            <thead>
+                                              <tr>
+                                                <th>Código</th>
+                                                <th>Artículo</th>
+                                                <th>Cantidad</th>
+                                                <th>Stock</th>
+                                                <th>Observaciones</th>
+                                              </tr>
+                                            </thead>
+                                            <tbody>
+                                              {solicitudItems[solicitud.id].map((item: any, index: number) => (
+                                                <tr key={index}>
+                                                  <td><code>{item.article_code}</code></td>
+                                                  <td>{item.article_name}</td>
+                                                  <td>
+                                                    <span className="badge bg-success">{item.cantidad}</span>
+                                                  </td>
+                                                  <td>
+                                                    <span className="text-muted">{item.stock_actual}</span>
+                                                  </td>
+                                                  <td>
+                                                    <span className="text-muted">{item.observaciones || '-'}</span>
+                                                  </td>
+                                                </tr>
+                                              ))}
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                      ) : (
+                                        <div className="d-flex align-items-center">
+                                          <div className="spinner-border spinner-border-sm me-2" role="status"></div>
+                                          <span className="text-muted">Cargando detalles...</span>
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
-                                  {item.observaciones && (
-                                    <div className="mt-2 pt-2 border-t border-gray-100">
-                                      <span className="font-medium text-gray-700">Observaciones:</span>
-                                      <span className="ml-1 text-gray-600">{item.observaciones}</span>
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="flex items-center space-x-2 text-gray-500">
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                              <span className="text-sm">Cargando detalles...</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
+                                </td>
+                              </tr>
+                            )}
+                          </>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-      {/* Métricas Adicionales */}
-      {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-md border border-blue-200 p-6">
-            <div className="flex items-center mb-4">
-              <div className="p-2 bg-blue-500 rounded-lg mr-3">
-                <IconClock className="h-5 w-5 text-white" />
-              </div>
-              <h4 className="text-lg font-semibold text-blue-900">Tiempo de Respuesta</h4>
-            </div>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-blue-800">Promedio actual:</span>
-                <span className="text-xl font-bold text-blue-900">{stats.tiempo_promedio_respuesta} hrs</span>
-              </div>
-              <div className="w-full bg-blue-200 rounded-full h-3">
-                <div 
-                  className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-500" 
-                  style={{ width: `${Math.min((stats.tiempo_promedio_respuesta / 24) * 100, 100)}%` }}
-                ></div>
-              </div>
-              <div className="flex justify-between text-xs">
-                <span className="text-blue-600 font-medium">Meta: 8 hrs</span>
-                <span className="text-blue-600 font-medium">Máximo: 24 hrs</span>
-              </div>
-              {stats.tiempo_promedio_respuesta <= 8 ? (
-                <div className="flex items-center text-green-700 text-sm font-medium">
-                  <IconCheck className="h-4 w-4 mr-1" />
-                  ¡Dentro de la meta!
-                </div>
-              ) : (
-                <div className="flex items-center text-orange-700 text-sm font-medium">
-                  <IconClock className="h-4 w-4 mr-1" />
-                  Requiere atención
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg shadow-md border border-green-200 p-6">
-            <div className="flex items-center mb-4">
-              <div className="p-2 bg-green-500 rounded-lg mr-3">
-                <IconTrendingUp className="h-5 w-5 text-white" />
-              </div>
-              <h4 className="text-lg font-semibold text-green-900">Resumen de Actividad</h4>
-            </div>
-            <div className="space-y-4">
-              <div className="bg-white bg-opacity-50 rounded-lg p-3">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-green-800">Tasa de Aprobación:</span>
-                  <span className="text-2xl font-bold text-green-900">
-                    {stats.total_mes > 0 ? Math.round((stats.autorizadas_hoy / stats.total_mes) * 100) : 0}%
-                  </span>
-                </div>
-                <div className="w-full bg-green-200 rounded-full h-2">
-                  <div 
-                    className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full transition-all duration-500" 
-                    style={{ width: `${stats.total_mes > 0 ? Math.round((stats.autorizadas_hoy / stats.total_mes) * 100) : 0}%` }}
-                  ></div>
-                </div>
-              </div>
-              
-              <div className="bg-white bg-opacity-50 rounded-lg p-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-green-800">Eficiencia Diaria:</span>
-                  <span className="text-xl font-bold text-green-900">
-                    {stats.autorizadas_hoy + stats.rechazadas_hoy}
-                  </span>
-                </div>
-                <p className="text-xs text-green-600 mt-1">solicitudes procesadas hoy</p>
-              </div>
-              
-              <div className="flex items-center justify-center text-green-700 text-sm font-medium">
-                <IconCheck className="h-4 w-4 mr-1" />
-                Sistema funcionando correctamente
+                )}
               </div>
             </div>
           </div>
         </div>
-      )}
+
+        {/* Métricas Adicionales */}
+        {stats && (
+          <div className="row row-cards mt-4">
+            <div className="col-md-6">
+              <div className="card">
+                <div className="card-header">
+                  <h3 className="card-title">
+                    <IconClock className="me-2" />
+                    Tiempo de Respuesta
+                  </h3>
+                </div>
+                <div className="card-body">
+                  <div className="row align-items-center mb-3">
+                    <div className="col-auto">
+                      <span className="text-muted">Promedio actual:</span>
+                    </div>
+                    <div className="col">
+                      <div className="text-h3 mb-0">{stats.tiempo_promedio_respuesta} hrs</div>
+                    </div>
+                  </div>
+                  <div className="progress mb-3">
+                    <div 
+                      className="progress-bar bg-primary" 
+                      style={{ width: `${Math.min((stats.tiempo_promedio_respuesta / 24) * 100, 100)}%` }}
+                    ></div>
+                  </div>
+                  <div className="row text-muted">
+                    <div className="col">Meta: 8 hrs</div>
+                    <div className="col-auto">Máximo: 24 hrs</div>
+                  </div>
+                  {stats.tiempo_promedio_respuesta <= 8 ? (
+                    <div className="mt-2">
+                      <span className="badge bg-success">
+                        <IconCheck size={16} className="me-1" />
+                        ¡Dentro de la meta!
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="mt-2">
+                      <span className="badge bg-warning">
+                        <IconClock size={16} className="me-1" />
+                        Requiere atención
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="col-md-6">
+              <div className="card">
+                <div className="card-header">
+                  <h3 className="card-title">
+                    <IconTrendingUp className="me-2" />
+                    Resumen de Actividad
+                  </h3>
+                </div>
+                <div className="card-body">
+                  <div className="mb-3">
+                    <div className="row align-items-center mb-2">
+                      <div className="col">Tasa de Aprobación:</div>
+                      <div className="col-auto">
+                        <span className="text-h4 text-success">
+                          {stats.total_mes > 0 ? Math.round((stats.autorizadas_hoy / stats.total_mes) * 100) : 0}%
+                        </span>
+                      </div>
+                    </div>
+                    <div className="progress">
+                      <div 
+                        className="progress-bar bg-success" 
+                        style={{ width: `${stats.total_mes > 0 ? Math.round((stats.autorizadas_hoy / stats.total_mes) * 100) : 0}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  <div className="mb-3">
+                    <div className="row align-items-center">
+                      <div className="col">Eficiencia Diaria:</div>
+                      <div className="col-auto">
+                        <span className="text-h4 text-primary">
+                          {stats.autorizadas_hoy + stats.rechazadas_hoy}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-muted small">solicitudes procesadas hoy</div>
+                  </div>
+                  
+                  <div className="mt-2">
+                    <span className="badge bg-success">
+                      <IconCheck size={16} className="me-1" />
+                      Sistema funcionando correctamente
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
