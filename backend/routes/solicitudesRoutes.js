@@ -12,7 +12,6 @@ import {
   getDashboardSolicitudesRecientes
 } from '../controllers/solicitudesController.js';
 import { verifyAuth } from '../middleware/authMiddleware.js';
-import checkAuthorizationAccess, { checkAuthorizationViewAccess } from '../middlewares/checkAuthorizationAccess.js';
 
 const router = Router();
 
@@ -23,14 +22,14 @@ router.get('/:id', verifyAuth, getSolicitudById);
 router.get('/folio/:folio', verifyAuth, getSolicitudByFolio);
 router.put('/:id/status', verifyAuth, updateSolicitudStatus);
 
-// Rutas específicas para autorización (con permisos especiales)
-router.get('/pendientes', verifyAuth, checkAuthorizationViewAccess, getSolicitudesPendientes);
-router.get('/:id/detalle', verifyAuth, checkAuthorizationViewAccess, getSolicitudDetalleAutorizacion);
-router.put('/:id/autorizar', verifyAuth, checkAuthorizationAccess, autorizarSolicitud);
+// Rutas específicas para autorización (usando solo verifyAuth como las demás vistas)
+router.get('/pendientes', verifyAuth, getSolicitudesPendientes);
+router.get('/:id/detalle', verifyAuth, getSolicitudDetalleAutorizacion);
+router.put('/:id/autorizar', verifyAuth, autorizarSolicitud);
 
-// Rutas para dashboard (requieren permisos de visualización)
-router.get('/dashboard/stats', verifyAuth, checkAuthorizationViewAccess, getDashboardStats);
-router.get('/dashboard/recientes', verifyAuth, checkAuthorizationViewAccess, getDashboardSolicitudesRecientes);
+// Rutas para dashboard (usando solo verifyAuth como las demás vistas)
+router.get('/dashboard/stats', verifyAuth, getDashboardStats);
+router.get('/dashboard/recientes', verifyAuth, getDashboardSolicitudesRecientes);
 
 // Ruta para generar PDF de solicitud
 router.get('/:id/pdf', verifyAuth, async (req, res) => {
