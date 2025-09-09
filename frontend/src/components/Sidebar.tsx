@@ -32,6 +32,8 @@ const Sidebar: React.FC<SidebarProps> = ({
       submenu: [
         { label: 'Inventario', href: '/almacen' },
         { label: 'Solicitudes', href: '/solicitudes' },
+        { label: 'Autorización', href: '/autorizacion-solicitudes' },
+        { label: 'Dashboard Autorización', href: '/dashboard-autorizacion' },
         { label: 'Ajustes', href: '/ajustes' },
         { label: 'Historial', href: '/historial' }
       ]

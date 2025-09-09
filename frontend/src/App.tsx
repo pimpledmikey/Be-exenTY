@@ -9,6 +9,8 @@ import CambiarPassword from './pages/seguridad/CambiarPassword';
 import GoogleCalendarPage from './pages/GoogleCalendarPage';
 import CatalogosMenu from './pages/almacen/CatalogosMenu';
 import PermisosPanel from './pages/administracion/PermisosPanel';
+import AutorizacionSolicitudes from './pages/almacen/AutorizacionSolicitudes';
+import DashboardAutorizacion from './pages/almacen/DashboardAutorizacion';
 import ThemeToggle from './components/ThemeToggle';
 import { useTheme } from './hooks/useTheme';
 import logoBeExEn from './assets/logoBeExEn.png';
@@ -240,6 +242,8 @@ function Dashboard({ user }: { user: any }) {
 				{ label: 'Stock', key: 'stock' },
 				{ label: 'Ajustes', key: 'ajustes' },
 				{ label: 'Catálogos', key: 'catalogos' },
+				{ label: 'Autorización', key: 'autorizacion-solicitudes' },
+				{ label: 'Dashboard Autorización', key: 'dashboard-autorizacion' },
 			],
 		},
 		...(user?.group === 'admin'
@@ -356,6 +360,10 @@ function Dashboard({ user }: { user: any }) {
 		content = <AlmacenMenu initialTab={current} />;
 	} else if (current === 'catalogos') {
 		content = <CatalogosMenu />;
+	} else if (current === 'autorizacion-solicitudes') {
+		content = <AutorizacionSolicitudes />;
+	} else if (current === 'dashboard-autorizacion') {
+		content = <DashboardAutorizacion />;
 	} else if (current === 'calendar') {
 		content = <GoogleCalendarPage />;
 	} else if (current === 'seguridad') {
