@@ -108,10 +108,6 @@ const DashboardAutorizacion: React.FC = () => {
     }
   };
 
-  const getTipoColor = (tipo: string) => {
-    return tipo === 'ENTRADA' ? 'text-green-600 bg-green-100' : 'text-red-600 bg-red-100';
-  };
-
   const formatTiempoEspera = (horas: number) => {
     if (horas < 1) {
       return `${Math.round(horas * 60)} min`;
@@ -120,13 +116,6 @@ const DashboardAutorizacion: React.FC = () => {
     } else {
       return `${Math.round(horas / 24)} días`;
     }
-  };
-
-  const getUrgenciaColor = (horas: number) => {
-    if (horas < 2) return 'bg-green-100 text-green-800';
-    if (horas < 8) return 'bg-yellow-100 text-yellow-800';
-    if (horas < 24) return 'bg-orange-100 text-orange-800';
-    return 'bg-red-100 text-red-800';
   };
 
   const getUrgenciaColorClass = (horas: number) => {
