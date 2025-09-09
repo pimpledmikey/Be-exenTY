@@ -396,15 +396,15 @@ const AutorizacionSolicitudes: React.FC = () => {
                                         <tbody>
                                           {solicitud.items.map((item, index) => (
                                             <tr key={index}>
-                                              <td><code className="text-primary">{item.article_code}</code></td>
+                                              <td><code className="bg-light text-dark px-2 py-1 rounded">{item.article_code}</code></td>
                                               <td>{item.article_name}</td>
                                               <td>
-                                                <span className="badge bg-success">{item.cantidad}</span>
+                                                <span className="badge bg-success text-white">{item.cantidad}</span>
                                               </td>
                                               <td>
                                                 <span className="text-muted">{item.stock_actual}</span>
                                                 {item.cantidad > item.stock_actual && (
-                                                  <span className="badge bg-danger ms-1">Stock insuficiente</span>
+                                                  <span className="badge bg-danger text-white ms-1">Stock insuficiente</span>
                                                 )}
                                               </td>
                                               <td>
@@ -497,11 +497,11 @@ const AutorizacionSolicitudes: React.FC = () => {
                         {solicitudDetalle.items.map((item) => (
                           <tr key={item.id}>
                             <td>
-                              <code className="text-primary">{item.article_code}</code>
+                              <code className="bg-light text-dark px-2 py-1 rounded">{item.article_code}</code>
                             </td>
                             <td>{item.article_name}</td>
                             <td>
-                              <span className="badge bg-success">{item.cantidad}</span>
+                              <span className="badge bg-success text-white">{item.cantidad}</span>
                             </td>
                             <td>
                               <span className="text-muted">{item.stock_actual}</span>
@@ -509,9 +509,9 @@ const AutorizacionSolicitudes: React.FC = () => {
                             {solicitudDetalle.tipo === 'SALIDA' && (
                               <td>
                                 {item.stock_actual >= item.cantidad ? (
-                                  <span className="badge bg-success">✓ Disponible</span>
+                                  <span className="badge bg-success text-white">✓ Disponible</span>
                                 ) : (
-                                  <span className="badge bg-danger">⚠ Insuficiente</span>
+                                  <span className="badge bg-danger text-white">⚠ Insuficiente</span>
                                 )}
                               </td>
                             )}

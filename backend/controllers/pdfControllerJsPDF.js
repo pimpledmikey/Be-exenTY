@@ -432,7 +432,220 @@ const generarPdfSolicitudSimple = async (req, res) => {
   }
 };
 
-export { generarPdfSolicitudSimple, validarSolicitudParaPdf };
+// Nueva función para generar PDF de solicitud existente
+const generarPdfSolicitudFromId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log('Generando PDF para solicitud ID:', id);
+
+    // Obtener datos de la solicitud
+    const [solicitudRows] = await pool.query(`
+      SELECT 
+        s.*,
+        u_solicita.name as usuario_solicita_nombre,
+        u_autoriza.name as usuario_autoriza_nombre
+      FROM solicitudes s
+      LEFT JOIN users u_solicita ON s.usuario_solicita_id = u_solicita.user_id
+      LEFT JOIN users u_autoriza ON s.usuario_autoriza_id = u_autoriza.user_id
+      WHERE s.id = ?
+    `, [id]);
+
+    if (solicitudRows.length === 0) {
+      return res.status(404).json({ error: 'Solicitud no encontrada' });
+    }
+
+    const solicitud = solicitudRows[0];
+
+    // Obtener items de la solicitud
+    const [itemsRows] = await pool.query(`
+      SELECT 
+        si.*,
+        a.code as article_code,
+        a.name as article_name,
+        a.price as precio_unitario,
+        inv.available_quantity as stock_actual
+      FROM solicitud_items si
+      JOIN articles a ON si.article_id = a.article_id
+      LEFT JOIN inventory inv ON a.article_id = inv.article_id
+      WHERE si.solicitud_id = ?
+      ORDER BY si.id
+    `, [id]);
+
+    // Crear el PDF
+    const doc = new jsPDF();
+    
+    // Configuración de colores
+    const colorPrimario = [76, 175, 80]; // Verde
+    const colorSecundario = [33, 150, 243]; // Azul
+    const colorTexto = [33, 37, 41]; // Gris oscuro
+    
+    // Header con logo y título
+    doc.setFillColor(...colorPrimario);
+    doc.rect(0, 0, 210, 25, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('SOLICITUD DE AUTORIZACIÓN', 105, 15, { align: 'center' });
+    
+    doc.setFontSize(14);
+    doc.text(`${solicitud.tipo} DE MATERIALES`, 105, 22, { align: 'center' });
+    
+    // Información básica
+    doc.setTextColor(...colorTexto);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    
+    let y = 35;
+    
+    // Folio y fecha
+    doc.setFont('helvetica', 'bold');
+    doc.text('Folio:', 20, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(solicitud.folio, 35, y);
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text('Fecha:', 120, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(new Date(solicitud.fecha).toLocaleDateString('es-ES'), 135, y);
+    
+    y += 8;
+    
+    // Usuario que solicita
+    doc.setFont('helvetica', 'bold');
+    doc.text('Solicitante:', 20, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(solicitud.usuario_solicita_nombre || 'N/A', 45, y);
+    
+    y += 8;
+    
+    // Usuario que autoriza
+    doc.setFont('helvetica', 'bold');
+    doc.text('Autoriza:', 20, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(solicitud.usuario_autoriza_nombre || 'N/A', 40, y);
+    
+    y += 8;
+    
+    // Estado
+    doc.setFont('helvetica', 'bold');
+    doc.text('Estado:', 20, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(solicitud.estado, 35, y);
+    
+    y += 15;
+    
+    // Tabla de items
+    if (itemsRows.length > 0) {
+      // Header de la tabla
+      doc.setFillColor(...colorSecundario);
+      doc.rect(15, y, 180, 8, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      
+      doc.text('CÓDIGO', 20, y + 5);
+      doc.text('ARTÍCULO', 50, y + 5);
+      doc.text('CANT.', 120, y + 5);
+      doc.text('STOCK', 140, y + 5);
+      doc.text('OBSERVACIONES', 160, y + 5);
+      
+      y += 12;
+      
+      // Contenido de la tabla
+      doc.setTextColor(...colorTexto);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      
+      itemsRows.forEach((item, index) => {
+        // Alternar color de fila
+        if (index % 2 === 0) {
+          doc.setFillColor(248, 249, 250);
+          doc.rect(15, y - 2, 180, 6, 'F');
+        }
+        
+        // Texto de la fila
+        doc.setTextColor(...colorTexto);
+        doc.text(item.article_code || '', 20, y + 2);
+        
+        // Truncar nombre del artículo si es muy largo
+        const articleName = item.article_name || '';
+        const maxLength = 25;
+        const displayName = articleName.length > maxLength ? 
+          articleName.substring(0, maxLength) + '...' : articleName;
+        doc.text(displayName, 50, y + 2);
+        
+        doc.text(item.cantidad.toString(), 120, y + 2);
+        doc.text((item.stock_actual || 0).toString(), 140, y + 2);
+        
+        const observaciones = item.observaciones || '-';
+        const maxObsLength = 15;
+        const displayObs = observaciones.length > maxObsLength ? 
+          observaciones.substring(0, maxObsLength) + '...' : observaciones;
+        doc.text(displayObs, 160, y + 2);
+        
+        y += 6;
+        
+        // Nueva página si es necesario
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+        }
+      });
+    }
+    
+    // Observaciones generales
+    if (solicitud.observaciones) {
+      y += 10;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.text('Observaciones:', 20, y);
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      const lines = doc.splitTextToSize(solicitud.observaciones, 170);
+      doc.text(lines, 20, y + 5);
+      y += lines.length * 4 + 10;
+    }
+    
+    // Footer con firmas
+    y = Math.max(y + 20, 250);
+    
+    doc.setLineWidth(0.5);
+    doc.setDrawColor(...colorTexto);
+    
+    // Líneas para firmas
+    doc.line(30, y, 80, y);
+    doc.line(110, y, 160, y);
+    
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.text('SOLICITADO POR:', 35, y + 5);
+    doc.text('AUTORIZADO POR:', 115, y + 5);
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.text(solicitud.usuario_solicita_nombre || 'NOMBRE Y FIRMA', 25, y + 10);
+    doc.text(solicitud.usuario_autoriza_nombre || 'NOMBRE Y FIRMA', 105, y + 10);
+    
+    // Generar el PDF
+    const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
+    
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="solicitud-${solicitud.tipo}-${solicitud.folio}.pdf"`);
+    res.setHeader('Content-Length', pdfBuffer.length);
+    
+    res.send(pdfBuffer);
+    
+  } catch (error) {
+    console.error('Error generando PDF de solicitud:', error);
+    res.status(500).json({ 
+      error: 'Error al generar PDF',
+      details: error.message 
+    });
+  }
+};
 
 // Función auxiliar para registrar las salidas en el inventario
 const registrarSalidasInventario = async (items, solicitudInfo) => {
@@ -506,3 +719,5 @@ const registrarSalidasInventario = async (items, solicitudInfo) => {
     throw error;
   }
 };
+
+export { generarPdfSolicitudSimple, validarSolicitudParaPdf, generarPdfSolicitudFromId };

@@ -119,10 +119,10 @@ const DashboardAutorizacion: React.FC = () => {
   };
 
   const getUrgenciaColorClass = (horas: number) => {
-    if (horas < 2) return 'bg-success';
-    if (horas < 8) return 'bg-warning';
-    if (horas < 24) return 'bg-orange';
-    return 'bg-danger';
+    if (horas < 2) return 'bg-success text-white';
+    if (horas < 8) return 'bg-warning text-dark';
+    if (horas < 24) return 'bg-orange text-white';
+    return 'bg-danger text-white';
   };
 
   const toggleExpanded = (solicitudId: number) => {
@@ -420,10 +420,10 @@ const DashboardAutorizacion: React.FC = () => {
                                             <tbody>
                                               {solicitudItems[solicitud.id].map((item: any, index: number) => (
                                                 <tr key={index}>
-                                                  <td><code>{item.article_code}</code></td>
+                                                  <td><code className="bg-light text-dark px-2 py-1 rounded">{item.article_code}</code></td>
                                                   <td>{item.article_name}</td>
                                                   <td>
-                                                    <span className="badge bg-success">{item.cantidad}</span>
+                                                    <span className="badge bg-success text-white">{item.cantidad}</span>
                                                   </td>
                                                   <td>
                                                     <span className="text-muted">{item.stock_actual}</span>
