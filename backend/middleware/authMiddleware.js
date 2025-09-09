@@ -13,10 +13,8 @@ export const verifyAuth = async (req, res, next) => {
       });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
-    
-    // Extraer el usuario del token (el token contiene { user: {...} })
-    req.user = decoded.user || decoded;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'beexenty_secret');
+    req.user = decoded;
     next();
   } catch (error) {
     return res.status(401).json({

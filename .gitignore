@@ -13,6 +13,9 @@ yarn-error.log*
 # dotenv environment files
 *.env
 
+# Token files (sensitive information)
+token.txt
+
 # Build output
 /dist
 frontend/dist
