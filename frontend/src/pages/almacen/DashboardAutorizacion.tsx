@@ -136,80 +136,95 @@ const DashboardAutorizacion: React.FC = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard de Autorización</h1>
-          <p className="text-gray-600">Resumen de solicitudes pendientes y actividad reciente</p>
-        </div>
-        <button
-          onClick={() => window.location.href = '/almacen/autorizacion-solicitudes'}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2"
-        >
-          <IconFileText className="h-4 w-4" />
-          Ver Todas las Solicitudes
-        </button>
-      </div>
-
-      {/* Stats Cards */}
-      {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <IconClock className="h-8 w-8 text-orange-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Pendientes</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.pendientes}</p>
-              </div>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Dashboard de Autorización</h1>
+              <p className="text-gray-600 mt-2">Resumen de solicitudes pendientes y actividad reciente</p>
             </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <IconCheck className="h-8 w-8 text-green-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Autorizadas Hoy</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.autorizadas_hoy}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <IconX className="h-8 w-8 text-red-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Rechazadas Hoy</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.rechazadas_hoy}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <IconTrendingUp className="h-8 w-8 text-blue-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Total Este Mes</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.total_mes}</p>
-              </div>
-            </div>
+            <button
+              onClick={() => window.location.href = '/almacen/autorizacion-solicitudes'}
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm"
+            >
+              <IconFileText className="h-5 w-5" />
+              Ver Todas las Solicitudes
+            </button>
           </div>
         </div>
-      )}
+
+        {/* Stats Cards */}
+        {stats && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg shadow-md border border-orange-200 p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <div className="p-3 bg-orange-500 rounded-full">
+                    <IconClock className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-orange-800">Pendientes</p>
+                  <p className="text-3xl font-bold text-orange-900">{stats.pendientes}</p>
+                  <p className="text-xs text-orange-600 mt-1">Esperando autorización</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg shadow-md border border-green-200 p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <div className="p-3 bg-green-500 rounded-full">
+                    <IconCheck className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-green-800">Autorizadas Hoy</p>
+                  <p className="text-3xl font-bold text-green-900">{stats.autorizadas_hoy}</p>
+                  <p className="text-xs text-green-600 mt-1">Completadas hoy</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-r from-red-50 to-red-100 rounded-lg shadow-md border border-red-200 p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <div className="p-3 bg-red-500 rounded-full">
+                    <IconX className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-red-800">Rechazadas Hoy</p>
+                  <p className="text-3xl font-bold text-red-900">{stats.rechazadas_hoy}</p>
+                  <p className="text-xs text-red-600 mt-1">No aprobadas</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg shadow-md border border-blue-200 p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <div className="p-3 bg-blue-500 rounded-full">
+                    <IconTrendingUp className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-blue-800">Total Este Mes</p>
+                  <p className="text-3xl font-bold text-blue-900">{stats.total_mes}</p>
+                  <p className="text-xs text-blue-600 mt-1">Solicitudes procesadas</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
       {/* Solicitudes Recientes */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
-            <IconClock className="h-5 w-5" />
+      <div className="bg-white rounded-lg shadow-md border border-gray-200">
+        <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <IconClock className="h-5 w-5 text-blue-600" />
             Solicitudes Recientes (Urgentes)
           </h3>
           <div className="flex justify-between items-center mt-1">
@@ -218,7 +233,7 @@ const DashboardAutorizacion: React.FC = () => {
             </p>
             <button 
               onClick={fetchDashboardData}
-              className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
+              className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-lg text-sm font-medium flex items-center gap-1 transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -228,34 +243,39 @@ const DashboardAutorizacion: React.FC = () => {
           </div>
         </div>
         
-        <div className="divide-y divide-gray-200">
+        <div className="divide-y divide-gray-100">
           {solicitudesRecientes.length === 0 ? (
-            <div className="px-6 py-8 text-center text-gray-500">
-              <IconCheck className="mx-auto h-12 w-12 text-gray-400 mb-2" />
-              <p>No hay solicitudes pendientes</p>
+            <div className="px-6 py-12 text-center">
+              <div className="bg-green-50 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <IconCheck className="h-8 w-8 text-green-500" />
+              </div>
+              <h4 className="text-lg font-medium text-gray-900 mb-2">¡Todo al día!</h4>
+              <p className="text-gray-500">No hay solicitudes pendientes de autorización</p>
             </div>
           ) : (
             solicitudesRecientes.map((solicitud) => (
-              <div key={solicitud.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
+              <div key={solicitud.id} className="px-6 py-4 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-200 cursor-pointer">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <div className="flex-shrink-0">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTipoColor(solicitud.tipo)}`}>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getTipoColor(solicitud.tipo)}`}>
                         {solicitud.tipo}
                       </span>
                     </div>
                     
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+                      <p className="text-sm font-semibold text-gray-900 truncate">
                         {solicitud.folio}
                       </p>
-                      <div className="flex items-center gap-3 text-xs text-gray-500">
-                        <span className="flex items-center gap-1">
+                      <div className="flex items-center gap-4 text-xs text-gray-600 mt-1">
+                        <span className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-md">
                           <IconUser className="h-3 w-3" />
                           {solicitud.usuario_solicita_nombre}
                         </span>
-                        <span>{solicitud.total_items} artículos</span>
-                        <span className="flex items-center gap-1">
+                        <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-md font-medium">
+                          {solicitud.total_items} artículos
+                        </span>
+                        <span className="flex items-center gap-1 text-gray-500">
                           <IconCalendar className="h-3 w-3" />
                           {new Date(solicitud.created_at).toLocaleDateString()}
                         </span>
@@ -264,15 +284,18 @@ const DashboardAutorizacion: React.FC = () => {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <span className={`text-sm font-medium ${getUrgenciaColor(solicitud.tiempo_espera_horas)}`}>
+                    <span className={`text-sm font-semibold px-3 py-1 rounded-full ${getUrgenciaColor(solicitud.tiempo_espera_horas)}`}>
                       {formatTiempoEspera(solicitud.tiempo_espera_horas)} esperando
                     </span>
                     
                     <button
                       onClick={() => window.location.href = `/almacen/autorizacion-solicitudes?solicitud=${solicitud.id}`}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-1 transition-colors shadow-sm"
                     >
-                      Revisar →
+                      Revisar
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
                     </button>
                   </div>
                 </div>
@@ -285,44 +308,84 @@ const DashboardAutorizacion: React.FC = () => {
       {/* Métricas Adicionales */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h4 className="text-md font-semibold text-gray-900 mb-4">Tiempo de Respuesta</h4>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600">Promedio:</span>
-                <span className="text-sm font-medium">{stats.tiempo_promedio_respuesta} hrs</span>
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-md border border-blue-200 p-6">
+            <div className="flex items-center mb-4">
+              <div className="p-2 bg-blue-500 rounded-lg mr-3">
+                <IconClock className="h-5 w-5 text-white" />
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <h4 className="text-lg font-semibold text-blue-900">Tiempo de Respuesta</h4>
+            </div>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-blue-800">Promedio actual:</span>
+                <span className="text-xl font-bold text-blue-900">{stats.tiempo_promedio_respuesta} hrs</span>
+              </div>
+              <div className="w-full bg-blue-200 rounded-full h-3">
                 <div 
-                  className="bg-blue-600 h-2 rounded-full" 
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-500" 
                   style={{ width: `${Math.min((stats.tiempo_promedio_respuesta / 24) * 100, 100)}%` }}
                 ></div>
               </div>
-              <p className="text-xs text-gray-500">
-                Meta: Menos de 8 horas
-              </p>
+              <div className="flex justify-between text-xs">
+                <span className="text-blue-600 font-medium">Meta: 8 hrs</span>
+                <span className="text-blue-600 font-medium">Máximo: 24 hrs</span>
+              </div>
+              {stats.tiempo_promedio_respuesta <= 8 ? (
+                <div className="flex items-center text-green-700 text-sm font-medium">
+                  <IconCheck className="h-4 w-4 mr-1" />
+                  ¡Dentro de la meta!
+                </div>
+              ) : (
+                <div className="flex items-center text-orange-700 text-sm font-medium">
+                  <IconClock className="h-4 w-4 mr-1" />
+                  Requiere atención
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h4 className="text-md font-semibold text-gray-900 mb-4">Resumen de Actividad</h4>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Tasa de Aprobación:</span>
-                <span className="text-sm font-medium text-green-600">
-                  {stats.total_mes > 0 ? Math.round((stats.autorizadas_hoy / stats.total_mes) * 100) : 0}%
-                </span>
+          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg shadow-md border border-green-200 p-6">
+            <div className="flex items-center mb-4">
+              <div className="p-2 bg-green-500 rounded-lg mr-3">
+                <IconTrendingUp className="h-5 w-5 text-white" />
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Eficiencia Diaria:</span>
-                <span className="text-sm font-medium text-blue-600">
-                  {stats.autorizadas_hoy + stats.rechazadas_hoy} procesadas
-                </span>
+              <h4 className="text-lg font-semibold text-green-900">Resumen de Actividad</h4>
+            </div>
+            <div className="space-y-4">
+              <div className="bg-white bg-opacity-50 rounded-lg p-3">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-green-800">Tasa de Aprobación:</span>
+                  <span className="text-2xl font-bold text-green-900">
+                    {stats.total_mes > 0 ? Math.round((stats.autorizadas_hoy / stats.total_mes) * 100) : 0}%
+                  </span>
+                </div>
+                <div className="w-full bg-green-200 rounded-full h-2">
+                  <div 
+                    className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full transition-all duration-500" 
+                    style={{ width: `${stats.total_mes > 0 ? Math.round((stats.autorizadas_hoy / stats.total_mes) * 100) : 0}%` }}
+                  ></div>
+                </div>
+              </div>
+              
+              <div className="bg-white bg-opacity-50 rounded-lg p-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-green-800">Eficiencia Diaria:</span>
+                  <span className="text-xl font-bold text-green-900">
+                    {stats.autorizadas_hoy + stats.rechazadas_hoy}
+                  </span>
+                </div>
+                <p className="text-xs text-green-600 mt-1">solicitudes procesadas hoy</p>
+              </div>
+              
+              <div className="flex items-center justify-center text-green-700 text-sm font-medium">
+                <IconCheck className="h-4 w-4 mr-1" />
+                Sistema funcionando correctamente
               </div>
             </div>
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

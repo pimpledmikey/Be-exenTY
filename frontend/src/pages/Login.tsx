@@ -61,6 +61,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
             onChange={e => setUsername(e.target.value)}
             required
             autoFocus
+            autoComplete="username"
             style={{ marginBottom: 16 }}
           />
           {isRegister && (
@@ -78,6 +79,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
+            autoComplete="current-password"
             style={{ marginBottom: isRegister ? 16 : 24 }}
           />
           {isRegister && (
@@ -86,6 +88,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
               type="password"
               placeholder="Confirmar contraseña"
               required
+              autoComplete="new-password"
               style={{ marginBottom: 24 }}
             />
           )}
