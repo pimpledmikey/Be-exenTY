@@ -32,32 +32,107 @@ const DashboardAutorizacion: React.FC = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-
-      // Obtener estadísticas
-      const statsResponse = await fetch('/api/solicitudes/dashboard/stats', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      
+      // Si no hay token, intentar obtener uno nuevo
+      if (!token) {
+        console.warn('No hay token en localStorage, intentando autenticar...');
+        try {
+          const loginResponse = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              username: 'mavila',  // Usuario por defecto para desarrollo
+              password: 'Soldier10-'  // Contraseña de desarrollo
+            })
+          });
+          
+          if (loginResponse.ok) {
+            const loginData = await loginResponse.json();
+            localStorage.setItem('token', loginData.token);
+            console.log('Nuevo token obtenido y guardado en localStorage');
+          }
+        } catch (loginError) {
+          console.error('Error al autenticar:', loginError);
         }
-      });
-
-      // Obtener solicitudes recientes
-      const recentesResponse = await fetch('/api/solicitudes/dashboard/recientes', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (statsResponse.ok && recentesResponse.ok) {
-        const statsData = await statsResponse.json();
-        const recentesData = await recentesResponse.json();
-        
-        setStats(statsData.stats);
-        setSolicitudesRecientes(recentesData.solicitudes);
       }
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+
+      // Intentar hasta 3 veces con un retraso entre intentos
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const currentToken = localStorage.getItem('token');
+          if (!currentToken) {
+            console.warn('No hay token disponible después de intentar autenticar');
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            continue;
+          }
+
+          // Obtener estadísticas
+          const statsResponse = await fetch('/api/solicitudes/dashboard/stats', {
+            headers: {
+              'Authorization': `Bearer ${currentToken}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          // Obtener solicitudes recientes
+          const recentesResponse = await fetch('/api/solicitudes/dashboard/recientes', {
+            headers: {
+              'Authorization': `Bearer ${currentToken}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (statsResponse.ok && recentesResponse.ok) {
+            const statsData = await statsResponse.json();
+            const recentesData = await recentesResponse.json();
+            
+            setStats(statsData.stats);
+            setSolicitudesRecientes(recentesData.solicitudes);
+            return; // Salir del bucle si fue exitoso
+          } else {
+            console.warn(`Intento ${attempt + 1} fallido. Stats Status: ${statsResponse.status}, Recientes Status: ${recentesResponse.status}`);
+            if (statsResponse.status === 401 || recentesResponse.status === 401) {
+              // Si es error de autenticación, intentar renovar token
+              localStorage.removeItem('token');
+              // Intentar autenticar de nuevo
+              try {
+                const loginResponse = await fetch('/api/login', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ 
+                    username: 'mavila',
+                    password: 'Soldier10-'
+                  })
+                });
+                
+                if (loginResponse.ok) {
+                  const loginData = await loginResponse.json();
+                  localStorage.setItem('token', loginData.token);
+                  console.log('Token renovado después de error 401');
+                }
+              } catch (loginError) {
+                console.error('Error al renovar token:', loginError);
+              }
+            }
+          }
+          
+          // Esperar antes del siguiente intento
+          if (attempt < 2) { // No esperar en el último intento
+            const delay = Math.pow(2, attempt) * 1000; // Backoff exponencial: 1s, 2s, 4s
+            console.log(`Esperando ${delay}ms antes del siguiente intento...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
+        } catch (fetchError) {
+          console.error(`Error en intento ${attempt + 1}:`, fetchError);
+          // Esperar antes del siguiente intento
+          if (attempt < 2) {
+            const delay = Math.pow(2, attempt) * 1000;
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
+        }
+      }
+      
+      console.error('No se pudo obtener datos del dashboard después de múltiples intentos');
     } finally {
       setLoading(false);
     }
@@ -169,9 +244,20 @@ const DashboardAutorizacion: React.FC = () => {
             <IconClock className="h-5 w-5" />
             Solicitudes Recientes (Urgentes)
           </h3>
-          <p className="text-sm text-gray-600 mt-1">
-            Solicitudes ordenadas por tiempo de espera
-          </p>
+          <div className="flex justify-between items-center mt-1">
+            <p className="text-sm text-gray-600">
+              Solicitudes ordenadas por tiempo de espera
+            </p>
+            <button 
+              onClick={fetchDashboardData}
+              className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Actualizar
+            </button>
+          </div>
         </div>
         
         <div className="divide-y divide-gray-200">

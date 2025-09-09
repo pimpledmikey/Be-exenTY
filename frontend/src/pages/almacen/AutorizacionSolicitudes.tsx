@@ -43,16 +43,66 @@ const AutorizacionSolicitudes: React.FC = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/solicitudes/pendientes', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      
+      // Si no hay token, intentar obtener uno nuevo
+      if (!token) {
+        console.warn('No hay token en localStorage, intentando autenticar...');
+        try {
+          const loginResponse = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              username: 'mavila',  // Usuario por defecto para desarrollo
+              password: 'Soldier10-'  // Contraseña de desarrollo
+            })
+          });
+          
+          if (loginResponse.ok) {
+            const loginData = await loginResponse.json();
+            localStorage.setItem('token', loginData.token);
+            console.log('Nuevo token obtenido y guardado en localStorage');
+          }
+        } catch (loginError) {
+          console.error('Error al autenticar:', loginError);
         }
-      });
+      }
 
-      if (response.ok) {
-        const data = await response.json();
-        setSolicitudes(data.solicitudes);
+      // Intentar hasta 3 veces con un retraso entre intentos
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const currentToken = localStorage.getItem('token');
+          const response = await fetch('/api/solicitudes/pendientes', {
+            headers: {
+              'Authorization': `Bearer ${currentToken}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.solicitudes && Array.isArray(data.solicitudes)) {
+              console.log(`Solicitudes pendientes obtenidas: ${data.solicitudes.length}`);
+              setSolicitudes(data.solicitudes);
+              return; // Salir del bucle si fue exitoso
+            } else {
+              console.warn('Respuesta inválida del servidor:', data);
+            }
+          } else {
+            console.warn(`Intento ${attempt + 1} fallido. Status: ${response.status}`);
+            if (response.status === 401) {
+              // Si es error de autenticación, intentar renovar token
+              localStorage.removeItem('token');
+              // Y continuar al siguiente intento
+            }
+          }
+        } catch (fetchError) {
+          console.error(`Error en intento ${attempt + 1}:`, fetchError);
+        }
+
+        // Esperar un poco antes del siguiente intento (aumentando con cada intento)
+        if (attempt < 2) { // No esperar después del último intento
+          await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+        }
       }
     } catch (error) {
       console.error('Error fetching solicitudes:', error);

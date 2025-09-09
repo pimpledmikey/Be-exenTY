@@ -16,11 +16,26 @@ const app = express();
 
 // Configuración de CORS para aceptar peticiones del frontend en Render
 app.use(cors({
-  origin: [
-    'https://front-lxru.onrender.com', // Dominio real de frontend en Render
-    'http://localhost:5173' // Para desarrollo local
-  ],
-  credentials: true
+  origin: function(origin, callback) {
+    // Permitir solicitudes sin origen (como curl o aplicaciones móviles)
+    if (!origin) return callback(null, true);
+    
+    // Dominios permitidos
+    const allowedOrigins = [
+      'https://front-lxru.onrender.com',
+      'http://localhost:5173',
+      'http://127.0.0.1:5173'
+    ];
+    
+    if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development') {
+      callback(null, true);
+    } else {
+      callback(new Error('Origen no permitido por política CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Authorization', 'Content-Type']
 }));
 
 // Parsers con límite aumentado para PDF (evitar 413)
