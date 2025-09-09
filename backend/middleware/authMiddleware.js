@@ -14,7 +14,9 @@ export const verifyAuth = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
-    req.user = decoded;
+    
+    // Extraer el usuario del token (el token contiene { user: {...} })
+    req.user = decoded.user || decoded;
     next();
   } catch (error) {
     return res.status(401).json({
