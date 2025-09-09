@@ -287,18 +287,30 @@ export const updateSolicitudStatus = async (req, res) => {
 // Obtener solicitudes pendientes de autorización
 export const getSolicitudesPendientes = async (req, res) => {
   try {
+    console.log('🔍 Buscando solicitudes pendientes...');
+    
     const [rows] = await pool.query(`
       SELECT s.*, 
-             us.username as usuario_solicita_nombre,
-             us.name as usuario_solicita_nombre_completo,
-             COUNT(si.id) as total_items
+             us.username as usuario_solicita_nombre
       FROM solicitudes s
       LEFT JOIN users us ON s.usuario_solicita_id = us.user_id
-      LEFT JOIN solicitudes_items si ON s.id = si.solicitud_id
       WHERE s.estado = 'PENDIENTE'
-      GROUP BY s.id
       ORDER BY s.created_at ASC
     `);
+    
+    console.log('📋 Solicitudes pendientes encontradas:', rows.length);
+    
+    // Obtener items para cada solicitud
+    for (let solicitud of rows) {
+      const [items] = await pool.query(`
+        SELECT si.*, a.name as articulo_nombre, a.code as articulo_codigo
+        FROM solicitudes_items si
+        LEFT JOIN articles a ON si.article_id = a.article_id
+        WHERE si.solicitud_id = ?
+      `, [solicitud.id]);
+      solicitud.items = items;
+      solicitud.total_items = items.length;
+    }
     
     res.json({ 
       success: true, 
@@ -322,7 +334,7 @@ export const getSolicitudDetalleAutorizacion = async (req, res) => {
     const [solicitudRows] = await pool.query(`
       SELECT s.*, 
              us.username as usuario_solicita_nombre,
-             us.name as usuario_solicita_nombre_completo,
+             us.username as usuario_solicita_nombre_completo,
              ua.username as usuario_autoriza_nombre
       FROM solicitudes s
       LEFT JOIN users us ON s.usuario_solicita_id = us.user_id
