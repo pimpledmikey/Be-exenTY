@@ -489,70 +489,206 @@ const generarPdfSolicitudFromId = async (req, res) => {
       })));
     }
 
-    // Crear el PDF
-    const doc = new jsPDF();
+    // Crear nuevo documento PDF optimizado con el mismo formato profesional
+    const doc = new jsPDF('portrait', 'mm', 'a4');
     
-    // Header
-    doc.setFontSize(20);
-    doc.text('SOLICITUD DE AUTORIZACIÓN', 105, 20, { align: 'center' });
-    doc.setFontSize(16);
-    doc.text(`${solicitud.tipo} DE MATERIALES`, 105, 30, { align: 'center' });
+    // Pre-configurar colores y fuentes para optimizar rendimiento (igual que en generarPdfSolicitudSimple)
+    const colors = {
+      verde: [76, 175, 80],
+      negro: [0, 0, 0],
+      blanco: [255, 255, 255],
+      grisFondo: [245, 245, 245],
+      grisBorde: [200, 200, 200]
+    };
     
-    // Información básica
-    doc.setFontSize(12);
-    let y = 50;
-    doc.text(`Folio: ${solicitud.folio}`, 20, y);
-    doc.text(`Fecha: ${new Date(solicitud.fecha).toLocaleDateString('es-ES')}`, 120, y);
-    y += 10;
-    doc.text(`Solicitante: ${solicitud.usuario_solicita_nombre || 'N/A'}`, 20, y);
-    y += 10;
-    doc.text(`Autoriza: ${solicitud.usuario_autoriza_nombre || 'N/A'}`, 20, y);
-    y += 10;
-    doc.text(`Estado: ${solicitud.estado}`, 20, y);
-    y += 20;
+    doc.setFont('helvetica');
     
-    // Tabla de items
-    if (itemsRows.length > 0) {
-      doc.text('ARTÍCULOS SOLICITADOS:', 20, y);
-      y += 10;
+    // HEADER PROFESIONAL - Igual formato que generarPdfSolicitudSimple
+    const headerHeight = 55;
+    
+    // Títulos del documento - Lado derecho
+    doc.setTextColor(...colors.verde);
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('SOLICITUD DE AUTORIZACIÓN', 200, 18, { align: 'right' });
+    
+    doc.setFontSize(14);
+    doc.text(`${solicitud.tipo} DE MATERIALES`, 200, 26, { align: 'right' });
+    
+    // Información del header en recuadros
+    doc.setTextColor(...colors.negro);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    
+    // Fecha en recuadro
+    doc.rect(155, 30, 40, 6);
+    doc.text('Fecha:', 157, 34);
+    doc.setFont('helvetica', 'bold');
+    doc.text(new Date(solicitud.fecha).toLocaleDateString('es-ES'), 170, 34);
+    
+    // Folio
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Folio: ${solicitud.folio}`, 155, 42);
+    
+    // Información de usuarios - con más separación de la línea verde
+    doc.text(`Solicitante: ${solicitud.usuario_solicita_nombre || 'N/A'}`, 15, 52);
+    doc.text(`Autoriza: ${solicitud.usuario_autoriza_nombre || 'N/A'}`, 15, 58);
+    
+    // Estado de la solicitud
+    doc.text(`Estado: ${solicitud.estado}`, 15, 64);
+    
+    // Línea separadora del header
+    doc.setLineWidth(0.8);
+    doc.setDrawColor(...colors.verde);
+    doc.line(15, headerHeight, 195, headerHeight);
+    
+    // TABLA DE ITEMS - Formato profesional igual que generarPdfSolicitudSimple
+    let currentY = headerHeight + 20;
+    
+    if (itemsRows && itemsRows.length > 0) {
+      // Headers de la tabla según el tipo de solicitud
+      let tableHeaders = [];
+      let colPositions = [];
       
-      // Headers
-      doc.setFontSize(10);
-      doc.text('CÓDIGO', 20, y);
-      doc.text('ARTÍCULO', 60, y);
-      doc.text('CANTIDAD', 120, y);
-      doc.text('STOCK', 150, y);
-      y += 5;
+      if (solicitud.tipo === 'SALIDA') {
+        // Para SALIDAS: sin columnas de precios
+        tableHeaders = ['NO.', 'CÓDIGO', 'DESCRIPCIÓN', 'CANTIDAD', 'STOCK'];
+        colPositions = [15, 35, 70, 140, 165];
+      } else {
+        // Para ENTRADAS: con columnas de precios
+        tableHeaders = ['NO.', 'CÓDIGO', 'DESCRIPCIÓN', 'CANTIDAD', 'PRECIO U', 'PRECIO T'];
+        colPositions = [15, 35, 70, 120, 145, 170];
+      }
       
-      // Línea separadora
-      doc.line(20, y, 180, y);
-      y += 5;
+      // Función auxiliar para dibujar header de tabla
+      const drawTableHeader = (y) => {
+        const tableWidth = solicitud.tipo === 'SALIDA' ? 170 : 180;
+        doc.setFillColor(...colors.verde);
+        doc.rect(15, y, tableWidth, 8, 'F');
+        doc.setTextColor(...colors.blanco);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        tableHeaders.forEach((header, index) => {
+          doc.text(header, colPositions[index] + 2, y + 5.5);
+        });
+        doc.setTextColor(...colors.negro);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+      };
       
-      // Items
+      // Dibujar header inicial
+      drawTableHeader(currentY);
+      currentY += 8;
+      
+      // Optimizar dibujo de filas
       itemsRows.forEach((item, index) => {
-        if (y > 270) {
+        // Verificar nueva página
+        if (currentY > 250) {
           doc.addPage();
-          y = 20;
+          drawTableHeader(15);
+          currentY = 25;
         }
-        doc.text(item.article_code || '', 20, y);
-        doc.text((item.article_name || '').substring(0, 30), 60, y);
-        doc.text(item.cantidad.toString(), 120, y);
-        doc.text((item.stock_actual || 0).toString(), 150, y);
-        y += 5;
+        
+        const tableWidth = solicitud.tipo === 'SALIDA' ? 170 : 180;
+        
+        // Fondo alternativo optimizado
+        if (index % 2 === 0) {
+          doc.setFillColor(...colors.grisFondo);
+          doc.rect(15, currentY, tableWidth, 7, 'F');
+        }
+        
+        // Bordes de tabla optimizados
+        doc.setDrawColor(...colors.grisBorde);
+        doc.setLineWidth(0.1);
+        doc.rect(15, currentY, tableWidth, 7);
+        
+        // Líneas verticales de separación
+        colPositions.slice(1).forEach(pos => {
+          doc.line(pos, currentY, pos, currentY + 7);
+        });
+        
+        // Datos de la fila según el tipo
+        let rowData = [];
+        
+        if (solicitud.tipo === 'SALIDA') {
+          // Para SALIDAS: sin precios
+          rowData = [
+            (index + 1).toString(),
+            item.article_code || '',
+            item.article_name?.length > 35 ? item.article_name.substring(0, 32) + '...' : item.article_name || '',
+            (item.cantidad || 0).toString(),
+            (item.stock_actual || 0).toString()
+          ];
+        } else {
+          // Para ENTRADAS: con precios
+          rowData = [
+            (index + 1).toString(),
+            item.article_code || '',
+            item.article_name?.length > 25 ? item.article_name.substring(0, 22) + '...' : item.article_name || '',
+            (item.cantidad || 0).toString(),
+            item.precio_unitario || '',
+            item.precio_total || ''
+          ];
+        }
+        
+        rowData.forEach((data, idx) => {
+          doc.text(data, colPositions[idx] + 2, currentY + 4.5);
+        });
+        
+        currentY += 7;
       });
     } else {
-      doc.text('No hay artículos en esta solicitud', 20, y);
+      doc.setFontSize(12);
+      doc.text('No hay artículos en esta solicitud', 20, currentY);
+      currentY += 15;
     }
     
-    // Footer
-    y = Math.max(y + 20, 250);
-    doc.text('___________________', 30, y);
-    doc.text('___________________', 120, y);
-    doc.setFontSize(8);
-    doc.text('SOLICITADO POR', 30, y + 5);
-    doc.text('AUTORIZADO POR', 120, y + 5);
+    // FIRMAS EN COLUMNAS - Mismo formato que generarPdfSolicitudSimple
+    currentY += 15;
     
-    // Generar el PDF
+    // Solo verificar si hay espacio mínimo
+    if (currentY > 780) {
+      doc.addPage();
+      currentY = 30;
+    }
+    
+    // Verificar si las 3 firmas caben en una fila o si necesitamos 2 filas
+    let firmas = [];
+    
+    if (currentY > 740) { // Si estamos muy abajo, usar 2 filas
+      firmas = [
+        // Primera fila - 2 firmas
+        { titulo: 'SOLICITADO POR:', nombre: solicitud.usuario_solicita_nombre || 'Juan Jesús Ortega Simbrón', x: 40, y: currentY },
+        { titulo: 'AUTORIZADO POR:', nombre: solicitud.usuario_autoriza_nombre || 'Lic. Elisa Avila Requena', x: 110, y: currentY },
+        // Segunda fila - 1 firma
+        { titulo: 'RECIBIDO POR:', nombre: 'Nombre y Firma', x: 40, y: currentY + 35 }
+      ];
+    } else { // Si hay espacio, usar 1 fila
+      firmas = [
+        { titulo: 'SOLICITADO POR:', nombre: solicitud.usuario_solicita_nombre || 'Juan Jesús Ortega Simbrón', x: 35, y: currentY },
+        { titulo: 'AUTORIZADO POR:', nombre: solicitud.usuario_autoriza_nombre || 'Lic. Elisa Avila Requena', x: 100, y: currentY },
+        { titulo: 'RECIBIDO POR:', nombre: 'Nombre y Firma', x: 165, y: currentY }
+      ];
+    }
+    
+    firmas.forEach((firma) => {
+      // Línea individual para cada firma
+      doc.setLineWidth(0.5);
+      doc.setDrawColor(...colors.negro);
+      doc.line(firma.x - 22, firma.y + 15, firma.x + 22, firma.y + 15);
+      
+      // Título de la sección
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.text(firma.titulo, firma.x, firma.y + 22, { align: 'center' });
+      
+      // Nombre del usuario
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.text(firma.nombre.toUpperCase(), firma.x, firma.y + 30, { align: 'center' });
+    });
+    
+    // Generar el PDF optimizado
     const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
     
     res.setHeader('Content-Type', 'application/pdf');
