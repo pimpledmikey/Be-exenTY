@@ -360,7 +360,7 @@ const DashboardAutorizacion: React.FC = () => {
                                 <span className="text-primary font-weight-medium">{solicitud.folio}</span>
                               </td>
                               <td>
-                                <span className={`badge ${solicitud.tipo === 'ENTRADA' ? 'bg-success' : 'bg-secondary'}`}>
+                                <span className={`badge ${solicitud.tipo === 'ENTRADA' ? 'bg-success text-white' : 'bg-secondary text-white'}`}>
                                   {solicitud.tipo}
                                 </span>
                               </td>
@@ -371,7 +371,7 @@ const DashboardAutorizacion: React.FC = () => {
                                 </div>
                               </td>
                               <td>
-                                <span className="badge bg-azure">{solicitud.total_items} items</span>
+                                <span className="badge bg-azure text-dark">{solicitud.total_items} items</span>
                               </td>
                               <td>
                                 <div className="d-flex align-items-center text-muted">

@@ -219,7 +219,7 @@ const AutorizacionSolicitudes: React.FC = () => {
     if (horasEspera > 48) {
       return 'bg-danger text-white'; // Crítico - más de 48 horas
     } else if (horasEspera > 24) {
-      return 'bg-warning text-dark'; // Urgente - más de 24 horas
+      return 'bg-warning text-dark'; // Urgente - más de 24 horas  
     } else if (horasEspera > 8) {
       return 'bg-yellow text-dark'; // Moderado - más de 8 horas
     } else {
@@ -321,7 +321,7 @@ const AutorizacionSolicitudes: React.FC = () => {
                           <span className="text-primary font-weight-medium text-h4">{solicitud.folio}</span>
                         </td>
                         <td>
-                          <span className={`badge ${solicitud.tipo === 'ENTRADA' ? 'bg-success' : 'bg-secondary'}`}>
+                          <span className={`badge ${solicitud.tipo === 'ENTRADA' ? 'bg-success text-white' : 'bg-secondary text-white'}`}>
                             {solicitud.tipo}
                           </span>
                         </td>
@@ -332,7 +332,7 @@ const AutorizacionSolicitudes: React.FC = () => {
                           </div>
                         </td>
                         <td>
-                          <span className="badge bg-azure">{solicitud.total_items} items</span>
+                          <span className="badge bg-azure text-dark">{solicitud.total_items} items</span>
                         </td>
                         <td>
                           <div className="d-flex align-items-center text-muted">

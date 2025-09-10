@@ -353,7 +353,9 @@ const SolicitudAutorizacion: React.FC<SolicitudAutorizacionProps> = ({
                 {filasCompletas.map((item, index) => (
                   <tr key={index}>
                     <td>{index + 1}</td>
-                    <td>{item.codigo}</td>
+                    <td>
+                      <code className="bg-light text-dark px-2 py-1 rounded border">{item.codigo}</code>
+                    </td>
                     <td>{item.descripcion}</td>
                     <td>{item.unidad}</td>
                     <td>{item.cantidad || ''}</td>
