@@ -133,18 +133,18 @@ const DashboardAutorizacion: React.FC = () => {
       newExpanded.add(solicitudId);
       // Cargar items si no están cargados
       if (!solicitudItems[solicitudId]) {
-        fetchSolicitudItems(solicitudId);
+        fetchSolicitudDetalle(solicitudId);
       }
     }
     setExpandedRows(newExpanded);
   };
 
-  const fetchSolicitudItems = async (solicitudId: number) => {
+  const fetchSolicitudDetalle = async (solicitudId: number) => {
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const response = await fetch(createApiUrl(`solicitudes/${solicitudId}/items`), {
+      const response = await fetch(createApiUrl(`solicitudes/${solicitudId}/detalle`), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -153,13 +153,14 @@ const DashboardAutorizacion: React.FC = () => {
 
       if (response.ok) {
         const data = await response.json();
+        // Usar los items de la respuesta de detalle
         setSolicitudItems(prev => ({
           ...prev,
-          [solicitudId]: data.items || []
+          [solicitudId]: data.solicitud?.items || []
         }));
       }
     } catch (error) {
-      console.error('Error fetching solicitud items:', error);
+      console.error('Error fetching solicitud detalle:', error);
     }
   };
 
@@ -360,7 +361,7 @@ const DashboardAutorizacion: React.FC = () => {
                                 <span className="text-primary font-weight-medium">{solicitud.folio}</span>
                               </td>
                               <td>
-                                <span className={`badge ${solicitud.tipo === 'ENTRADA' ? 'bg-success text-white' : 'bg-secondary text-white'}`}>
+                                <span className={`badge ${solicitud.tipo === 'ENTRADA' ? 'bg-success text-dark' : 'bg-secondary text-white'}`}>
                                   {solicitud.tipo}
                                 </span>
                               </td>
@@ -386,7 +387,7 @@ const DashboardAutorizacion: React.FC = () => {
                               </td>
                               <td>
                                 <button
-                                  onClick={() => window.location.href = `/almacen/autorizacion-solicitudes?solicitud=${solicitud.id}`}
+                                  onClick={() => window.location.href = `/almacen/autorizacion-solicitudes?highlight=${solicitud.id}`}
                                   className="btn btn-primary btn-sm"
                                 >
                                   Revisar
@@ -420,13 +421,13 @@ const DashboardAutorizacion: React.FC = () => {
                                             <tbody>
                                               {solicitudItems[solicitud.id].map((item: any, index: number) => (
                                                 <tr key={index}>
-                                                  <td><code className="bg-light text-dark px-2 py-1 rounded">{item.article_code}</code></td>
-                                                  <td>{item.article_name}</td>
+                                                  <td><code className="bg-light text-dark px-2 py-1 rounded">{item.article_code || 'N/A'}</code></td>
+                                                  <td>{item.article_name || 'N/A'}</td>
                                                   <td>
-                                                    <span className="badge bg-success text-white">{item.cantidad}</span>
+                                                    <span className="badge bg-success text-dark">{item.cantidad}</span>
                                                   </td>
                                                   <td>
-                                                    <span className="text-muted">{item.stock_actual}</span>
+                                                    <span className="text-muted">{item.stock_actual || 0}</span>
                                                   </td>
                                                   <td>
                                                     <span className="text-muted">{item.observaciones || '-'}</span>

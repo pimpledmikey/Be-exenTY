@@ -138,9 +138,9 @@ const SolicitudesPanel: React.FC = () => {
   const getStatusBadge = (estado: string) => {
     const statusClasses = {
       'PENDIENTE': 'bg-warning text-dark',
-      'AUTORIZADA': 'bg-success',
-      'RECHAZADA': 'bg-danger',
-      'COMPLETADA': 'bg-info'
+      'AUTORIZADA': 'bg-success text-dark',
+      'RECHAZADA': 'bg-danger text-white',
+      'COMPLETADA': 'bg-info text-dark'
     };
     
     return (

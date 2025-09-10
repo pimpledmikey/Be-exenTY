@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import pool from '../db.js';
 import { 
   getSolicitudes, 
   createSolicitud, 
@@ -26,6 +27,33 @@ router.get('/dashboard/recientes', verifyAuth, checkPermission('solicitudes', 'v
 
 // Rutas con parámetros (DESPUÉS de las rutas específicas)
 router.get('/:id', verifyAuth, checkPermission('solicitudes', 'view'), getSolicitudById);
+router.get('/:id/items', verifyAuth, checkPermission('solicitudes', 'view'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log('🔍 Obteniendo items para solicitud ID:', id);
+    
+    const [items] = await pool.query(`
+      SELECT si.*, 
+             a.name as article_name, 
+             a.code as article_code,
+             COALESCE(stock.stock, 0) as stock_actual
+      FROM solicitudes_items si
+      LEFT JOIN articles a ON si.article_id = a.article_id
+      LEFT JOIN inventory_stock stock ON si.article_id = stock.article_id
+      WHERE si.solicitud_id = ?
+      ORDER BY a.name
+    `, [id]);
+    
+    console.log(`📋 Items encontrados: ${items.length}`);
+    res.json({ success: true, items });
+  } catch (error) {
+    console.error('❌ Error obteniendo items:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+});
 router.get('/folio/:folio', verifyAuth, checkPermission('solicitudes', 'view'), getSolicitudByFolio);
 router.put('/:id/status', verifyAuth, checkPermission('solicitudes', 'edit'), updateSolicitudStatus);
 router.get('/:id/detalle', verifyAuth, checkPermission('solicitudes', 'view'), getSolicitudDetalleAutorizacion);
