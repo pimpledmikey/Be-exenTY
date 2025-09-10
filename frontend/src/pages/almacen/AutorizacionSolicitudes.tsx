@@ -164,7 +164,7 @@ const AutorizacionSolicitudes: React.FC = () => {
   const generarPDF = async (solicitudId: number) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(createApiUrl(`solicitudes/${solicitudId}/pdf`), {
+      const response = await fetch(createApiUrl(`pdf/solicitud/${solicitudId}`), {
         headers: {
           'Authorization': `Bearer ${token}`,
         }

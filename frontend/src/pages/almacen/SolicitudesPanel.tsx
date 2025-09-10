@@ -3,6 +3,7 @@ import { useSolicitudes } from '../../hooks/useSolicitudes';
 import FormSolicitud from '../../components/FormSolicitud';
 import ResponsiveTable from '../../components/ResponsiveTable';
 import PageHeader from '../../components/PageHeader';
+import { createApiUrl } from '../../config/api';
 
 const SolicitudesPanel: React.FC = () => {
   const {
@@ -99,6 +100,35 @@ const SolicitudesPanel: React.FC = () => {
     alert(`Solicitud creada exitosamente con folio: ${folio}`);
     setShowFormSolicitud(false);
     loadSolicitudes();
+  };
+
+  const generarPDF = async (solicitudId: number, folio: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(createApiUrl(`pdf/solicitud/${solicitudId}`), {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `solicitud-${folio}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+      } else {
+        const errorData = await response.json();
+        alert(`Error al generar PDF: ${errorData.error || 'Error desconocido'}`);
+      }
+    } catch (error) {
+      console.error('Error generando PDF:', error);
+      alert('Error al generar PDF');
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -359,6 +389,15 @@ const SolicitudesPanel: React.FC = () => {
                 )}
               </div>
               <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => generarPDF(selectedSolicitud.id, selectedSolicitud.folio)}
+                >
+                  <i className="ti ti-file-text me-2"></i>
+                  Generar PDF
+                </button>
+                
                 <button
                   type="button"
                   className="btn btn-secondary"
