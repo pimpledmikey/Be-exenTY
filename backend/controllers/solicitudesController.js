@@ -303,10 +303,15 @@ export const getSolicitudesPendientes = async (req, res) => {
     // Obtener items para cada solicitud
     for (let solicitud of rows) {
       const [items] = await pool.query(`
-        SELECT si.*, a.name as articulo_nombre, a.code as articulo_codigo
+        SELECT si.*, 
+               a.name as article_name, 
+               a.code as article_code,
+               COALESCE(stock.stock, 0) as stock_actual
         FROM solicitudes_items si
         LEFT JOIN articles a ON si.article_id = a.article_id
+        LEFT JOIN inventory_stock stock ON si.article_id = stock.article_id
         WHERE si.solicitud_id = ?
+        ORDER BY a.name
       `, [solicitud.id]);
       solicitud.items = items;
       solicitud.total_items = items.length;
